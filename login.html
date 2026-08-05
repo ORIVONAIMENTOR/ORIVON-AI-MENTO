@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In — Orivon</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = "https://mkuklkqvatequxvlpncm.supabase.co";
+  const supabaseKey = "sb_publishable_amstxWXd3Vt19V7um1YMsw_gw-keZHT";
+
+  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  window._sb = supabaseClient; // expose globally for DB object below
+</script>
+<style>
+  :root{
+    --bg:#08070d;
+    --bg-soft:#0e0c17;
+    --card:#12101d;
+    --card-border:#232037;
+    --text:#f5f4fa;
+    --muted:#9490a8;
+    --purple:#8b5cf6;
+    --purple-2:#a855f7;
+    --orange:#f0a94e;
+    --green:#34d399;
+    --blue:#60a5fa;
+    --red:#f87171;
+    --radius:16px;
+    --maxw:1200px;
+  }
+  html[data-theme="light"]{
+    --bg:#faf9fc;
+    --bg-soft:#f1eff8;
+    --card:#ffffff;
+    --card-border:#e4e1ee;
+    --text:#17151f;
+    --muted:#6b6680;
+  }
+  html{transition:background-color .2s ease;}
+  body{transition:background-color .2s ease,color .2s ease;}
+
+  .theme-toggle{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--bg-soft);border:1px solid var(--card-border);
+    border-radius:100px;padding:4px;cursor:pointer;
+  }
+  .theme-toggle .track{position:relative;width:42px;height:22px;border-radius:100px;background:var(--card-border);transition:background .2s ease;}
+  .theme-toggle .knob{
+    position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    transition:transform .2s ease;display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  html[data-theme="light"] .theme-toggle .knob{transform:translateX(20px);}
+
+  /* ---------- Settings button + popover ---------- */
+  .settings-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--bg-soft);border:1px solid var(--card-border);
+    color:var(--muted);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:background .15s,color .15s,border-color .15s;
+  }
+  .settings-btn:hover{background:var(--card);color:var(--text);border-color:var(--purple-2);}
+  .settings-anchor{position:relative;display:inline-flex;}
+  .settings-popover{
+    position:absolute;top:calc(100% + 10px);right:0;width:230px;
+    background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:16px;
+    box-shadow:0 16px 40px -12px rgba(0,0,0,.5);
+    opacity:0;visibility:hidden;transform:translateY(-6px);
+    transition:opacity .15s,transform .15s,visibility .15s;z-index:60;
+  }
+  .settings-popover.show{opacity:1;visibility:visible;transform:translateY(0);}
+  .settings-popover-title{font-size:12.5px;font-weight:700;color:var(--text);margin:0 0 12px;}
+  .settings-popover-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--text);}
+
+
+  *{box-sizing:border-box;}
+  html{overflow-x:hidden;width:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  input{font-family:inherit;}
+
+  /* ---------- Ambient background ---------- */
+  .bg-glow{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(139,92,246,.22), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(168,85,247,.18), transparent 45%);
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 24px;
+    max-width:var(--maxw);
+    margin:0 auto;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:700;
+    font-size:1.1rem;
+    letter-spacing:.5px;
+  }
+  .logoimg{
+    width:50px;
+  }
+  .logo .mark{color:var(--purple-2);font-size:1.3rem;}
+  .topbar .back{
+    color:var(--muted);
+    font-size:.88rem;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .topbar .back:hover{color:var(--text);}
+
+  /* ---------- Auth layout ---------- */
+  .auth-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 20px 60px;
+    min-height:calc(100vh - 78px);
+  }
+  .auth-card{
+    width:100%;
+    max-width:420px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:20px;
+    padding:36px;
+  }
+  .auth-head{
+    text-align:center;
+    margin-bottom:28px;
+  }
+  .auth-icon{
+    width:52px;height:52px;
+    margin:0 auto 18px;
+    border-radius:14px;
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.4rem;
+    box-shadow:0 10px 26px -8px rgba(139,92,246,.6);
+  }
+  .auth-head h1{
+    font-size:1.5rem;
+    margin:0 0 8px;
+    font-weight:700;
+  }
+  .auth-head p{
+    color:var(--muted);
+    font-size:.9rem;
+    margin:0;
+  }
+
+  /* ---------- Social buttons ---------- */
+  .social-row{
+    display:flex;
+    gap:12px;
+    margin-bottom:22px;
+  }
+  .social-btn{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:11px;
+    border-radius:12px;
+    background:var(--bg-soft);
+    border:1px solid var(--card-border);
+    color:var(--text);
+    font-size:.85rem;
+    font-weight:600;
+  }
+  .social-btn:hover{background:rgba(255,255,255,.05);}
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:var(--muted);
+    font-size:.78rem;
+    margin:22px 0;
+  }
+  .divider::before,.divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--card-border);
+  }
+
+  /* ---------- Form ---------- */
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;
+    font-size:.82rem;
+    font-weight:600;
+    margin-bottom:8px;
+    color:var(--text);
+  }
+  .input-wrap{
+    position:relative;
+  }
+  .input-wrap .field-icon{
+    position:absolute;
+    left:14px;top:50%;
+    transform:translateY(-50%);
+    color:var(--muted);
+    font-size:.9rem;
+    pointer-events:none;
+  }
+  .input-wrap input{
+    width:100%;
+    padding:12px 14px 12px 40px;
+    background:var(--bg-soft);
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    color:var(--text);
+    font-size:.9rem;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .input-wrap input::placeholder{color:#5f5b73;}
+  .input-wrap input:focus{
+    border-color:var(--purple-2);
+    box-shadow:0 0 0 3px rgba(168,85,247,.18);
+  }
+  .input-wrap input.error{
+    border-color:var(--red);
+  }
+  .toggle-visibility{
+    position:absolute;
+    right:12px;top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:.8rem;
+    padding:4px 6px;
+  }
+  .toggle-visibility:hover{color:var(--text);}
+  .field-error{
+    display:none;
+    color:var(--red);
+    font-size:.76rem;
+    margin-top:6px;
+  }
+  .field-error.show{display:block;}
+  .socialimg{
+    width: 30px;
+  }
+  .row-between{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:22px;
+    font-size:.84rem;
+  }
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--muted);
+  }
+  .checkbox-row input{accent-color:var(--purple-2);width:15px;height:15px;}
+  .link-purple{color:var(--purple-2);font-weight:600;}
+  .link-purple:hover{text-decoration:underline;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:13px;
+    border-radius:100px;
+    font-size:.95rem;
+    font-weight:700;
+    border:none;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    color:#fff;
+    box-shadow:0 8px 24px -8px rgba(139,92,246,.6);
+  }
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-primary:disabled{opacity:.65;cursor:not-allowed;filter:none;}
+  .btn-primary .spinner{
+    width:16px;height:16px;
+    border:2px solid rgba(255,255,255,.35);
+    border-top-color:#fff;
+    border-radius:50%;
+    display:none;
+    animation:spin .7s linear infinite;
+  }
+  .btn-primary.loading .spinner{display:inline-block;}
+  .btn-primary.loading .btn-label{opacity:.7;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .auth-footer{
+    text-align:center;
+    margin-top:24px;
+    font-size:.87rem;
+    color:var(--muted);
+  }
+
+  .form-banner{
+    display:none;
+    align-items:center;
+    gap:8px;
+    padding:12px 14px;
+    border-radius:12px;
+    font-size:.83rem;
+    margin-bottom:18px;
+  }
+  .form-banner.show{display:flex;}
+  .form-banner.success{
+    background:rgba(52,211,153,.12);
+    border:1px solid rgba(52,211,153,.35);
+    color:var(--green);
+  }
+  .form-banner.error{
+    background:rgba(248,113,113,.1);
+    border:1px solid rgba(248,113,113,.35);
+    color:var(--red);
+  }
+
+  @media (max-width:480px){
+    .auth-card{padding:26px 20px;border-radius:16px;}
+    .social-row{flex-direction:column;}
+    .topbar{padding:18px;}
+  }
+
+  :focus-visible{outline:2px solid var(--purple-2);outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<div class="topbar">
+  <a class="logo" href="orivon-landing-v5.html"><span class="mark"><img class="logoimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png"></span> ORIVON</a>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div class="settings-anchor">
+      <button class="settings-btn" id="settingsBtn" aria-label="Settings">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <div class="settings-popover" id="settingsPopover">
+        <p class="settings-popover-title">Appearance</p>
+        <div class="settings-popover-row">
+          <span>Dark Mode</span>
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
+            <div class="track"><div class="knob">🌙</div></div>
+          </button>
+        </div>
+      </div>
+    </div>
+    <a class="back" href="orivon-landing-v5.html">← Back to home</a>
+  </div>
+</div>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-head">
+      <div class="auth-icon"><img class="logoimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png"></div>
+      <h1>Welcome back</h1>
+      <p>Log in to continue your journey with Orivon.</p>
+    </div>
+
+    <div class="form-banner" id="formBanner"></div>
+
+    <div class="social-row">
+      <button type="button" class="social-btn" id="googleBtn"><img class="socialimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/222223ee%20copy.png">Google</button>
+      <button type="button" class="social-btn" id="githubBtn"> <img class="socialimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/githublogo1.png">GitHub</button>
+    </div>
+
+    <div class="divider">or continue with email</div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="loginEmail">Email address</label>
+        <div class="input-wrap">
+          <span class="field-icon">✉</span>
+          <input type="email" id="loginEmail" name="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="field-error" id="loginEmailError">Please enter a valid email address.</div>
+      </div>
+
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <div class="input-wrap">
+          <span class="field-icon">🔒</span>
+          <input type="password" id="loginPassword" name="password" placeholder="Enter your password" autocomplete="current-password">
+          <button type="button" class="toggle-visibility" data-target="loginPassword">Show</button>
+        </div>
+        <div class="field-error" id="loginPasswordError">Password is required.</div>
+      </div>
+
+      <div class="row-between">
+        <label class="checkbox-row">
+          <input type="checkbox" id="rememberMe">
+          Remember me
+        </label>
+        <a class="link-purple" href="#" id="forgotLink">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="loginSubmit">
+        <span class="spinner"></span>
+        <span class="btn-label">Log In</span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Don't have an account? <a class="link-purple" href="register.html">Sign up free</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme toggle (light/dark)
+  function setTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    document.querySelectorAll('.theme-toggle .knob').forEach(k => k.textContent = mode === 'light' ? '☀️' : '🌙');
+  }
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    setTheme(current === 'light' ? 'dark' : 'light');
+  });
+
+  // Settings popover — toggle only visible after pressing Settings
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPopover = document.getElementById('settingsPopover');
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    settingsPopover.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if(!settingsPopover.contains(e.target) && e.target !== settingsBtn){
+      settingsPopover.classList.remove('show');
+    }
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') settingsPopover.classList.remove('show'); });
+  const form = document.getElementById('loginForm');
+  const emailInput = document.getElementById('loginEmail');
+  const passwordInput = document.getElementById('loginPassword');
+  const emailError = document.getElementById('loginEmailError');
+  const passwordError = document.getElementById('loginPasswordError');
+  const submitBtn = document.getElementById('loginSubmit');
+  const banner = document.getElementById('formBanner');
+
+  function isValidEmail(value){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  }
+
+  function setFieldState(input, errorEl, valid){
+    input.classList.toggle('error', !valid);
+    errorEl.classList.toggle('show', !valid);
+  }
+
+  function showBanner(message, type){
+    banner.textContent = message;
+    banner.className = 'form-banner show ' + type;
+  }
+
+  // Toggle password visibility
+  document.querySelectorAll('.toggle-visibility').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      const isPassword = target.type === 'password';
+      target.type = isPassword ? 'text' : 'password';
+      btn.textContent = isPassword ? 'Hide' : 'Show';
+    });
+  });
+
+  // Live validation
+  emailInput.addEventListener('blur', () => {
+    setFieldState(emailInput, emailError, emailInput.value.trim() !== '' && isValidEmail(emailInput.value));
+  });
+  passwordInput.addEventListener('blur', () => {
+    setFieldState(passwordInput, passwordError, passwordInput.value.trim() !== '');
+  });
+  emailInput.addEventListener('input', () => { if(emailInput.classList.contains('error')) setFieldState(emailInput, emailError, isValidEmail(emailInput.value)); });
+  passwordInput.addEventListener('input', () => { if(passwordInput.classList.contains('error')) setFieldState(passwordInput, passwordError, passwordInput.value.trim() !== ''); });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    banner.classList.remove('show');
+
+    const emailValid = isValidEmail(emailInput.value);
+    const passwordValid = passwordInput.value.trim() !== '';
+
+    setFieldState(emailInput, emailError, emailValid);
+    setFieldState(passwordInput, passwordError, passwordValid);
+
+    if(!emailValid || !passwordValid){
+      showBanner('Please fix the highlighted fields before continuing.', 'error');
+      return;
+    }
+
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    try{
+      const { data, error } = await window._sb.auth.signInWithPassword({
+        email: emailInput.value.trim(),
+        password: passwordInput.value
+      });
+
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+
+      if(error){
+        showBanner(error.message || 'Could not log in. Please check your credentials.', 'error');
+        return;
+      }
+
+      showBanner('Logged in successfully. Redirecting…', 'success');
+      setTimeout(() => {
+        window.location.href = 'profile.html';
+      }, 700);
+    }catch(err){
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+      showBanner('Something went wrong. Please try again.', 'error');
+    }
+  });
+
+  document.getElementById('forgotLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+    if(!isValidEmail(email)){
+      setFieldState(emailInput, emailError, false);
+      showBanner('Enter your email above first, then click "Forgot password?" again.', 'error');
+      return;
+    }
+    const { error } = await window._sb.auth.resetPasswordForEmail(email);
+    if(error){
+      showBanner(error.message, 'error');
+    }else{
+      showBanner("If an account exists for that email, we've sent a reset link.", 'success');
+    }
+  });
+
+  ['googleBtn','githubBtn'].forEach(id => {
+    document.getElementById(id).addEventListener('click', () => {
+      showBanner('Social login isn\'t connected yet — wire this up to your auth provider.', 'error');
+    });
+  });
+</script>
+</body>
+</html>

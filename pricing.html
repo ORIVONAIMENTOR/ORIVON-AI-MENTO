@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — Orivon</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = "https://mkuklkqvatequxvlpncm.supabase.co";
+  const supabaseKey = "sb_publishable_amstxWXd3Vt19V7um1YMsw_gw-keZHT";
+  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  window._sb = supabaseClient;
+</script>
+<style>
+  :root{
+    --bg:#08070d;
+    --bg-soft:#0e0c17;
+    --card:#12101d;
+    --card-border:#232037;
+    --text:#f5f4fa;
+    --muted:#9490a8;
+    --purple:#8b5cf6;
+    --purple-2:#a855f7;
+    --orange:#f0a94e;
+    --green:#34d399;
+    --blue:#60a5fa;
+    --pink:#ec4899;
+    --radius:16px;
+    --maxw:1200px;
+  }
+  html[data-theme="light"]{
+    --bg:#faf9fc;
+    --bg-soft:#f1eff8;
+    --card:#ffffff;
+    --card-border:#e4e1ee;
+    --text:#17151f;
+    --muted:#6b6680;
+  }
+  html{transition:background-color .2s ease;}
+  body{transition:background-color .2s ease,color .2s ease;}
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  html{overflow-x:hidden;width:100%;}
+  img{max-width:100%;display:block;}
+  a{color:inherit;text-decoration:none;}
+  ul{margin:0;padding:0;list-style:none;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    padding:12px 22px;border-radius:100px;font-size:.95rem;font-weight:600;
+    border:1px solid transparent;white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    color:#fff;box-shadow:0 8px 24px -8px rgba(139,92,246,.6);
+  }
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-outline{background:rgba(255,255,255,.03);border-color:var(--card-border);color:var(--text);}
+  .btn-outline:hover{background:rgba(255,255,255,.07);}
+  .btn-sm{padding:10px 16px;font-size:.85rem;}
+  .btn-block{width:100%;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:rgba(8,7,13,.85);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--card-border);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:var(--maxw);margin:0 auto;}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.1rem;letter-spacing:.5px;}
+  .logoimg{width:40px;}
+  .logo .mark{color:var(--purple-2);font-size:1.3rem;}
+  .nav-links{display:flex;gap:28px;font-size:.92rem;color:var(--muted);}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--text);font-weight:700;}
+  .nav-cta{display:flex;align-items:center;gap:12px;}
+  .burger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:6px;}
+  .burger span{width:22px;height:2px;background:var(--text);border-radius:2px;transition:.25s;}
+  .mobile-menu{display:none;flex-direction:column;gap:4px;padding:8px 24px 20px;border-top:1px solid var(--card-border);}
+  .mobile-menu a{padding:12px 4px;color:var(--muted);border-bottom:1px solid var(--card-border);font-size:.95rem;}
+  .mobile-menu.open{display:flex;}
+  .mobile-menu .btn{margin-top:12px;width:100%;}
+
+  /* ---------- Settings button + popover ---------- */
+  .settings-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--bg-soft);border:1px solid var(--card-border);color:var(--muted);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .settings-btn:hover{background:var(--card);color:var(--text);border-color:var(--purple-2);}
+  .settings-anchor{position:relative;display:inline-flex;}
+  .profile-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--bg-soft);border:1px solid var(--card-border);color:var(--muted);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s;text-decoration:none;
+  }
+  .profile-btn:hover{background:var(--card);color:var(--text);border-color:var(--purple-2);}
+  .settings-popover{
+    position:absolute;top:calc(100% + 10px);right:0;width:230px;
+    background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:16px;
+    box-shadow:0 16px 40px -12px rgba(0,0,0,.5);
+    opacity:0;visibility:hidden;transform:translateY(-6px);
+    transition:opacity .15s,transform .15s,visibility .15s;z-index:60;
+  }
+  .settings-popover.show{opacity:1;visibility:visible;transform:translateY(0);}
+  .settings-popover-title{font-size:12.5px;font-weight:700;color:var(--text);margin:0 0 12px;}
+  .settings-popover-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--text);}
+  .theme-toggle{display:inline-flex;align-items:center;gap:8px;background:var(--bg-soft);border:1px solid var(--card-border);border-radius:100px;padding:4px;cursor:pointer;}
+  .theme-toggle .track{position:relative;width:42px;height:22px;border-radius:100px;background:var(--card-border);transition:background .2s ease;}
+  .theme-toggle .knob{
+    position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    transition:transform .2s ease;display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  html[data-theme="light"] .theme-toggle .knob{transform:translateX(20px);}
+
+  /* ---------- Section shared ---------- */
+  .section{padding:64px 0;}
+  .section-head{text-align:center;margin-bottom:40px;max-width:640px;margin-left:auto;margin-right:auto;}
+  .section-head .eyebrow{
+    color:var(--purple-2);font-size:.75rem;font-weight:700;letter-spacing:1.5px;
+    text-transform:uppercase;margin-bottom:10px;
+  }
+  .section-head h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;margin:0 0 12px;}
+  .section-head p{color:var(--muted);font-size:1rem;margin:0;}
+  .accent{color:var(--purple-2);}
+
+  /* ---------- Pricing Hero ---------- */
+  .pricing-hero{padding:64px 0 20px;text-align:center;}
+  .pricing-hero h1{
+    font-size:clamp(2rem,4.4vw,3rem);font-weight:800;line-height:1.15;margin:0 0 18px;
+  }
+  .pricing-hero h1 .grad{
+    background:linear-gradient(90deg,var(--purple-2),var(--orange));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .pricing-hero p{color:var(--muted);font-size:1.05rem;max-width:560px;margin:0 auto 32px;}
+
+  .billing-toggle{
+    display:inline-flex;align-items:center;gap:14px;
+    background:var(--card);border:1px solid var(--card-border);
+    border-radius:100px;padding:6px;margin-bottom:8px;
+  }
+  .billing-toggle button{
+    border:none;background:none;color:var(--muted);font-size:.9rem;font-weight:600;
+    padding:9px 20px;border-radius:100px;transition:background .2s,color .2s;
+  }
+  .billing-toggle button.active{
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));color:#fff;
+  }
+  .save-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);
+    color:var(--green);font-size:.78rem;font-weight:700;
+    padding:5px 12px;border-radius:100px;margin-left:10px;
+  }
+
+  /* ---------- Pricing Cards ---------- */
+  .pricing-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+    align-items:stretch;margin-top:44px;
+  }
+  .price-card{
+    background:var(--card);border:1px solid var(--card-border);border-radius:20px;
+    padding:30px 26px;display:flex;flex-direction:column;position:relative;
+    transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .price-card:hover{
+    transform:translateY(-6px);
+    border-color:var(--purple-2);
+    box-shadow:0 20px 44px -18px rgba(139,92,246,.45);
+  }
+  .price-card.popular:hover{
+    transform:translateY(-14px);
+  }
+  .price-card.popular{
+    border-color:var(--purple-2);
+    box-shadow:0 0 0 1px var(--purple-2), 0 24px 60px -20px rgba(139,92,246,.55);
+    transform:translateY(-8px);
+  }
+  .popular-badge{
+    position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.5px;
+    padding:6px 16px;border-radius:100px;white-space:nowrap;
+    box-shadow:0 8px 20px -6px rgba(139,92,246,.7);
+  }
+  .plan-name{font-size:1.05rem;font-weight:700;margin:0 0 6px;}
+  .plan-desc{color:var(--muted);font-size:.85rem;margin:0 0 22px;min-height:38px;}
+  .plan-price{display:flex;align-items:baseline;gap:6px;margin-bottom:6px;}
+  .plan-price .amount{font-size:2.4rem;font-weight:800;}
+  .plan-price .period{color:var(--muted);font-size:.9rem;}
+  .plan-price-note{color:var(--muted);font-size:.78rem;margin-bottom:24px;min-height:16px;}
+
+  .plan-features{display:flex;flex-direction:column;gap:12px;margin-bottom:26px;flex:1;}
+  .plan-features li{
+    display:flex;align-items:flex-start;gap:10px;font-size:.88rem;color:var(--text);
+  }
+  .plan-features li .check{
+    width:18px;height:18px;border-radius:50%;flex:none;margin-top:1px;
+    background:rgba(52,211,153,.15);color:var(--green);
+    display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;
+  }
+  .price-card.popular .plan-features li .check{background:rgba(139,92,246,.2);color:var(--purple-2);}
+  .plan-features li.muted{color:var(--muted);}
+  .plan-features li.muted .check{background:var(--bg-soft);color:var(--muted);}
+
+  @media (max-width:940px){.pricing-grid{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto;}
+    .price-card.popular{transform:none;}
+  }
+
+  /* ---------- Comparison table ---------- */
+  .compare-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:16px;border:1px solid var(--card-border);}
+  table.compare{width:100%;border-collapse:collapse;min-width:640px;background:var(--card);}
+  table.compare th, table.compare td{
+    padding:14px 18px;text-align:left;font-size:.86rem;border-bottom:1px solid var(--card-border);
+  }
+  table.compare thead th{
+    background:var(--bg-soft);color:var(--text);font-weight:700;font-size:.82rem;
+    position:sticky;top:0;
+  }
+  table.compare thead th:not(:first-child){text-align:center;}
+  table.compare td:not(:first-child){text-align:center;}
+  table.compare tbody th{color:var(--muted);font-weight:400;white-space:nowrap;}
+  table.compare tbody tr:last-child td, table.compare tbody tr:last-child th{border-bottom:none;}
+  table.compare .yes{color:var(--green);font-weight:700;}
+  table.compare .no{color:var(--muted);}
+  table.compare .col-popular{background:rgba(139,92,246,.06);}
+  table.compare thead th.col-popular{color:var(--purple-2);}
+
+  /* ---------- Why upgrade ---------- */
+  .upgrade-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  .upgrade-card{
+    background:var(--card);border:1px solid var(--card-border);border-radius:16px;
+    padding:22px 18px;text-align:center;
+  }
+  .upgrade-icon{
+    width:44px;height:44px;border-radius:12px;margin:0 auto 14px;
+    background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(240,169,78,.18));
+    display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--purple-2);
+  }
+  .upgrade-card h3{font-size:.92rem;margin:0 0 8px;}
+  .upgrade-card p{color:var(--muted);font-size:.8rem;margin:0;line-height:1.5;}
+  @media (max-width:940px){.upgrade-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.upgrade-grid{grid-template-columns:1fr;}}
+
+  /* ---------- FAQ ---------- */
+  .faq-list{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+  .faq-item{background:var(--card);border:1px solid var(--card-border);border-radius:14px;overflow:hidden;}
+  .faq-question{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:18px 20px;cursor:pointer;font-size:.95rem;font-weight:650;
+  }
+  .faq-question .plus{
+    flex:none;width:24px;height:24px;border-radius:50%;
+    background:var(--bg-soft);color:var(--purple-2);
+    display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;
+    transition:transform .2s ease;
+  }
+  .faq-item.open .faq-question .plus{transform:rotate(45deg);}
+  .faq-answer{
+    max-height:0;overflow:hidden;transition:max-height .25s ease;
+  }
+  .faq-answer p{color:var(--muted);font-size:.87rem;line-height:1.6;padding:0 20px 18px;margin:0;}
+
+  /* ---------- Final CTA ---------- */
+  .final-cta{
+    text-align:center;padding:80px 0 90px;
+    background:radial-gradient(ellipse at 50% 100%, rgba(139,92,246,.25), transparent 70%);
+  }
+  .final-cta h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:700;margin:0 0 28px;line-height:1.4;}
+  .final-cta .cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--card-border);padding:56px 0 28px;}
+  .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:32px;margin-bottom:36px;}
+  .footer-brand p{color:var(--muted);font-size:.85rem;margin-top:14px;max-width:280px;}
+  .footer-col h5{font-size:.85rem;margin:0 0 14px;}
+  .footer-col a{display:block;color:var(--muted);font-size:.85rem;margin-bottom:10px;}
+  .footer-col a:hover{color:var(--text);}
+  .footer-bottom{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+    padding-top:24px;border-top:1px solid var(--card-border);color:var(--muted);font-size:.8rem;
+  }
+  .social-icons{display:flex;gap:14px;}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:860px){
+    .nav-links{display:none;}
+    .burger{display:flex;}
+    .nav-cta .btn-outline{display:none;}
+    .nav-cta .settings-anchor{display:none;}
+    .nav-cta .profile-btn{display:none;}
+    .footer-grid{grid-template-columns:1fr 1fr;row-gap:28px;}
+    .footer-brand{grid-column:1 / -1;}
+  }
+  @media (max-width:640px){
+    .wrap{padding:0 18px;}
+    .pricing-hero{padding:44px 0 12px;}
+    .section{padding:48px 0;}
+    .final-cta{padding:56px 0 64px;}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+  }
+
+  :focus-visible{outline:2px solid var(--purple-2);outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <div class="logo"><span class="mark"><img class="logoimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png"></span> ORIVON</div>
+    <ul class="nav-links">
+      <li><a href="orivon-landing-v5.html#features">Product</a></li>
+      <li><a href="orivon-landing-v5.html#ai-mentor">AI Mentor</a></li>
+      <li><a href="orivon-landing-v5.html#opportunities">Opportunities</a></li>
+      <li><a href="#">Careers</a></li>
+      <li><a href="pricing.html" class="active">Pricing</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="profile-btn" href="profile.html" aria-label="Profile">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
+      <div class="settings-anchor">
+        <button class="settings-btn" id="settingsBtn" aria-label="Settings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <div class="settings-popover" id="settingsPopover">
+          <p class="settings-popover-title">Appearance</p>
+          <div class="settings-popover-row">
+            <span>Dark Mode</span>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
+              <div class="track"><div class="knob">🌙</div></div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <a class="btn btn-outline btn-sm" href="register.html">Get Early Access</a>
+      <a class="btn btn-outline btn-sm" href="login.html" style="margin-left:8px;">Log In</a>
+      <button class="burger" id="burgerBtn" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="orivon-landing-v5.html#features">Product</a>
+    <a href="orivon-landing-v5.html#ai-mentor">AI Mentor</a>
+    <a href="orivon-landing-v5.html#opportunities">Opportunities</a>
+    <a href="#">Careers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="about.html">About</a>
+    <a href="profile.html" class="nav-item" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <button class="nav-item" id="settingsBtnMobile" style="display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--card-border);border-radius:10px;padding:10px 12px;color:var(--muted);font-size:.9rem;margin-top:6px;width:100%;text-align:left;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+    <div class="settings-popover" id="settingsPopoverMobile" style="position:static;width:100%;opacity:1;visibility:visible;transform:none;box-shadow:none;display:none;margin-top:4px;">
+      <p class="settings-popover-title">Appearance</p>
+      <div class="settings-popover-row">
+        <span>Dark Mode</span>
+        <button class="theme-toggle" id="themeToggleMobile" aria-label="Toggle dark/light mode">
+          <div class="track"><div class="knob">🌙</div></div>
+        </button>
+      </div>
+    </div>
+    <a class="btn btn-primary" href="register.html">Get Early Access →</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="pricing-hero wrap">
+    <h1>Choose the plan that <span class="grad">grows with you.</span></h1>
+    <p>Start free and explore what Orivon can do. Upgrade whenever you're ready for unlimited AI mentorship, deeper career tools, and priority support — no surprises, cancel any time.</p>
+
+    <div class="billing-toggle" id="billingToggle">
+      <button class="active" data-billing="monthly">Monthly</button>
+      <button data-billing="yearly">Yearly <span class="save-badge">Save 20%</span></button>
+    </div>
+  </section>
+
+  <!-- ============ PRICING CARDS ============ -->
+  <section class="section wrap" style="padding-top:8px;">
+    <div class="pricing-grid">
+
+      <!-- Free -->
+      <div class="price-card">
+        <h3 class="plan-name">Free</h3>
+        <p class="plan-desc">For individuals exploring Orivon.</p>
+        <div class="plan-price"><span class="amount">$0</span><span class="period">/ forever</span></div>
+        <div class="plan-price-note">No credit card required</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Access to community</li>
+          <li><span class="check">✓</span> Limited AI Mentor usage</li>
+          <li><span class="check">✓</span> Browse opportunities</li>
+          <li><span class="check">✓</span> Basic profile</li>
+          <li><span class="check">✓</span> Limited mentorship requests</li>
+        </ul>
+        <a href="register.html" class="btn btn-outline btn-block">Get Started Free</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="price-card popular">
+        <div class="popular-badge">MOST POPULAR</div>
+        <h3 class="plan-name">Pro</h3>
+        <p class="plan-desc">For students and professionals serious about growth.</p>
+        <div class="plan-price"><span class="amount" id="proPrice">$12</span><span class="period">/ month</span></div>
+        <div class="plan-price-note" id="proPriceNote">Billed monthly</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Unlimited AI Mentor</li>
+          <li><span class="check">✓</span> Unlimited mentorship sessions</li>
+          <li><span class="check">✓</span> CV &amp; portfolio reviews</li>
+          <li><span class="check">✓</span> Interview preparation</li>
+          <li><span class="check">✓</span> Scholarship &amp; internship recommendations</li>
+          <li><span class="check">✓</span> Career roadmap</li>
+          <li><span class="check">✓</span> Priority support</li>
+        </ul>
+        <a href="register.html" class="btn btn-primary btn-block">Start Pro</a>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="price-card">
+        <h3 class="plan-name">Enterprise</h3>
+        <p class="plan-desc">For universities, organizations, and communities.</p>
+        <div class="plan-price"><span class="amount" style="font-size:1.7rem;">Custom Pricing</span></div>
+        <div class="plan-price-note">Tailored to your organization's size</div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Everything in Pro</li>
+          <li><span class="check">✓</span> Team management</li>
+          <li><span class="check">✓</span> Analytics dashboard</li>
+          <li><span class="check">✓</span> Institution-wide AI Mentor</li>
+          <li><span class="check">✓</span> Custom onboarding</li>
+          <li><span class="check">✓</span> Dedicated support</li>
+          <li class="muted"><span class="check">✓</span> API access (coming soon)</li>
+        </ul>
+        <a href="#faq" class="btn btn-outline btn-block">Contact Sales</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ COMPARISON TABLE ============ -->
+  <section class="section wrap">
+    <div class="section-head">
+      <div class="eyebrow">Compare Plans</div>
+      <h2>See exactly what's included.</h2>
+      <p>A side-by-side look at every feature, so you know exactly what you're getting.</p>
+    </div>
+
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Free</th>
+            <th class="col-popular">Pro</th>
+            <th>Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Community access</th><td class="yes">✓</td><td class="col-popular yes">✓</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">AI Mentor</th><td>Limited</td><td class="col-popular yes">Unlimited</td><td class="yes">Unlimited</td></tr>
+          <tr><th scope="row">Mentorship sessions</th><td>Limited requests</td><td class="col-popular yes">Unlimited</td><td class="yes">Unlimited</td></tr>
+          <tr><th scope="row">Browse opportunities</th><td class="yes">✓</td><td class="col-popular yes">✓</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">CV &amp; portfolio reviews</th><td class="no">—</td><td class="col-popular yes">✓</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Interview preparation</th><td class="no">—</td><td class="col-popular yes">✓</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Scholarship &amp; internship matches</th><td class="no">—</td><td class="col-popular yes">✓</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Career roadmap</th><td class="no">—</td><td class="col-popular yes">✓</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Priority support</th><td class="no">—</td><td class="col-popular yes">✓</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Team management</th><td class="no">—</td><td class="col-popular no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Analytics dashboard</th><td class="no">—</td><td class="col-popular no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Institution-wide AI Mentor</th><td class="no">—</td><td class="col-popular no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Custom onboarding</th><td class="no">—</td><td class="col-popular no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">Dedicated support</th><td class="no">—</td><td class="col-popular no">—</td><td class="yes">✓</td></tr>
+          <tr><th scope="row">API access</th><td class="no">—</td><td class="col-popular no">—</td><td>Coming soon</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ WHY UPGRADE ============ -->
+  <section class="section wrap">
+    <div class="section-head">
+      <div class="eyebrow">Why Upgrade</div>
+      <h2>What you unlock with <span class="accent">Pro.</span></h2>
+      <p>Everything you need to move faster, with fewer limits standing between you and your goals.</p>
+    </div>
+    <div class="upgrade-grid">
+      <div class="upgrade-card">
+        <div class="upgrade-icon">🚀</div>
+        <h3>Faster career growth</h3>
+        <p>Unlimited guidance means you never wait to get unstuck.</p>
+      </div>
+      <div class="upgrade-card">
+        <div class="upgrade-icon">✦</div>
+        <h3>Personalized AI guidance</h3>
+        <p>Recommendations tailored to your goals, skills, and progress.</p>
+      </div>
+      <div class="upgrade-card">
+        <div class="upgrade-icon">🏆</div>
+        <h3>Exclusive opportunities</h3>
+        <p>Priority access to scholarships, internships, and programs.</p>
+      </div>
+      <div class="upgrade-card">
+        <div class="upgrade-icon">🌐</div>
+        <h3>Better networking</h3>
+        <p>Deeper mentor matching and unlimited session requests.</p>
+      </div>
+      <div class="upgrade-card">
+        <div class="upgrade-icon">📈</div>
+        <h3>Advanced learning tools</h3>
+        <p>CV reviews, interview prep, and a full career roadmap.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section wrap" id="faq">
+    <div class="section-head">
+      <div class="eyebrow">FAQ</div>
+      <h2>Common questions.</h2>
+      <p>Can't find what you're looking for? Reach out and we'll help.</p>
+    </div>
+    <div class="faq-list" id="faqList">
+      <div class="faq-item">
+        <div class="faq-question">Can I change my plan anytime?
+          <span class="plus">+</span>
+        </div>
+        <div class="faq-answer"><p>Yes. You can upgrade, downgrade, or cancel your plan at any time from your account settings. Changes to your billing take effect at the start of your next cycle.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Is there a free trial?
+          <span class="plus">+</span>
+        </div>
+        <div class="faq-answer"><p>Our Free plan gives you ongoing access to core features with no time limit, so you can explore Orivon before upgrading. Pro also includes a 14-day money-back guarantee if it's not the right fit.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">What payment methods are accepted?
+          <span class="plus">+</span>
+        </div>
+        <div class="faq-answer"><p>We accept all major credit and debit cards. Enterprise customers can also pay via invoice or bank transfer — just contact sales to set that up.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Can universities purchase in bulk?
+          <span class="plus">+</span>
+        </div>
+        <div class="faq-answer"><p>Yes. Our Enterprise plan is built for universities, bootcamps, and organizations, with volume-based pricing, team management, and institution-wide AI Mentor access. Contact sales for a custom quote.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Is my data secure?
+          <span class="plus">+</span>
+        </div>
+        <div class="faq-answer"><p>Yes. All data is encrypted in transit and at rest, and we never sell your personal information. Enterprise customers can also request a dedicated data processing agreement.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="final-cta wrap">
+    <h2>Your future starts with<br>the <span class="accent">right guidance.</span></h2>
+    <div class="cta-actions">
+      <a href="register.html" class="btn btn-primary">Start Free</a>
+      <a href="#faq" class="btn btn-outline">Contact Sales</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><span class="mark"><img class="logoimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png"></span> ORIVON</div>
+        <p>An intelligent ecosystem that empowers you to learn, connect, and grow — without limits.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="orivon-landing-v5.html#features">Overview</a><a href="orivon-landing-v5.html#features">Features</a><a href="pricing.html">Pricing</a>
+      </div>
+      <div class="footer-col">
+        <h5>AI Mentor</h5>
+        <a href="orivon-landing-v5.html#ai-mentor">How it Works</a><a href="#">Roadmaps</a><a href="#">Ask AI</a>
+      </div>
+      <div class="footer-col">
+        <h5>Careers</h5>
+        <a href="#">Jobs</a><a href="#">Internships</a><a href="#">Career Resources</a>
+      </div>
+      <div class="footer-col">
+        <h5>Opportunities</h5>
+        <a href="orivon-landing-v5.html#opportunities">Scholarships</a><a href="orivon-landing-v5.html#opportunities">Hackathons</a><a href="orivon-landing-v5.html#opportunities">Programs</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="social-icons">
+        <a href="#" aria-label="Twitter">🐦</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Instagram">📷</a>
+        <a href="#" aria-label="YouTube">▶</a>
+        <a href="#" aria-label="Discord">🎮</a>
+      </div>
+      <div>© 2024 Orivon. All rights reserved.</div>
+      <div>Privacy Policy &nbsp; Terms of Service</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle (light/dark)
+  function setTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    document.querySelectorAll('.theme-toggle .knob').forEach(k => k.textContent = mode === 'light' ? '☀️' : '🌙');
+  }
+  function toggleTheme(){
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    setTheme(current === 'light' ? 'dark' : 'light');
+  }
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+  document.getElementById('themeToggleMobile').addEventListener('click', toggleTheme);
+
+  // Settings popover (desktop)
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPopover = document.getElementById('settingsPopover');
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    settingsPopover.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if(!settingsPopover.contains(e.target) && e.target !== settingsBtn){
+      settingsPopover.classList.remove('show');
+    }
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') settingsPopover.classList.remove('show'); });
+
+  // Settings panel (mobile menu)
+  const settingsBtnMobile = document.getElementById('settingsBtnMobile');
+  const settingsPopoverMobile = document.getElementById('settingsPopoverMobile');
+  settingsBtnMobile.addEventListener('click', () => {
+    const isOpen = settingsPopoverMobile.style.display === 'block';
+    settingsPopoverMobile.style.display = isOpen ? 'none' : 'block';
+  });
+
+  // Mobile nav toggle
+  const burgerBtn = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  burgerBtn.addEventListener('click', () => {
+    const open = mobileMenu.classList.toggle('open');
+    burgerBtn.setAttribute('aria-expanded', open);
+  });
+  mobileMenu.querySelectorAll('a').forEach(a=>{
+    a.addEventListener('click', ()=> mobileMenu.classList.remove('open'));
+  });
+
+  // ---------- Billing toggle (monthly / yearly) ----------
+  const MONTHLY_PRICE = 12;
+  const YEARLY_MONTHLY_EQUIVALENT = 9.6; // 20% off, billed annually
+  const proPrice = document.getElementById('proPrice');
+  const proPriceNote = document.getElementById('proPriceNote');
+
+  document.querySelectorAll('#billingToggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#billingToggle button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const billing = btn.dataset.billing;
+      if(billing === 'yearly'){
+        proPrice.textContent = '$' + YEARLY_MONTHLY_EQUIVALENT.toFixed(2).replace(/\.00$/, '');
+        proPriceNote.textContent = 'Billed annually ($' + (YEARLY_MONTHLY_EQUIVALENT * 12).toFixed(0) + '/yr)';
+      }else{
+        proPrice.textContent = '$' + MONTHLY_PRICE;
+        proPriceNote.textContent = 'Billed monthly';
+      }
+    });
+  });
+
+  // ---------- FAQ accordion ----------
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const question = item.querySelector('.faq-question');
+    const answer = item.querySelector('.faq-answer');
+    question.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(openItem => {
+        if(openItem !== item){
+          openItem.classList.remove('open');
+          openItem.querySelector('.faq-answer').style.maxHeight = null;
+        }
+      });
+      if(isOpen){
+        item.classList.remove('open');
+        answer.style.maxHeight = null;
+      }else{
+        item.classList.add('open');
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+      }
+    });
+  });
+</script>
+</body>
+</html>

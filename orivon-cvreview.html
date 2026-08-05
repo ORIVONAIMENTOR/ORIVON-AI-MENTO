@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CV Review — Orivon Mentor</title>
+<style>
+  :root{
+    --bg:#0b0b10;
+    --bg-elevated:#111116;
+    --panel:#15151b;
+    --panel-2:#1a1a22;
+    --border:#262630;
+    --border-soft:#1e1e26;
+    --text:#f2f2f5;
+    --text-dim:#9a9aa7;
+    --text-faint:#65656f;
+    --accent:#7c5cff;
+    --accent-2:#6a47ef;
+    --accent-soft:rgba(124,92,255,.14);
+    --accent-soft-strong:rgba(124,92,255,.22);
+    --green:#34d399;
+    --green-soft:rgba(52,211,153,.13);
+    --teal:#22d3ee;
+    --teal-soft:rgba(34,211,238,.13);
+    --amber:#f59e0b;
+    --amber-soft:rgba(245,158,11,.13);
+    --pink:#ec4899;
+    --pink-soft:rgba(236,72,153,.13);
+    --blue:#3b82f6;
+    --blue-soft:rgba(59,130,246,.13);
+    --red:#f0654c;
+    --red-soft:rgba(240,101,76,.13);
+    --radius-lg:18px;
+    --radius-md:13px;
+    --radius-sm:9px;
+    --shadow-pop:0 16px 40px -12px rgba(0,0,0,.55);
+    --dur:.22s;
+  }
+  html[data-theme="light"]{
+    --bg:#f6f6fa;
+    --bg-elevated:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#f1f1f6;
+    --border:#e4e4ec;
+    --border-soft:#ececf3;
+    --text:#15151b;
+    --text-dim:#54545f;
+    --text-faint:#84848f;
+    --accent-soft:rgba(124,92,255,.10);
+    --accent-soft-strong:rgba(124,92,255,.18);
+    --green-soft:rgba(52,211,153,.14);
+    --shadow-pop:0 16px 40px -12px rgba(0,0,0,.12);
+  }
+  html{transition:background-color .2s ease;}
+  body{transition:background-color .2s ease,color .2s ease;}
+
+  /* ---------- Settings modal ---------- */
+  .settings-modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:95;
+    display:flex;align-items:center;justify-content:center;padding:18px;
+    opacity:0;visibility:hidden;transition:opacity var(--dur);
+  }
+  .settings-modal-backdrop.show{opacity:1;visibility:visible;}
+  .settings-modal{
+    background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);
+    width:100%;max-width:400px;padding:22px;box-shadow:var(--shadow-pop);
+  }
+  .settings-modal h3{margin:0 0 4px;font-size:16px;font-weight:750;}
+  .settings-modal .sub{margin:0 0 20px;font-size:12.5px;color:var(--text-faint);}
+  .settings-row{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:13px 14px;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-md);
+  }
+  .settings-row .s-label{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:650;}
+  .settings-row .s-label svg{color:var(--accent);}
+  .settings-row .s-desc{font-size:11.5px;color:var(--text-faint);margin-top:2px;font-weight:400;}
+  .settings-toggle{
+    position:relative;width:44px;height:24px;border-radius:100px;background:var(--border);
+    border:none;cursor:pointer;flex-shrink:0;transition:background .2s ease;
+  }
+  .settings-toggle .knob{
+    position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    transition:transform .2s ease;display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  html[data-theme="light"] .settings-toggle .knob{transform:translateX(20px);}
+  .settings-modal-close{
+    width:32px;height:32px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;float:right;
+  }
+  .settings-modal-close:hover{color:var(--text);border-color:var(--accent);}
+  .settings-modal-head{display:flex;justify-content:space-between;align-items:flex-start;}
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden;}
+  button,input,textarea{font-family:inherit;}
+  ::selection{background:var(--accent-soft-strong);}
+  *:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px;}
+  a{color:inherit;text-decoration:none;}
+  svg.icon{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+  .app{display:flex;height:100vh;height:100dvh;width:100%;position:relative;}
+  .mobile-bar{display:none;align-items:center;justify-content:space-between;gap:8px;height:56px;padding:0 12px;border-bottom:1px solid var(--border);background:var(--bg-elevated);position:fixed;top:0;left:0;right:0;z-index:40;}
+  .mobile-bar .brand-mini{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;overflow:hidden;white-space:nowrap;}
+  .icon-btn{width:38px;height:38px;border-radius:var(--radius-sm);background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background var(--dur),color var(--dur),border-color var(--dur);}
+  .icon-btn:hover{background:var(--accent-soft);color:var(--text);border-color:var(--accent);}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:45;opacity:0;visibility:hidden;transition:opacity var(--dur);}
+  .overlay.show{opacity:1;visibility:visible;}
+  .sidebar{height:100vh;height:100dvh;overflow-y:auto;background:var(--bg-elevated);display:flex;flex-direction:column;scrollbar-width:thin;}
+  .sidebar::-webkit-scrollbar{width:8px;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+
+  /* left sidebar */
+  .sidebar-left{width:266px;flex:0 0 266px;border-right:1px solid var(--border);padding:18px 14px 16px;}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 16px;}
+  .brand .hex{width:34px;height:34px;flex-shrink:0;color:var(--accent);}
+  .brand-text h1{font-size:15.5px;margin:0;line-height:1.2;font-weight:750;letter-spacing:-.2px;}
+  .brand-text p{font-size:11.5px;margin:1px 0 0;color:var(--text-faint);}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;margin-bottom:16px;color:var(--text-faint);transition:border-color var(--dur);}
+  .search-box:focus-within{border-color:var(--accent);}
+  .search-box input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font-size:13px;}
+  .search-box input::placeholder{color:var(--text-faint);}
+  .kbd-hint{font-size:10.5px;color:var(--text-faint);background:var(--panel-2);border:1px solid var(--border);border-radius:5px;padding:2px 5px;flex-shrink:0;}
+  nav.nav-list{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--radius-sm);color:var(--text-dim);font-size:13.5px;font-weight:560;cursor:pointer;border:1px solid transparent;background:none;text-align:left;width:100%;transition:background var(--dur),color var(--dur);}
+  .nav-item svg{color:var(--text-faint);transition:color var(--dur);}
+  .nav-item:hover{background:var(--panel);color:var(--text);}
+  .nav-item:hover svg{color:var(--text-dim);}
+  .nav-item.active{background:var(--accent-soft-strong);color:#fff;}
+  .nav-item.active svg{color:var(--accent);}
+  .sidebar-divider{height:1px;background:var(--border-soft);margin:6px 4px 12px;}
+  .eyebrow{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;padding:0 11px;margin-bottom:6px;}
+  .sidebar-spacer{flex:1 1 auto;min-height:14px;}
+  .privacy-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:13px;margin:10px 0 14px;}
+  .privacy-box .top{display:flex;gap:9px;align-items:flex-start;}
+  .privacy-box .lock{width:28px;height:28px;border-radius:8px;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .privacy-box h3{font-size:13px;margin:0 0 3px;font-weight:650;}
+  .privacy-box p{font-size:11.5px;color:var(--text-faint);margin:0;line-height:1.4;}
+  .privacy-box .badge{display:flex;align-items:center;gap:5px;color:var(--green);font-size:12px;font-weight:650;margin-top:10px;}
+  .sidebar-foot{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px solid var(--border-soft);}
+
+  /* main */
+  .main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;height:100vh;height:100dvh;}
+  .main-scroll{flex:1 1 auto;overflow-y:auto;padding:26px 30px 40px;scrollbar-width:thin;}
+  .main-scroll::-webkit-scrollbar{width:9px;}
+  .main-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+  .main-inner{max-width:1040px;margin:0 auto;}
+
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+  .ph-left{display:flex;gap:14px;align-items:flex-start;min-width:0;}
+  .ph-icon{width:46px;height:46px;border-radius:13px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .ph-left h2{font-size:23px;margin:0 0 4px;font-weight:750;letter-spacing:-.3px;}
+  .ph-left p{margin:0;color:var(--text-dim);font-size:13.5px;max-width:520px;}
+  .ph-actions{display:flex;gap:8px;flex-shrink:0;}
+  .btn-outline-accent{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:var(--radius-sm);background:var(--accent-soft);border:1px solid var(--accent);color:#cfc2ff;font-size:13px;font-weight:650;cursor:pointer;white-space:nowrap;transition:background var(--dur);}
+  .btn-outline-accent:hover{background:var(--accent-soft-strong);color:#fff;}
+
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{display:flex;align-items:center;gap:7px;padding:11px 14px;background:none;border:none;color:var(--text-dim);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;flex-shrink:0;transition:color var(--dur);}
+  .tab svg{color:var(--text-faint);}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:#fff;border-bottom-color:var(--accent);}
+  .tab.active svg{color:var(--accent);}
+
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .sec-head .left{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+  .sec-head h3{font-size:16.5px;margin:0;font-weight:700;}
+  .sec-head .tag{font-size:11.5px;color:var(--text-faint);background:var(--panel-2);border:1px solid var(--border);padding:3px 9px;border-radius:99px;}
+  .sec-head .view-all{font-size:12.5px;color:var(--accent);font-weight:650;display:flex;align-items:center;gap:3px;cursor:pointer;background:none;border:none;}
+  .sec-head .view-all:hover{text-decoration:underline;}
+  section.block{margin-bottom:32px;}
+
+  /* dropzone */
+  .dropzone{
+    border:2px dashed var(--border);border-radius:var(--radius-lg);background:var(--panel);
+    padding:40px 24px;text-align:center;cursor:pointer;transition:border-color var(--dur),background var(--dur);
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+  }
+  .dropzone.dragover{border-color:var(--accent);background:var(--accent-soft);}
+  .dropzone .dz-icon{width:54px;height:54px;border-radius:14px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;}
+  .dropzone h4{margin:6px 0 2px;font-size:15.5px;font-weight:700;}
+  .dropzone p{margin:0;font-size:12.8px;color:var(--text-faint);}
+  .dropzone .dz-btn{margin-top:10px;padding:9px 18px;border-radius:var(--radius-sm);background:var(--accent);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer;}
+  .dropzone .dz-btn:hover{background:var(--accent-2);}
+  .dz-hint{font-size:11px;color:var(--text-faint);margin-top:4px;}
+
+  /* score hero */
+  .score-hero{display:flex;align-items:center;gap:28px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;flex-wrap:wrap;}
+  .score-ring-wrap{position:relative;width:140px;height:140px;flex-shrink:0;}
+  .score-ring-wrap svg{width:100%;height:100%;}
+  .score-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .score-ring-center .num{font-size:30px;font-weight:800;}
+  .score-ring-center .lbl{font-size:10.5px;color:var(--text-faint);margin-top:2px;}
+  .score-summary{flex:1;min-width:220px;}
+  .score-summary h4{margin:0 0 6px;font-size:16px;font-weight:700;}
+  .score-summary p{margin:0;font-size:13px;color:var(--text-dim);line-height:1.55;}
+  .score-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .score-tag{font-size:11.5px;font-weight:650;padding:4px 10px;border-radius:99px;}
+  .score-tag.good{background:var(--green-soft);color:var(--green);}
+  .score-tag.warn{background:var(--amber-soft);color:var(--amber);}
+  .score-tag.bad{background:var(--red-soft);color:var(--red);}
+
+  /* metric grid */
+  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;}
+  .metric-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:15px;}
+  .metric-card .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .metric-card .mh span:first-child{font-size:12.5px;color:var(--text-dim);font-weight:600;}
+  .metric-card .mh span:last-child{font-size:13px;font-weight:750;}
+  .metric-track{height:6px;border-radius:99px;background:var(--panel-2);overflow:hidden;}
+  .metric-fill{display:block;height:100%;border-radius:99px;}
+
+  /* finding cards */
+  .finding-list{display:flex;flex-direction:column;gap:10px;}
+  .finding-card{display:flex;gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 15px;}
+  .finding-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .finding-ic.good{background:var(--green-soft);color:var(--green);}
+  .finding-ic.warn{background:var(--amber-soft);color:var(--amber);}
+  .finding-ic.bad{background:var(--red-soft);color:var(--red);}
+  .finding-text h5{margin:0 0 3px;font-size:13.3px;font-weight:650;}
+  .finding-text p{margin:0;font-size:12.5px;color:var(--text-dim);line-height:1.5;}
+
+  /* upload list item already-reviewed */
+  .cv-item{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:13px 14px;cursor:pointer;transition:border-color var(--dur);}
+  .cv-item:hover{border-color:var(--accent);}
+  .cv-ic{width:36px;height:36px;border-radius:10px;background:var(--red-soft);color:var(--red);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cv-meta{flex:1;min-width:0;}
+  .cv-meta .t1{font-size:13.3px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cv-meta .t2{font-size:11.3px;color:var(--text-faint);}
+  .cv-score-pill{font-size:12px;font-weight:750;padding:4px 11px;border-radius:99px;flex-shrink:0;}
+
+  /* template grid */
+  .tpl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;}
+  .tpl-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;cursor:pointer;transition:border-color var(--dur),transform var(--dur);}
+  .tpl-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .tpl-thumb{height:120px;border-radius:8px;margin-bottom:10px;display:flex;flex-direction:column;gap:4px;padding:10px;background:#fff;}
+  .tpl-thumb .ln{height:5px;border-radius:2px;background:#d8d8e0;}
+  .tpl-thumb .ln.dark{background:#7c5cff;width:55%;}
+  .tpl-thumb .ln.short{width:35%;}
+  .tpl-card h5{margin:0 0 2px;font-size:13px;font-weight:650;}
+  .tpl-card span{font-size:11px;color:var(--text-faint);}
+
+  /* right sidebar */
+  .sidebar-right{width:320px;flex:0 0 320px;border-left:1px solid var(--border);padding:18px 16px;}
+  .panel-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;}
+  .panel-card:last-child{margin-bottom:0;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
+  .panel-head h3{font-size:13.8px;margin:0;font-weight:650;}
+  .link-btn{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--accent);font-weight:650;background:none;border:none;cursor:pointer;}
+  .link-btn:hover{text-decoration:underline;}
+  .checklist{display:flex;flex-direction:column;gap:10px;}
+  .check-row{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--text-dim);}
+  .check-row .dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .check-row .dot.good{background:var(--green-soft);color:var(--green);}
+  .check-row .dot.pending{background:var(--panel-2);color:var(--text-faint);border:1px solid var(--border);}
+  .stat-rows{display:flex;flex-direction:column;gap:9px;}
+  .stat-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;}
+  .stat-row span:first-child{color:var(--text-faint);}
+  .stat-row span:last-child{font-weight:650;}
+  .btn-primary-full{width:100%;padding:10px;border-radius:var(--radius-sm);background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:background var(--dur);}
+  .btn-primary-full:hover{background:var(--accent-2);}
+  .ghost-btn{width:100%;padding:9px;border-radius:var(--radius-sm);background:var(--panel-2);border:1px solid var(--border);color:var(--text);font-size:12.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background var(--dur),border-color var(--dur);}
+  .ghost-btn:hover{background:var(--accent-soft);border-color:var(--accent);}
+
+  #fileInput{display:none;}
+
+  /* toast */
+  .toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,12px);background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:99px;font-size:13px;font-weight:560;box-shadow:var(--shadow-pop);opacity:0;visibility:hidden;transition:all var(--dur);z-index:80;display:flex;align-items:center;gap:7px;max-width:88vw;}
+  .toast.show{opacity:1;visibility:visible;transform:translate(-50%,0);}
+  .toast svg{color:var(--green);flex-shrink:0;}
+
+  /* modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;visibility:hidden;transition:opacity var(--dur);}
+  .modal-backdrop.show{opacity:1;visibility:visible;}
+  .modal{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:480px;padding:22px;box-shadow:var(--shadow-pop);}
+  .modal h3{margin:0 0 10px;font-size:15px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+  .btn-secondary{padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-dim);}
+  .btn-secondary:hover{background:var(--panel-2);}
+  .btn-primary{padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent-2);}
+
+  /* responsive */
+  @media (max-width:1100px){.sidebar-right{width:300px;flex-basis:300px;}}
+  @media (max-width:1024px){
+    .mobile-bar{display:flex;}
+    .app{padding-top:56px;}
+    .main{height:calc(100vh - 56px);height:calc(100dvh - 56px);}
+    .sidebar-left,.sidebar-right{position:fixed;top:56px;bottom:0;z-index:50;transition:transform var(--dur) ease;box-shadow:var(--shadow-pop);}
+    .sidebar-left{left:0;transform:translateX(-100%);width:280px;flex-basis:280px;}
+    .sidebar-right{right:0;transform:translateX(100%);width:320px;flex-basis:320px;}
+    .sidebar-left.open,.sidebar-right.open{transform:translateX(0);}
+  }
+  @media (min-width:1025px){.overlay{display:none;}}
+  @media (max-width:900px){.main-scroll{padding:20px 18px 32px;} .score-hero{padding:20px;}}
+  @media (max-width:680px){
+    .ph-left{width:100%;} .ph-actions{width:100%;} .btn-outline-accent{flex:1;justify-content:center;}
+    .score-hero{flex-direction:column;text-align:center;}
+    .score-ring-wrap{margin:0 auto;}
+  }
+  @media (max-width:560px){
+    .ph-icon{width:40px;height:40px;} .ph-left h2{font-size:20px;}
+    .sidebar-right{width:88vw;flex-basis:88vw;} .sidebar-left{width:84vw;flex-basis:84vw;}
+    .dropzone{padding:28px 16px;}
+  }
+  @media (max-width:420px){.main-scroll{padding:16px 14px 28px;}}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+</style>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<body>
+
+<div class="app">
+
+  <header class="mobile-bar">
+    <button class="icon-btn" id="openLeft" aria-label="Open navigation">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="brand-mini">
+      <svg viewBox="0 0 24 24" width="20" height="20" style="color:var(--accent)"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>
+      CV Review
+    </div>
+    <button class="icon-btn" id="openRight" aria-label="Open review panel">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </button>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ============ LEFT SIDEBAR ============ -->
+  <aside class="sidebar sidebar-left" id="sidebarLeft">
+    <a href="orivon-landing-v5.html" class="brand" style="text-decoration:none;color:inherit;">
+      <svg class="hex" viewBox="0 0 24 24"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg>
+      <div class="brand-text"><h1>Orivon Mentor</h1><p>Your Offline AI Mentor</p></div>
+    </a>
+
+    <div class="search-box">
+      <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Search">
+      <span class="kbd-hint">Ctrl+K</span>
+    </div>
+
+    <nav class="nav-list" id="navList">
+      <button class="nav-item" data-name="Chat">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2 8.5 8.5 0 0 1-7.5 4.3 8.4 8.4 0 0 1-4.2-1.1L3 21l2.1-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.4 3a8.5 8.5 0 0 1 8.5 8.5z"/></svg>
+        Chat
+      </button>
+      <button class="nav-item" data-name="Career Guidance">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg>
+        Career Guidance
+      </button>
+      <button class="nav-item active" data-name="CV Review">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        CV Review
+      </button>
+      <button class="nav-item" data-name="Interview Prep">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Interview Prep
+      </button>
+      <button class="nav-item" data-name="Learning Roadmaps">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7.5" x2="10.3" y2="16"/><line x1="16" y1="7.5" x2="13.7" y2="16"/></svg>
+        Learning Roadmaps
+      </button>
+      <button class="nav-item" data-name="Programming Help">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Programming Help
+      </button>
+      <button class="nav-item" data-name="Startup Advice">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
+        Startup Advice
+      </button>
+      <button class="nav-item" data-name="Scholarships">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+        Scholarships
+      </button>
+      <button class="nav-item" data-name="Research Assistant">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        Research Assistant
+      </button>
+      <button class="nav-item" data-name="Explore Life Coach/Mentors">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        Explore Life Coach/Mentors
+      </button>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+    <div class="eyebrow">My Library</div>
+    <nav class="nav-list">
+      <button class="nav-item" id="navUploads">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Uploads
+      </button>
+      <button class="nav-item" id="navNotes">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Notes
+      </button>
+      <button class="nav-item" id="navBookmarks">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        Bookmarks
+      </button>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="privacy-box">
+      <div class="top">
+        <div class="lock"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <div><h3>Everything is offline</h3><p>All data stays on your device. No internet, no tracking.</p></div>
+      </div>
+      <div class="badge"><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>100% Private</div>
+    </div>
+
+    <div class="sidebar-foot">
+      <button class="nav-item" id="navProfile" onclick="window.location.href='profile.html'">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </button>
+      <button class="nav-item" id="navSettings">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+      <button class="nav-item" id="navAbout">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        About
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="main-scroll" id="mainScroll">
+      <div class="main-inner">
+
+        <div class="page-header">
+          <div class="ph-left">
+            <div class="ph-icon"><svg class="icon" viewBox="0 0 24 24" width="22" height="22"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
+            <div>
+              <h2>CV Review</h2>
+              <p>Upload your CV and get instant, offline feedback on structure, content and keyword match.</p>
+            </div>
+          </div>
+          <div class="ph-actions">
+            <button class="btn-outline-accent" id="btnUploadTop">
+              <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload CV
+            </button>
+          </div>
+        </div>
+
+        <div class="tabs" id="tabs">
+          <button class="tab active" data-tab="Overview"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="9"/></svg>Overview</button>
+          <button class="tab" data-tab="Findings"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M9 11l3 3L22 4"/></svg>Findings</button>
+          <button class="tab" data-tab="History"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>History</button>
+          <button class="tab" data-tab="Templates"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Templates</button>
+        </div>
+
+        <!-- ===== OVERVIEW PANEL ===== -->
+        <div class="tab-panel active" id="panel-Overview" data-panel="Overview">
+
+          <!-- Upload state -->
+          <div id="uploadState">
+            <section class="block">
+              <div class="dropzone" id="dropzone">
+                <div class="dz-icon"><svg class="icon" viewBox="0 0 24 24" width="26" height="26"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                <h4>Drag &amp; drop your CV here</h4>
+                <p>Supports PDF, DOCX, or TXT — analyzed entirely on your device</p>
+                <button class="dz-btn" id="dzBrowse" type="button">Browse Files</button>
+                <span class="dz-hint">or paste text below instead</span>
+              </div>
+            </section>
+            <section class="block">
+              <div class="sec-head"><div class="left"><h3>Or Paste Your CV Text</h3></div></div>
+              <textarea id="pasteArea" placeholder="Paste your CV content here to analyze it instantly..." style="width:100%;min-height:160px;resize:vertical;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-family:inherit;font-size:13.3px;padding:14px;outline:none;line-height:1.5;"></textarea>
+              <button class="btn-outline-accent" id="btnAnalyzePaste" style="margin-top:10px;">
+                <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Analyze Text
+              </button>
+            </section>
+          </div>
+
+          <!-- Results state (hidden until a CV is analyzed) -->
+          <div id="resultsState" style="display:none;">
+            <section class="block">
+              <div class="score-hero">
+                <div class="score-ring-wrap">
+                  <svg viewBox="0 0 140 140">
+                    <circle cx="70" cy="70" r="58" fill="none" stroke="var(--panel-2)" stroke-width="12"/>
+                    <circle id="cvRingFill" cx="70" cy="70" r="58" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="364.4" transform="rotate(-90 70 70)"/>
+                  </svg>
+                  <div class="score-ring-center"><span class="num" id="cvScoreNum">0</span><span class="lbl">Heuristic Score</span></div>
+                </div>
+                <div class="score-summary">
+                  <h4 id="cvFileName">your_cv.pdf</h4>
+                  <p id="cvSummaryText">Analyzing...</p>
+                  <div class="score-tags" id="cvScoreTags"></div>
+                  <p style="margin:12px 0 0;font-size:11px;color:var(--text-faint);line-height:1.5;">This score comes from pattern-matching (keywords, structure, formatting signals) — not full language understanding. Treat it as a quick structural check, not a final verdict. For deeper feedback, open this CV in Chat and ask the AI mentor to review it directly.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="block">
+              <div class="sec-head"><div class="left"><h3>Key Metrics</h3></div></div>
+              <div class="metric-grid" id="metricGrid"></div>
+            </section>
+
+            <section class="block">
+              <div class="sec-head">
+                <div class="left"><h3>Top Suggestions</h3><span class="tag" id="findingsCountTag">0 findings</span></div>
+                <button class="view-all" id="goToFindings">View All <svg class="icon" viewBox="0 0 24 24" width="13" height="13"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+              </div>
+              <div class="finding-list" id="findingPreview"></div>
+            </section>
+
+            <section class="block">
+              <div class="sec-head"><div class="left"><h3>Match Against a Job Description</h3><span class="tag">Keyword overlap, not AI judgment</span></div></div>
+              <div style="background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+                <p style="margin:0 0 10px;font-size:12.5px;color:var(--text-dim);">Paste a job posting to see which of its key terms already appear in your CV and which are missing. This is literal keyword overlap — it doesn't judge whether you're actually qualified.</p>
+                <textarea id="jdArea" placeholder="Paste the job description here..." style="width:100%;min-height:100px;resize:vertical;background:var(--panel-2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:inherit;font-size:13px;padding:11px;outline:none;line-height:1.5;"></textarea>
+                <button class="btn-outline-accent" id="btnMatchJd" style="margin-top:10px;">
+                  <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Compare Keywords
+                </button>
+                <div id="jdResults" style="display:none;margin-top:16px;">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <div style="font-size:22px;font-weight:800;" id="jdMatchPct">0%</div>
+                    <div style="font-size:12px;color:var(--text-faint);">of the job posting's key terms appear in your CV</div>
+                  </div>
+                  <div style="margin-bottom:10px;">
+                    <div style="font-size:11.5px;font-weight:700;color:var(--green);margin-bottom:6px;">FOUND IN YOUR CV</div>
+                    <div id="jdFound" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+                  </div>
+                  <div>
+                    <div style="font-size:11.5px;font-weight:700;color:var(--amber);margin-bottom:6px;">MISSING / NOT FOUND</div>
+                    <div id="jdMissing" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <button class="btn-outline-accent" id="btnReanalyze">
+              <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Analyze a Different CV
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== FINDINGS PANEL ===== -->
+        <div class="tab-panel" id="panel-Findings" data-panel="Findings">
+          <div class="sec-head"><div class="left"><h3>All Findings</h3></div></div>
+          <div class="finding-list" id="findingFull"></div>
+          <p id="findingsEmptyMsg" style="font-size:13px;color:var(--text-faint);margin-top:6px;">Upload or paste a CV in the Overview tab to see findings here.</p>
+        </div>
+
+        <!-- ===== HISTORY PANEL ===== -->
+        <div class="tab-panel" id="panel-History" data-panel="History">
+          <div class="sec-head"><div class="left"><h3>Review History</h3><span class="tag">This session only — clears on reload</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;" id="historyList"></div>
+          <p id="historyEmptyMsg" style="font-size:13px;color:var(--text-faint);">No CVs analyzed yet this session.</p>
+        </div>
+
+        <!-- ===== TEMPLATES PANEL ===== -->
+        <div class="tab-panel" id="panel-Templates" data-panel="Templates">
+          <div class="sec-head"><div class="left"><h3>CV Templates</h3><span class="tag">Offline, editable</span></div></div>
+          <div class="tpl-grid">
+            <div class="tpl-card" data-tpl="Minimal">
+              <div class="tpl-thumb"><div class="ln dark" style="width:60%;height:9px;"></div><div class="ln short"></div><div class="ln"></div><div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln" style="width:50%"></div></div>
+              <h5>Minimal</h5><span>Clean, ATS-friendly</span>
+            </div>
+            <div class="tpl-card" data-tpl="Modern">
+              <div class="tpl-thumb"><div class="ln dark" style="width:45%;height:9px;"></div><div class="ln" style="background:#7c5cff33;width:90%;height:18px;border-radius:4px;"></div><div class="ln"></div><div class="ln" style="width:80%"></div><div class="ln" style="width:60%"></div></div>
+              <h5>Modern</h5><span>Sidebar layout</span>
+            </div>
+            <div class="tpl-card" data-tpl="Academic">
+              <div class="tpl-thumb"><div class="ln dark" style="width:50%;height:9px;"></div><div class="ln short"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln" style="width:65%"></div></div>
+              <h5>Academic</h5><span>Publications-first</span>
+            </div>
+            <div class="tpl-card" data-tpl="Compact">
+              <div class="tpl-thumb"><div class="ln dark" style="width:40%;height:7px;"></div><div class="ln" style="height:4px"></div><div class="ln" style="height:4px"></div><div class="ln" style="height:4px"></div><div class="ln" style="height:4px;width:70%"></div><div class="ln" style="height:4px;width:55%"></div></div>
+              <h5>Compact</h5><span>Fits more in one page</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ RIGHT SIDEBAR ============ -->
+  <aside class="sidebar sidebar-right" id="sidebarRight">
+
+    <div class="panel-card">
+      <div class="panel-head"><h3>Review Checklist</h3></div>
+      <div class="checklist" id="checklist">
+        <div class="check-row"><div class="dot pending" id="chk-upload">1</div><span>Upload or paste your CV</span></div>
+        <div class="check-row"><div class="dot pending" id="chk-analyze">2</div><span>Run offline analysis</span></div>
+        <div class="check-row"><div class="dot pending" id="chk-fix">3</div><span>Review top suggestions</span></div>
+        <div class="check-row"><div class="dot pending" id="chk-template">4</div><span>Pick a template (optional)</span></div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-head"><h3>This Session</h3></div>
+      <div class="stat-rows">
+        <div class="stat-row"><span>CVs analyzed</span><span id="statAnalyzed">0</span></div>
+        <div class="stat-row"><span>Average score</span><span id="statAvgScore">—</span></div>
+        <div class="stat-row"><span>Findings surfaced</span><span id="statFindings">0</span></div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-head"><h3>Quick Tips</h3></div>
+      <div class="checklist">
+        <div class="check-row"><div class="dot good"><svg class="icon" viewBox="0 0 24 24" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg></div><span>Lead bullets with verbs + numbers, not duties.</span></div>
+        <div class="check-row"><div class="dot good"><svg class="icon" viewBox="0 0 24 24" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg></div><span>Mirror keywords from the job description.</span></div>
+        <div class="check-row"><div class="dot good"><svg class="icon" viewBox="0 0 24 24" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg></div><span>Keep it to one page under 8 years experience.</span></div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-head"><h3>Ask About Your CV</h3></div>
+      <p style="font-size:11.8px;color:var(--text-faint);margin:0 0 12px;line-height:1.5;">Jump into Chat with your CV already loaded as context.</p>
+      <button class="btn-primary-full" id="btnAskChat">Open in Chat</button>
+    </div>
+
+  </aside>
+
+</div>
+
+<input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt">
+
+<div class="toast" id="toast">
+  <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Saved</span>
+</div>
+
+<div class="modal-backdrop" id="findingModalBackdrop">
+  <div class="modal">
+    <h3 id="findingModalTitle">Finding</h3>
+    <p id="findingModalBody" style="font-size:13.3px;color:var(--text-dim);line-height:1.6;margin:0;"></p>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="findingModalClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const sidebarLeft = document.getElementById('sidebarLeft');
+  const sidebarRight = document.getElementById('sidebarRight');
+  const overlay = document.getElementById('overlay');
+  const mainScroll = document.getElementById('mainScroll');
+
+  function openDrawer(el){ el.classList.add('open'); overlay.classList.add('show'); }
+  function closeDrawers(){ sidebarLeft.classList.remove('open'); sidebarRight.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('openLeft').addEventListener('click', () => openDrawer(sidebarLeft));
+  document.getElementById('openRight').addEventListener('click', () => openDrawer(sidebarRight));
+  overlay.addEventListener('click', closeDrawers);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawers(); });
+  window.addEventListener('resize', () => { if (window.innerWidth > 1024) closeDrawers(); });
+
+  let toastTimer = null;
+  function toast(msg){
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  /* ---------- Cross-page navigation ---------- */
+  const PAGE_LINKS = { 'Chat':'orivon-ai-mentor.html', 'Career Guidance':'ORIVON-career-guaidance.html', 'CV Review':'orivon-cvreview.html', 'Interview Prep':'interview-prep.html', 'Learning Roadmaps':'learning-roadmaps.html', 'Profile':'profile.html' };
+  document.querySelectorAll('#navList .nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.dataset.name;
+      if (PAGE_LINKS[name] && name !== 'CV Review'){ window.location.href = PAGE_LINKS[name]; return; }
+      document.querySelectorAll('#navList .nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (name !== 'CV Review') toast(name + ' page isn\'t built in this preview yet');
+      closeDrawers();
+    });
+  });
+  ['navUploads','navNotes','navBookmarks','navAbout'].forEach(id => {
+    document.getElementById(id).addEventListener('click', () => {
+      const labels = {navUploads:'Uploads page isn\'t built in this preview yet', navNotes:'Notes page isn\'t built in this preview yet', navBookmarks:'Bookmarks page isn\'t built in this preview yet', navAbout:'Orivon Mentor v1.0 — fully offline'};
+      toast(labels[id]);
+      closeDrawers();
+    });
+  });
+
+  /* ---------- Search ---------- */
+  const searchInput = document.getElementById('searchInput');
+  const allNavItems = Array.from(document.querySelectorAll('.sidebar-left .nav-item'));
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    allNavItems.forEach(item => { item.style.display = (!q || item.textContent.trim().toLowerCase().includes(q)) ? '' : 'none'; });
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){ e.preventDefault(); if (window.innerWidth <= 1024) openDrawer(sidebarLeft); searchInput.focus(); }
+  });
+
+  /* ---------- Tabs ---------- */
+  function switchTab(name){
+    document.querySelectorAll('#tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+    mainScroll.scrollTo({top:0, behavior:'smooth'});
+    closeDrawers();
+  }
+  document.querySelectorAll('#tabs .tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+  document.getElementById('goToFindings').addEventListener('click', () => switchTab('Findings'));
+
+  /* ---------- Checklist helpers ---------- */
+  function markChecked(id){
+    const el = document.getElementById(id);
+    el.classList.remove('pending');
+    el.classList.add('good');
+    el.innerHTML = '<svg class="icon" viewBox="0 0 24 24" width="11" height="11"><polyline points="20 6 9 17 4 12"/></svg>';
+  }
+
+  /* ---------- Analysis engine (runs entirely client-side) ---------- */
+  let sessionCount = 0;
+  let sessionScoreTotal = 0;
+  let sessionFindingsTotal = 0;
+  const history = [];
+
+  function analyzeText(text, fileName, meta){
+    meta = meta || {};
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+    const lower = text.toLowerCase();
+
+    const hasEmail = /[\w.+-]+@[\w-]+\.[a-z]{2,}/i.test(text);
+    const hasPhone = /(\+?\d[\d\s().-]{7,}\d)/.test(text);
+
+    // Bullets: literal markers OR numbered lists OR short, dense "statement" lines
+    // (a reasonable proxy for list items that lost their markers during copy/paste).
+    const markedBullets = lines.filter(l => /^[-•*]\s+/.test(l) || /^\d+[.)]\s+/.test(l));
+    const shortStatementLines = lines.filter(l => {
+      const wc = l.split(/\s+/).length;
+      return wc >= 4 && wc <= 24 && !/[:]$/.test(l) && !/^[-•*]\s+/.test(l);
+    });
+    const bulletCount = markedBullets.length || Math.round(shortStatementLines.length * 0.6);
+    const bulletsWereInferred = markedBullets.length === 0 && shortStatementLines.length > 0;
+
+    // Quantified impact: only count numbers that look like real metrics, not
+    // years, phone digits, or page/zip-style numbers.
+    const metricMatches = text.match(/\$\s?\d[\d,.]*\s?(k|m|b)?\b|\b\d+(\.\d+)?\s?%|\b\d+x\b|\b\d+\+\s?(years|yrs|users|clients|members|projects)?|\b(increased|reduced|decreased|grew|cut|saved|improved|boosted|drove)\b[^.]{0,40}?\b\d+(\.\d+)?\s?%?/gi) || [];
+    const numberCount = metricMatches.length;
+
+    // Action verbs: only counted when they open a line or a bullet, not when
+    // merely mentioned anywhere in a sentence.
+    const actionVerbs = ['led','built','designed','created','launched','improved','increased','reduced','managed','developed','implemented','optimized','delivered','automated','drove','shipped','architected','mentored','negotiated','migrated','streamlined'];
+    const verbPattern = new RegExp('^(?:[-•*]\\s+|\\d+[.)]\\s+)?(' + actionVerbs.join('|') + ')\\b', 'i');
+    const verbHits = lines.filter(l => verbPattern.test(l)).length;
+
+    // Section headings: require the line to actually look like a heading
+    // (short, near a section keyword, not a mid-sentence mention).
+    const headingLike = kw => lines.some(l => l.length <= 32 && new RegExp('^' + kw, 'i').test(l));
+    const hasSummary = headingLike('(summary|profile|objective|about me)') || /summary|objective/i.test(text.slice(0, 250));
+    const hasEducation = headingLike('education') || /education|university|college|bachelor|master|degree/i.test(text);
+    const hasSkills = headingLike('(skills|technologies|tools|technical skills)');
+    const lengthOk = wordCount >= 250 && wordCount <= 900;
+
+    // ATS-risk signal: very little extractable text relative to claimed file
+    // size usually means a scanned/image-based PDF or heavy use of graphics —
+    // both break most ATS parsers even if the CV looks fine visually.
+    let atsRisk = null;
+    if (meta.fileSize && meta.extracted){
+      const density = text.length / meta.fileSize; // chars per byte
+      if (meta.fileSize > 20000 && density < 0.01) atsRisk = 'high';
+      else if (meta.fileSize > 20000 && density < 0.03) atsRisk = 'medium';
+    }
+    // Column/table layout heuristic: runs of 4+ spaces inside body lines often
+    // indicate multi-column or tabbed layouts that scramble when ATS-parsed.
+    const wideGapLines = lines.filter(l => /\S {4,}\S/.test(l)).length;
+    const possibleColumns = wideGapLines > lines.length * 0.15 && lines.length > 8;
+
+    // scoring — explicitly a heuristic point system, not a calibrated model
+    let score = 40;
+    if (hasEmail) score += 6;
+    if (hasPhone) score += 4;
+    if (bulletCount >= 5) score += 10; else if (bulletCount >= 2) score += 5;
+    if (numberCount >= 4) score += 12; else if (numberCount >= 1) score += 6;
+    if (verbHits >= 5) score += 12; else if (verbHits >= 2) score += 6;
+    if (hasSummary) score += 4;
+    if (hasEducation) score += 4;
+    if (hasSkills) score += 4;
+    if (lengthOk) score += 8; else if (wordCount > 0) score += 2;
+    if (atsRisk === 'high') score -= 14; else if (atsRisk === 'medium') score -= 6;
+    if (possibleColumns) score -= 5;
+    score = Math.max(20, Math.min(96, score));
+
+    const findings = [];
+    if (atsRisk === 'high') findings.push({level:'bad', title:'Very little text could be extracted', body:'Only a small fraction of this file\'s size came through as readable text, which usually means it\'s a scanned image or a heavily graphic-based PDF. Most ATS systems will see this as a near-blank document. Export from a text-based source (Word, Google Docs) instead of a flattened image/PDF.'});
+    else if (atsRisk === 'medium') findings.push({level:'warn', title:'Lower-than-expected text density', body:'This file extracted less text than expected for its size, which can happen with image-heavy templates, icon-based skill bars, or embedded text boxes. Worth double-checking how it parses in an actual ATS.'});
+    if (possibleColumns) findings.push({level:'warn', title:'Possible multi-column or tabbed layout', body:'A number of lines have large internal gaps, which often signals a multi-column or table-based layout. Many ATS parsers read these out of order and scramble the content — a single-column layout is safer.'});
+    if (!hasEmail) findings.push({level:'bad', title:'No email address detected', body:'Recruiters and ATS systems look for a clear contact email near the top of the document. Add one if it\'s missing from the parsed text.'});
+    if (!hasPhone) findings.push({level:'warn', title:'No phone number detected', body:'A phone number is optional but still common on CVs in many regions — consider adding one if you want recruiters to call directly.'});
+    if (numberCount < 4) findings.push({level:'warn', title:'Light on quantified impact', body:'Found ' + numberCount + ' metric-shaped result(s) (numbers tied to %, $, or impact verbs). Bullets like "increased signups 18%" or "cut load time by 400ms" are far more persuasive than duty descriptions.'});
+    if (verbHits < 3) findings.push({level:'warn', title:'Few bullets open with a strong action verb', body:'Found ' + verbHits + ' line(s) that start with a strong verb (e.g. "Built", "Led", "Launched"). This is checked at the start of each line, not just mentioned anywhere — starting bullets this way makes accomplishments scan faster.'});
+    if (bulletCount < 4) findings.push({level:'warn', title:'Consider using more bullet points', body:'Dense paragraphs are harder to scan than short bullets. Aim for 3-5 bullets per role.' + (bulletsWereInferred ? ' Note: no literal bullet characters were found — this estimate is based on short line lengths, so it may be inaccurate if formatting was lost on paste.' : '')});
+    if (!hasSummary) findings.push({level:'warn', title:'No clear summary/profile heading found', body:'A short heading like "Summary" or "Profile" followed by 2-3 lines helps recruiters quickly understand your focus before reading further.'});
+    if (!hasSkills) findings.push({level:'warn', title:'No clear skills section heading found', body:'A dedicated "Skills" heading makes it easier for ATS keyword scanners and human reviewers to match you to a role.'});
+    if (!hasEducation) findings.push({level:'warn', title:'No education section detected', body:'Even a brief education line is expected on most CVs unless you intentionally omit it for senior roles.'});
+    if (!lengthOk){
+      findings.push({level:'warn', title: wordCount < 250 ? 'CV looks quite short' : 'CV may be too long', body: wordCount < 250 ? ('Only ' + wordCount + ' words detected — there may be room to add more detail on your experience and impact.') : ('Around ' + wordCount + ' words detected — consider trimming to keep it closer to one page for most roles.')});
+    }
+    if (hasEmail) findings.push({level:'good', title:'Contact email found', body:'Your email is clearly present, which is essential for recruiters and ATS parsing.'});
+    if (numberCount >= 4) findings.push({level:'good', title:'Good use of quantified results', body:'You\'ve included ' + numberCount + ' metric-shaped data point(s) — this is one of the strongest signals recruiters look for.'});
+    if (verbHits >= 5) findings.push({level:'good', title:'Bullets lead with strong, active language', body:'Multiple lines open with a strong action verb, which reads as confident and outcome-focused.'});
+    if (hasSummary) findings.push({level:'good', title:'Summary section present', body:'A clear summary heading at the top gives reviewers fast context before they read the rest.'});
+    if (atsRisk === null && !possibleColumns && meta.extracted) findings.push({level:'good', title:'Layout looks ATS-friendly', body:'No strong signals of scanned images or multi-column layouts were detected in the extracted text — a good sign for ATS compatibility.'});
+
+    return {
+      fileName, wordCount, score, findings, atsRisk, possibleColumns,
+      extractionNote: meta.extractionNote || null,
+      metrics: [
+        {label:'Quantified Impact', value: Math.min(100, numberCount * 15), color:'var(--accent)'},
+        {label:'Action Verb Usage', value: Math.min(100, verbHits * 14), color:'var(--teal)'},
+        {label:'Structure & Bullets', value: Math.min(100, bulletCount * 10 + (hasSummary?15:0) + (hasSkills?10:0)), color:'var(--amber)'},
+        {label:'Length Fit', value: lengthOk ? 92 : Math.max(20, 100 - Math.abs(wordCount-550)/8), color:'var(--green)'}
+      ]
+    };
+  }
+
+  function levelColor(level){ return level === 'good' ? 'var(--green)' : level === 'bad' ? 'var(--red)' : 'var(--amber)'; }
+  function levelIconWrap(level){
+    const icons = {
+      good: '<svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg>',
+      warn: '<svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
+      bad: '<svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+    };
+    return `<div class="finding-ic ${level}">${icons[level]}</div>`;
+  }
+
+  function renderResults(result){
+    document.getElementById('uploadState').style.display = 'none';
+    document.getElementById('resultsState').style.display = 'block';
+
+    document.getElementById('cvFileName').textContent = result.fileName;
+    const tone = result.score >= 80 ? 'a strong CV with' : result.score >= 60 ? 'a solid CV with' : 'a CV with notable gaps and';
+    document.getElementById('cvSummaryText').textContent = `This looks like ${tone} ${result.findings.filter(f=>f.level!=='good').length} area(s) worth improving, based on ${result.wordCount} words analyzed entirely on-device.`;
+
+    // ring animation
+    const circumference = 364.4;
+    const ring = document.getElementById('cvRingFill');
+    const numEl = document.getElementById('cvScoreNum');
+    const start = performance.now(), duration = 900, target = result.score;
+    function step(ts){
+      const t = Math.min((ts-start)/duration, 1);
+      const eased = 1 - Math.pow(1-t, 3);
+      const current = Math.round(target * eased);
+      numEl.textContent = current;
+      ring.style.strokeDashoffset = circumference * (1 - (target*eased)/100);
+      ring.style.stroke = target >= 80 ? 'var(--green)' : target >= 60 ? 'var(--accent)' : 'var(--amber)';
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+
+    const tags = document.getElementById('cvScoreTags');
+    tags.innerHTML = '';
+    const goodCount = result.findings.filter(f=>f.level==='good').length;
+    const warnCount = result.findings.filter(f=>f.level==='warn').length;
+    const badCount = result.findings.filter(f=>f.level==='bad').length;
+    if (goodCount) tags.innerHTML += `<span class="score-tag good">${goodCount} strengths</span>`;
+    if (warnCount) tags.innerHTML += `<span class="score-tag warn">${warnCount} suggestions</span>`;
+    if (badCount) tags.innerHTML += `<span class="score-tag bad">${badCount} issues</span>`;
+
+    // metrics
+    document.getElementById('metricGrid').innerHTML = result.metrics.map(m => `
+      <div class="metric-card">
+        <div class="mh"><span>${m.label}</span><span>${Math.round(m.value)}%</span></div>
+        <div class="metric-track"><span class="metric-fill" style="width:${Math.max(4,Math.round(m.value))}%;background:${m.color}"></span></div>
+      </div>`).join('');
+
+    // findings: order bad, warn, good
+    const order = {bad:0, warn:1, good:2};
+    const sorted = [...result.findings].sort((a,b)=>order[a.level]-order[b.level]);
+    const card = f => `<div class="finding-card" data-title="${escapeHtml(f.title)}" data-body="${escapeHtml(f.body)}">
+        ${levelIconWrap(f.level)}
+        <div class="finding-text"><h5>${escapeHtml(f.title)}</h5><p>${escapeHtml(f.body)}</p></div>
+      </div>`;
+    document.getElementById('findingPreview').innerHTML = sorted.slice(0,4).map(card).join('');
+    document.getElementById('findingFull').innerHTML = sorted.map(card).join('');
+    document.getElementById('findingsCountTag').textContent = result.findings.length + ' findings';
+    document.getElementById('findingsEmptyMsg').style.display = 'none';
+
+    bindFindingClicks();
+
+    markChecked('chk-upload');
+    markChecked('chk-analyze');
+    markChecked('chk-fix');
+
+    // session stats
+    sessionCount++;
+    sessionScoreTotal += result.score;
+    sessionFindingsTotal += result.findings.length;
+    document.getElementById('statAnalyzed').textContent = sessionCount;
+    document.getElementById('statAvgScore').textContent = Math.round(sessionScoreTotal / sessionCount) + '%';
+    document.getElementById('statFindings').textContent = sessionFindingsTotal;
+
+    // history
+    history.unshift(result);
+    renderHistory();
+
+    window.__lastCvResult = result;
+    mainScroll.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function bindFindingClicks(){
+    document.querySelectorAll('.finding-card').forEach(card => {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => {
+        document.getElementById('findingModalTitle').textContent = card.dataset.title;
+        document.getElementById('findingModalBody').textContent = card.dataset.body;
+        document.getElementById('findingModalBackdrop').classList.add('show');
+      });
+    });
+  }
+  document.getElementById('findingModalClose').addEventListener('click', () => document.getElementById('findingModalBackdrop').classList.remove('show'));
+  document.getElementById('findingModalBackdrop').addEventListener('click', e => { if (e.target.id === 'findingModalBackdrop') e.currentTarget.classList.remove('show'); });
+
+  function renderHistory(){
+    const list = document.getElementById('historyList');
+    if (!history.length){ document.getElementById('historyEmptyMsg').style.display='block'; list.innerHTML=''; return; }
+    document.getElementById('historyEmptyMsg').style.display='none';
+    list.innerHTML = history.map((h,i) => {
+      const color = h.score >= 80 ? 'var(--green)' : h.score >= 60 ? 'var(--accent)' : 'var(--amber)';
+      const bg = h.score >= 80 ? 'var(--green-soft)' : h.score >= 60 ? 'var(--accent-soft)' : 'var(--amber-soft)';
+      return `<div class="cv-item" data-idx="${i}">
+        <div class="cv-ic"><svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="cv-meta"><div class="t1">${escapeHtml(h.fileName)}</div><div class="t2">${h.wordCount} words · ${h.findings.length} findings</div></div>
+        <span class="cv-score-pill" style="background:${bg};color:${color}">${h.score}</span>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.cv-item').forEach(item => {
+      item.addEventListener('click', () => { renderResults(history[item.dataset.idx]); switchTab('Overview'); });
+    });
+  }
+
+  function escapeHtml(str){ const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+  /* ---------- File handling: real extraction for txt/pdf/docx ---------- */
+  const fileInput = document.getElementById('fileInput');
+  let pdfLibReady = false;
+  try {
+    if (window['pdfjsLib']){
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      pdfLibReady = true;
+    }
+  } catch(e){ pdfLibReady = false; }
+
+  function setLoading(isLoading, label){
+    const dz = document.getElementById('dropzone');
+    if (isLoading){
+      dz.dataset.prevHtml = dz.innerHTML;
+      dz.innerHTML = `<div class="dz-icon"><svg class="icon" viewBox="0 0 24 24" width="26" height="26"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><h4>${label || 'Reading file...'}</h4><p>Extracting text on-device</p>`;
+    } else if (dz.dataset.prevHtml){
+      dz.innerHTML = dz.dataset.prevHtml;
+    }
+  }
+
+  async function extractPdfText(file){
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+    let out = '';
+    const pageCount = Math.min(pdf.numPages, 10); // cap for very long documents
+    for (let i = 1; i <= pageCount; i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items.map(it => it.str).join(' ');
+      out += pageText + '\n';
+    }
+    return out;
+  }
+
+  async function extractDocxText(file){
+    const buf = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({arrayBuffer: buf});
+    return result.value || '';
+  }
+
+  async function handleFile(file){
+    if (!file) return;
+    const lowerName = file.name.toLowerCase();
+    const isTxt = /\.(txt|md)$/.test(lowerName) || file.type === 'text/plain';
+    const isPdf = /\.pdf$/.test(lowerName) || file.type === 'application/pdf';
+    const isDocx = /\.docx$/.test(lowerName);
+    const isLegacyDoc = /\.doc$/.test(lowerName) && !isDocx;
+
+    if (isTxt){
+      const reader = new FileReader();
+      reader.onload = () => analyzeAndRender(reader.result, file.name, {fileSize:file.size, extracted:true});
+      reader.onerror = () => toast('Could not read that file');
+      reader.readAsText(file);
+      return;
+    }
+
+    if (isPdf){
+      if (!pdfLibReady){ toast('PDF reader failed to load — try pasting the text instead'); return; }
+      setLoading(true, 'Extracting text from PDF...');
+      try {
+        const text = await extractPdfText(file);
+        setLoading(false);
+        if (text.trim().length < 20){
+          toast('Almost no text could be extracted — this may be a scanned/image PDF');
+        }
+        analyzeAndRender(text, file.name, {fileSize:file.size, extracted:true});
+      } catch(err){
+        setLoading(false);
+        toast('Could not parse this PDF — try pasting the text instead');
+      }
+      return;
+    }
+
+    if (isDocx){
+      if (typeof mammoth === 'undefined'){ toast('DOCX reader failed to load — try pasting the text instead'); return; }
+      setLoading(true, 'Extracting text from DOCX...');
+      try {
+        const text = await extractDocxText(file);
+        setLoading(false);
+        analyzeAndRender(text, file.name, {fileSize:file.size, extracted:true});
+      } catch(err){
+        setLoading(false);
+        toast('Could not parse this DOCX — try pasting the text instead');
+      }
+      return;
+    }
+
+    if (isLegacyDoc){
+      toast('Legacy .doc isn\'t supported for extraction — please paste the text or save as .docx');
+      return;
+    }
+
+    toast('Unsupported file type — try PDF, DOCX, TXT, or paste text directly');
+  }
+
+  function analyzeAndRender(text, fileName, meta){
+    if (!text || !text.trim()){
+      toast('No readable text found in that file — try pasting the CV text instead');
+      return;
+    }
+    const result = analyzeText(text, fileName, meta || {});
+    window.__lastCvRawText = text;
+    renderResults(result);
+  }
+
+  document.getElementById('btnUploadTop').addEventListener('click', () => fileInput.click());
+  document.getElementById('dzBrowse').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); fileInput.value=''; });
+
+  const dropzone = document.getElementById('dropzone');
+  ['dragenter','dragover'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
+  dropzone.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+  dropzone.addEventListener('click', e => { if (e.target.id !== 'dzBrowse') fileInput.click(); });
+
+  document.getElementById('btnAnalyzePaste').addEventListener('click', () => {
+    const text = document.getElementById('pasteArea').value.trim();
+    if (!text){ toast('Paste some CV text first'); return; }
+    analyzeAndRender(text, 'Pasted CV', {extracted:false});
+  });
+
+  document.getElementById('btnReanalyze').addEventListener('click', () => {
+    document.getElementById('uploadState').style.display = 'block';
+    document.getElementById('resultsState').style.display = 'none';
+    document.getElementById('pasteArea').value = '';
+    document.getElementById('jdArea').value = '';
+    document.getElementById('jdResults').style.display = 'none';
+  });
+
+  document.querySelectorAll('.tpl-card').forEach(card => {
+    card.addEventListener('click', () => { markChecked('chk-template'); toast(card.dataset.tpl + ' template selected'); });
+  });
+
+  const STOPWORDS = new Set(['the','and','for','with','that','this','from','your','you','are','will','have','has','was','were','its','our','their','a','an','of','to','in','on','at','as','is','be','by','or','we','they','it','i','about','into','than','then','also','etc','role','job','years','year','team','work','experience']);
+  function extractKeywords(text){
+    const tokens = (text.toLowerCase().match(/[a-z][a-z0-9+.#-]{2,}/g) || []);
+    const freq = {};
+    tokens.forEach(t => {
+      if (STOPWORDS.has(t)) return;
+      freq[t] = (freq[t] || 0) + 1;
+    });
+    return Object.keys(freq).sort((a,b) => freq[b]-freq[a]).slice(0, 30);
+  }
+  document.getElementById('btnMatchJd').addEventListener('click', () => {
+    const jdText = document.getElementById('jdArea').value.trim();
+    if (!jdText){ toast('Paste a job description first'); return; }
+    if (!window.__lastCvRawText){ toast('Analyze a CV first'); return; }
+    const jdKeywords = extractKeywords(jdText);
+    const cvLower = window.__lastCvRawText.toLowerCase();
+    const found = jdKeywords.filter(k => cvLower.includes(k));
+    const missing = jdKeywords.filter(k => !cvLower.includes(k));
+    const pct = jdKeywords.length ? Math.round((found.length / jdKeywords.length) * 100) : 0;
+
+    document.getElementById('jdResults').style.display = 'block';
+    document.getElementById('jdMatchPct').textContent = pct + '%';
+    document.getElementById('jdMatchPct').style.color = pct >= 60 ? 'var(--green)' : pct >= 35 ? 'var(--amber)' : 'var(--red)';
+    document.getElementById('jdFound').innerHTML = found.length
+      ? found.map(k => `<span style="font-size:11.5px;background:var(--green-soft);color:var(--green);padding:3px 9px;border-radius:99px;">${escapeHtml(k)}</span>`).join('')
+      : '<span style="font-size:12px;color:var(--text-faint);">No overlapping terms found.</span>';
+    document.getElementById('jdMissing').innerHTML = missing.length
+      ? missing.map(k => `<span style="font-size:11.5px;background:var(--amber-soft);color:var(--amber);padding:3px 9px;border-radius:99px;">${escapeHtml(k)}</span>`).join('')
+      : '<span style="font-size:12px;color:var(--text-faint);">None — strong overlap.</span>';
+  });
+
+  document.getElementById('btnAskChat').addEventListener('click', () => {
+    if (window.__lastCvResult){
+      sessionStorage.setItem('orivon_cv_context', JSON.stringify({
+        fileName: window.__lastCvResult.fileName, score: window.__lastCvResult.score
+      }));
+    }
+    window.location.href = 'orivon.html';
+  });
+
+})();
+
+</script>
+
+
+<div class="settings-modal-backdrop" id="settingsModalBackdrop">
+  <div class="settings-modal">
+    <div class="settings-modal-head">
+      <div>
+        <h3>Settings</h3>
+        <p class="sub">Personalize how Orivon Mentor looks.</p>
+      </div>
+      <button class="settings-modal-close" id="settingsModalClose" aria-label="Close settings">
+        <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="settings-row">
+      <div class="s-label">
+        <svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <div>
+          Dark Mode
+          <div class="s-desc">Switch between light and dark appearance</div>
+        </div>
+      </div>
+      <button class="settings-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+        <div class="knob">🌙</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ---------- Theme (light/dark) ---------- */
+  function setTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    const knob = document.querySelector('#darkModeToggle .knob');
+    if(knob) knob.textContent = mode === 'light' ? '☀️' : '🌙';
+  }
+  document.getElementById('darkModeToggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    setTheme(current === 'light' ? 'dark' : 'light');
+  });
+  const settingsBackdrop = document.getElementById('settingsModalBackdrop');
+  function openSettings(){ settingsBackdrop.classList.add('show'); }
+  function closeSettings(){ settingsBackdrop.classList.remove('show'); }
+  document.getElementById('settingsModalClose').addEventListener('click', closeSettings);
+  settingsBackdrop.addEventListener('click', e => { if(e.target === settingsBackdrop) closeSettings(); });
+  document.getElementById('navSettings').addEventListener('click', () => { openSettings(); closeDrawers(); });
+</script>
+</body>
+</html>

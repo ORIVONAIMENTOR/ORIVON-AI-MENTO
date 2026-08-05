@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Profile — Orivon Mentor</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = "https://mkuklkqvatequxvlpncm.supabase.co";
+  const supabaseKey = "sb_publishable_amstxWXd3Vt19V7um1YMsw_gw-keZHT";
+  try{
+    window._sb = supabase.createClient(supabaseUrl, supabaseKey);
+  }catch(err){
+    console.error('Supabase failed to initialize:', err);
+  }
+</script>
+<style>
+  :root{
+    --bg:#0b0b10;
+    --bg-elevated:#111116;
+    --panel:#15151b;
+    --panel-2:#1a1a22;
+    --border:#262630;
+    --border-soft:#1e1e26;
+    --text:#f2f2f5;
+    --text-dim:#9a9aa7;
+    --text-faint:#65656f;
+    --accent:#7c5cff;
+    --accent-2:#6a47ef;
+    --accent-soft:rgba(124,92,255,.14);
+    --accent-soft-strong:rgba(124,92,255,.22);
+    --green:#34d399;
+    --green-soft:rgba(52,211,153,.12);
+    --orange:#f0a94e;
+    --orange-soft:rgba(240,169,78,.14);
+    --red:#f0654c;
+    --red-soft:rgba(240,101,76,.14);
+    --blue:#60a5fa;
+    --blue-soft:rgba(96,165,250,.14);
+    --radius-lg:18px;
+    --radius-md:13px;
+    --radius-sm:9px;
+    --shadow-pop:0 16px 40px -12px rgba(0,0,0,.55);
+    --dur:.22s;
+  }
+  html[data-theme="light"]{
+    --bg:#f6f6fa;
+    --bg-elevated:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#f1f1f6;
+    --border:#e4e4ec;
+    --border-soft:#ececf3;
+    --text:#15151b;
+    --text-dim:#54545f;
+    --text-faint:#84848f;
+    --accent-soft:rgba(124,92,255,.10);
+    --accent-soft-strong:rgba(124,92,255,.18);
+    --green-soft:rgba(52,211,153,.14);
+    --shadow-pop:0 16px 40px -12px rgba(0,0,0,.12);
+  }
+  html{transition:background-color .2s ease;}
+  body{transition:background-color .2s ease,color .2s ease;}
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  button,select,textarea,input{font-family:inherit;}
+  ::selection{background:var(--accent-soft-strong);}
+  *:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px;}
+  svg.icon{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* ---------- App shell ---------- */
+  .app{display:flex;height:100vh;height:100dvh;width:100%;position:relative;}
+
+  /* ---------- Mobile top bar ---------- */
+  .mobile-bar{
+    display:none;align-items:center;justify-content:space-between;gap:8px;
+    height:56px;padding:0 12px;border-bottom:1px solid var(--border);
+    background:var(--bg-elevated);position:fixed;top:0;left:0;right:0;z-index:40;
+  }
+  .mobile-bar .brand-mini{display:flex;align-items:center;gap:8px;font-weight:700;font-size:20px;overflow:hidden;white-space:nowrap;}
+  .mobile-bar .logoimg{width:34px;}
+  .icon-btn{
+    width:38px;height:38px;border-radius:var(--radius-sm);
+    background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text-dim);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:background var(--dur),color var(--dur),border-color var(--dur);flex-shrink:0;
+  }
+  .icon-btn:hover{background:var(--accent-soft);color:var(--text);border-color:var(--accent);}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:45;opacity:0;visibility:hidden;transition:opacity var(--dur);}
+  .overlay.show{opacity:1;visibility:visible;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{height:100vh;height:100dvh;overflow-y:auto;background:var(--bg-elevated);display:flex;flex-direction:column;scrollbar-width:thin;}
+  .sidebar::-webkit-scrollbar{width:8px;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+  .sidebar-left{width:266px;flex:0 0 266px;border-right:1px solid var(--border);padding:18px 14px 16px;}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 16px;}
+  .brand .hex{width:34px;height:34px;flex-shrink:0;color:var(--accent);}
+  .brand-text h1{font-size:15.5px;margin:0;line-height:1.2;font-weight:750;letter-spacing:-.2px;}
+  .brand-text p{font-size:11.5px;margin:1px 0 0;color:var(--text-faint);}
+
+  .model-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:11px 12px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;
+  }
+  .model-card .cube{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .model-card .meta{min-width:0;}
+  .model-card .label{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;}
+  .model-card .name{font-size:13px;font-weight:650;margin:1px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .status-dot-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:600;}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft);}
+
+  nav.nav-list{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--radius-sm);
+    color:var(--text-dim);font-size:13.5px;font-weight:560;cursor:pointer;border:1px solid transparent;
+    background:none;text-align:left;width:100%;transition:background var(--dur),color var(--dur);
+  }
+  .nav-item svg{color:var(--text-faint);transition:color var(--dur);}
+  .nav-item:hover{background:var(--panel);color:var(--text);}
+  .nav-item:hover svg{color:var(--text-dim);}
+  .nav-item.active{background:var(--accent-soft-strong);color:#fff;}
+  .nav-item.active svg{color:var(--accent);}
+
+  .sidebar-divider{height:1px;background:var(--border-soft);margin:6px 4px 12px;}
+  .eyebrow{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;padding:0 11px;margin-bottom:6px;}
+  .sidebar-spacer{flex:1 1 auto;min-height:14px;}
+
+  .privacy-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:13px;margin:10px 0 14px;}
+  .privacy-box .top{display:flex;gap:9px;align-items:flex-start;}
+  .privacy-box .lock{width:28px;height:28px;border-radius:8px;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .privacy-box h3{font-size:13px;margin:0 0 3px;font-weight:650;}
+  .privacy-box p{font-size:11.5px;color:var(--text-faint);margin:0;line-height:1.4;}
+  .privacy-box .badge{display:flex;align-items:center;gap:5px;color:var(--green);font-size:12px;font-weight:650;margin-top:10px;}
+
+  .sidebar-foot{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px solid var(--border-soft);}
+
+  /* ---------- Mini profile card in sidebar ---------- */
+  .sidebar-profile{
+    display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--radius-sm);
+    background:var(--panel);border:1px solid var(--border);margin-bottom:14px;cursor:pointer;
+    transition:border-color var(--dur);
+  }
+  .sidebar-profile:hover{border-color:var(--accent);}
+  .sidebar-profile .avatar{
+    width:34px;height:34px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;
+  }
+  .sidebar-profile .meta{min-width:0;}
+  .sidebar-profile .p-name{font-size:13px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sidebar-profile .p-email{font-size:11px;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* ---------- Main column ---------- */
+  .main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;height:100vh;height:100dvh;}
+  .main-scroll{flex:1 1 auto;overflow-y:auto;padding:34px 32px 40px;scrollbar-width:thin;}
+  .main-scroll::-webkit-scrollbar{width:9px;}
+  .main-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+  .main-inner{max-width:820px;margin:0 auto;}
+
+  .page-head{margin-bottom:22px;}
+  .page-head h2{font-size:22px;margin:0 0 4px;font-weight:750;letter-spacing:-.3px;}
+  .page-head p{margin:0;color:var(--text-faint);font-size:13px;}
+
+  /* ---------- Cards ---------- */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;}
+  .card + .card{margin-top:16px;}
+  .section-title{display:flex;align-items:center;gap:9px;font-size:15.5px;font-weight:700;margin:0 0 4px;}
+  .section-title svg{color:var(--accent);}
+  .section-sub{color:var(--text-faint);font-size:12.5px;margin:0 0 20px;}
+
+  /* ---------- Profile header card ---------- */
+  .profile-head{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .avatar-lg{
+    width:84px;height:84px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:30px;
+    position:relative;
+  }
+  .avatar-edit{
+    position:absolute;bottom:-2px;right:-2px;width:28px;height:28px;border-radius:50%;
+    background:var(--panel);border:2px solid var(--panel);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);
+  }
+  .avatar-edit:hover{color:var(--accent);}
+  .profile-head-meta{flex:1;min-width:180px;}
+  .profile-head-meta h3{margin:0 0 4px;font-size:19px;font-weight:750;}
+  .profile-head-meta .p-role{
+    display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:650;color:var(--accent);
+    background:var(--accent-soft);padding:4px 10px;border-radius:100px;margin-bottom:8px;
+  }
+  .profile-head-meta .p-email{color:var(--text-faint);font-size:13px;}
+  .profile-head-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 20px;border-radius:100px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;
+    transition:filter var(--dur),transform var(--dur),background var(--dur),border-color var(--dur),color var(--dur);
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 10px 26px -10px rgba(124,92,255,.7);}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-outline{background:var(--panel-2);border:1px solid var(--border);color:var(--text);}
+  .btn-outline:hover{background:var(--panel);border-color:var(--accent);}
+  .btn-danger{background:var(--red-soft);border:1px solid rgba(240,101,76,.35);color:#ff8a76;}
+  .btn-danger:hover{background:rgba(240,101,76,.2);}
+  .btn-sm{padding:8px 14px;font-size:12.5px;}
+  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+  .btn .spinner{
+    width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+    border-radius:50%;display:none;animation:spin .7s linear infinite;
+  }
+  .btn.loading .spinner{display:inline-block;}
+  .btn.loading .btn-label{opacity:.7;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- Form ---------- */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;}
+  .form-grid.full{grid-template-columns:1fr;}
+  .field{display:flex;flex-direction:column;gap:8px;}
+  .field label{font-size:12.5px;font-weight:650;color:var(--text-dim);}
+  .field input,
+  .field select,
+  .field textarea{
+    width:100%;padding:11px 13px;border-radius:var(--radius-sm);background:var(--panel-2);
+    border:1px solid var(--border);color:var(--text);font-size:13.5px;outline:none;
+    transition:border-color var(--dur);font-family:inherit;
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{border-color:var(--accent);}
+  .field input:disabled{opacity:.6;cursor:not-allowed;}
+  .field textarea{resize:vertical;min-height:90px;}
+  .field-hint{font-size:11.5px;color:var(--text-faint);}
+  @media (max-width:640px){.form-grid{grid-template-columns:1fr;}}
+
+  .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+
+  /* ---------- Stats ---------- */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media (max-width:700px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat-card{background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;}
+  .stat-card .s-icon{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+  .stat-card .s-val{font-size:21px;font-weight:800;}
+  .stat-card .s-label{font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+
+  /* ---------- Danger zone ---------- */
+  .danger-row{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    padding:14px 16px;background:var(--red-soft);border:1px solid rgba(240,101,76,.3);border-radius:var(--radius-md);
+  }
+  .danger-row + .danger-row{margin-top:12px;}
+  .danger-row .d-title{font-size:13.5px;font-weight:650;}
+  .danger-row .d-desc{font-size:11.8px;color:var(--text-faint);margin-top:2px;}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    padding:12px 18px;border-radius:12px;font-size:13.3px;box-shadow:var(--shadow-pop);
+    opacity:0;visibility:hidden;transition:opacity var(--dur),transform var(--dur);z-index:100;
+    display:flex;align-items:center;gap:8px;
+  }
+  #toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+  #toast svg{color:var(--green);flex-shrink:0;}
+  #toast.error svg{color:var(--red);}
+
+  /* ---------- Settings modal (reused pattern) ---------- */
+  .settings-modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:95;
+    display:flex;align-items:center;justify-content:center;padding:18px;
+    opacity:0;visibility:hidden;transition:opacity var(--dur);
+  }
+  .settings-modal-backdrop.show{opacity:1;visibility:visible;}
+  .settings-modal{
+    background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);
+    width:100%;max-width:400px;padding:22px;box-shadow:var(--shadow-pop);
+  }
+  .settings-modal h3{margin:0 0 4px;font-size:16px;font-weight:750;}
+  .settings-modal .sub{margin:0 0 20px;font-size:12.5px;color:var(--text-faint);}
+  .settings-row{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:13px 14px;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-md);
+  }
+  .settings-row .s-label{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:650;}
+  .settings-row .s-label svg{color:var(--accent);}
+  .settings-row .s-desc{font-size:11.5px;color:var(--text-faint);margin-top:2px;font-weight:400;}
+  .settings-toggle{
+    position:relative;width:44px;height:24px;border-radius:100px;background:var(--border);
+    border:none;cursor:pointer;flex-shrink:0;transition:background .2s ease;
+  }
+  .settings-toggle .knob{
+    position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    transition:transform .2s ease;display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  html[data-theme="light"] .settings-toggle .knob{transform:translateX(20px);}
+  .settings-modal-close{
+    width:32px;height:32px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;float:right;
+  }
+  .settings-modal-close:hover{color:var(--text);border-color:var(--accent);}
+  .settings-modal-head{display:flex;justify-content:space-between;align-items:flex-start;}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:1024px){
+    .mobile-bar{display:flex;}
+    .app{padding-top:56px;}
+    .sidebar-left{
+      position:fixed;top:0;left:0;bottom:0;z-index:50;transform:translateX(-100%);
+      transition:transform var(--dur);box-shadow:var(--shadow-pop);
+    }
+    .sidebar-left.open{transform:translateX(0);}
+    .main-scroll{padding:22px 16px 34px;}
+    .profile-head{flex-direction:column;text-align:center;}
+    .profile-head-actions{justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Mobile top bar -->
+  <header class="mobile-bar">
+    <button class="icon-btn" id="openLeft" aria-label="Open navigation">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="brand-mini">
+      <img class="logoimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png">
+       Your Profile
+    </div>
+    <div style="width:38px;"></div>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ============ LEFT SIDEBAR ============ -->
+  <aside class="sidebar sidebar-left" id="sidebarLeft">
+    <a href="orivon-landing-v5.html" class="brand" style="text-decoration:none;color:inherit;">
+      <svg class="hex" viewBox="0 0 24 24"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg>
+      <div class="brand-text">
+        <h1>Orivon Mentor</h1>
+        <p>Your Offline AI Mentor</p>
+      </div>
+    </a>
+
+    <a href="profile.html" class="sidebar-profile" style="text-decoration:none;color:inherit;">
+      <div class="avatar" id="sidebarAvatar">U</div>
+      <div class="meta">
+        <div class="p-name" id="sidebarName">Loading…</div>
+        <div class="p-email" id="sidebarEmail">—</div>
+      </div>
+    </a>
+
+    <div class="model-card">
+      <div class="cube">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+      </div>
+      <div class="meta">
+        <div class="label">AI Model</div>
+        <div class="name">Qwen 3 4B (GGUF)</div>
+        <div class="status-dot-row"><span class="status-dot"></span> Running Locally</div>
+      </div>
+    </div>
+
+    <nav class="nav-list" id="navList">
+      <button class="nav-item" data-name="Chat">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2 8.5 8.5 0 0 1-7.5 4.3 8.4 8.4 0 0 1-4.2-1.1L3 21l2.1-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.4 3a8.5 8.5 0 0 1 8.5 8.5z"/></svg>
+        Chat
+      </button>
+      <button class="nav-item" data-name="Career Guidance">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg>
+        Career Guidance
+      </button>
+      <button class="nav-item" data-name="CV Review">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        CV Review
+      </button>
+      <button class="nav-item" data-name="Interview Prep">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Interview Prep
+      </button>
+      <button class="nav-item" data-name="Learning Roadmaps">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7.5" x2="10.3" y2="16"/><line x1="16" y1="7.5" x2="13.7" y2="16"/></svg>
+        Learning Roadmaps
+      </button>
+      <button class="nav-item" data-name="Programming Help">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Programming Help
+      </button>
+      <button class="nav-item" data-name="Startup Advice">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        Startup Advice
+      </button>
+      <button class="nav-item" data-name="Scholarships">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+        Scholarships
+      </button>
+      <button class="nav-item" data-name="Research Assistant">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        Research Assistant
+      </button>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+    <div class="eyebrow">Account</div>
+    <nav class="nav-list">
+      <button class="nav-item active" id="navProfile">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </button>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="privacy-box">
+      <div class="top">
+        <div class="lock">
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </div>
+        <div>
+          <h3>Everything is offline</h3>
+          <p>All data stays on your device. No internet, no tracking.</p>
+        </div>
+      </div>
+      <div class="badge">
+        <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+        100% Private
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      <button class="nav-item" id="navSettings">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+      <button class="nav-item" id="navAbout">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        About
+      </button>
+      <button class="nav-item" id="navSignOut">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="main-scroll" id="mainScroll">
+      <div class="main-inner">
+
+        <div class="page-head">
+          <h2>Your Profile</h2>
+          <p>Manage your personal information, account, and preferences.</p>
+        </div>
+
+        <div class="card" id="loadErrorCard" style="display:none;border-color:rgba(240,101,76,.4);background:var(--red-soft);">
+          <div class="section-title" style="color:#ff8a76;">
+            <svg class="icon" viewBox="0 0 24 24" width="17" height="17"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Couldn't load your profile
+          </div>
+          <p class="section-sub" id="loadErrorMsg" style="color:var(--text-dim);">Something went wrong while loading your profile.</p>
+          <button class="btn btn-outline btn-sm" id="retryLoadBtn">Try Again</button>
+        </div>
+
+        <!-- ============ Profile header ============ -->
+        <div class="card">
+          <div class="profile-head">
+            <div class="avatar-lg" id="avatarLg">
+              U
+              <div class="avatar-edit" id="avatarEditBtn" title="Change photo">
+                <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </div>
+            </div>
+            <div class="profile-head-meta">
+              <h3 id="headName">Loading…</h3>
+              <div class="p-role" id="headRole">
+                <svg class="icon" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="9"/></svg>
+                <span id="headRoleText">—</span>
+              </div>
+              <div class="p-email" id="headEmail">—</div>
+            </div>
+            <div class="profile-head-actions">
+              <button class="btn btn-outline btn-sm" id="viewDashboardShortcut">
+                <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+                My Activity
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Stats ============ -->
+        <div class="card">
+          <div class="section-title">
+            <svg class="icon" viewBox="0 0 24 24" width="17" height="17"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Your Activity
+          </div>
+          <p class="section-sub">A quick snapshot of how you've been using Orivon Mentor.</p>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="s-icon"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <div class="s-val" id="statInterviews">0</div>
+              <div class="s-label">Mock Interviews</div>
+            </div>
+            <div class="stat-card">
+              <div class="s-icon"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div class="s-val" id="statCVs">0</div>
+              <div class="s-label">CV Reviews</div>
+            </div>
+            <div class="stat-card">
+              <div class="s-icon"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2 8.5 8.5 0 0 1-7.5 4.3 8.4 8.4 0 0 1-4.2-1.1L3 21l2.1-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.4 3a8.5 8.5 0 0 1 8.5 8.5z"/></svg></div>
+              <div class="s-val" id="statChats">0</div>
+              <div class="s-label">Mentor Chats</div>
+            </div>
+            <div class="stat-card">
+              <div class="s-icon"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg></div>
+              <div class="s-val" id="statDays">0</div>
+              <div class="s-label">Days Active</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ Personal information ============ -->
+        <div class="card">
+          <div class="section-title">
+            <svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Personal Information
+          </div>
+          <p class="section-sub">This information helps personalize your AI Mentor guidance.</p>
+
+          <form id="profileForm">
+            <div class="form-grid">
+              <div class="field">
+                <label for="firstName">First name</label>
+                <input type="text" id="firstName" placeholder="Jane">
+              </div>
+              <div class="field">
+                <label for="lastName">Last name</label>
+                <input type="text" id="lastName" placeholder="Doe">
+              </div>
+              <div class="field">
+                <label for="emailField">Email address</label>
+                <input type="email" id="emailField" disabled>
+                <span class="field-hint">Contact support to change your email.</span>
+              </div>
+              <div class="field">
+                <label for="roleField">I am a</label>
+                <select id="roleField">
+                  <option value="student">Student</option>
+                  <option value="mentor">Mentor</option>
+                  <option value="founder">Founder</option>
+                  <option value="professional">Professional</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-grid full">
+              <div class="field">
+                <label for="bioField">Bio</label>
+                <textarea id="bioField" placeholder="Tell your AI Mentor a bit about your goals, interests, and background…"></textarea>
+                <span class="field-hint">Used to personalize your career guidance and recommendations.</span>
+              </div>
+            </div>
+            
+          </form>
+        </div>
+
+      
+
+        <!-- ============ Danger zone ============ -->
+        <div class="card">
+          <div class="section-title">
+            <svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+            Account
+          </div>
+          <p class="section-sub">Manage your session and account access.</p>
+
+          <div class="danger-row">
+            <div>
+              <div class="d-title">Sign out</div>
+              <div class="d-desc">You'll need to log in again to access your account.</div>
+            </div>
+            <button class="btn btn-outline btn-sm" id="signOutBtn2">Sign Out</button>
+          </div>
+          <div class="danger-row">
+            <div>
+              <div class="d-title">Delete account</div>
+              <div class="d-desc">Permanently delete your account and all associated data.</div>
+            </div>
+            <button class="btn btn-danger btn-sm" id="deleteAccountBtn">Delete Account</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg"></span></div>
+
+<div class="settings-modal-backdrop" id="settingsModalBackdrop">
+  <div class="settings-modal">
+    <div class="settings-modal-head">
+      <div>
+        <h3>Settings</h3>
+        <p class="sub">Personalize how Orivon Mentor looks.</p>
+      </div>
+      <button class="settings-modal-close" id="settingsModalClose" aria-label="Close settings">
+        <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="settings-row">
+      <div class="s-label">
+        <svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <div>
+          Dark Mode
+          <div class="s-desc">Switch between light and dark appearance</div>
+        </div>
+      </div>
+      <button class="settings-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+        <div class="knob">🌙</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* =========================================================
+     Toast
+  ========================================================= */
+  let toastTimer = null;
+  function toast(msg, isError){
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.classList.toggle('error', !!isError);
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  /* =========================================================
+     Sidebar / mobile drawer
+  ========================================================= */
+  const sidebarLeft = document.getElementById('sidebarLeft');
+  const overlay = document.getElementById('overlay');
+  function openDrawer(){ sidebarLeft.classList.add('open'); overlay.classList.add('show'); }
+  function closeDrawers(){ sidebarLeft.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('openLeft').addEventListener('click', openDrawer);
+  overlay.addEventListener('click', closeDrawers);
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeDrawers(); });
+  window.addEventListener('resize', () => { if(window.innerWidth > 1024) closeDrawers(); });
+
+  const PAGE_LINKS = {
+    'Chat':'orivon-ai-mentor.html',
+    'Career Guidance':'ORIVON-career-guaidance.html',
+    'CV Review':'orivon-cvreview.html',
+    'Interview Prep':'interview-prep.html',
+    'Learning Roadmaps':'learning-roadmaps.html'
+  };
+  document.querySelectorAll('#navList .nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.dataset.name;
+      if(PAGE_LINKS[name]){ window.location.href = PAGE_LINKS[name]; return; }
+      toast(name + " page isn't built in this preview yet");
+      closeDrawers();
+    });
+  });
+  document.getElementById('navProfile').addEventListener('click', () => closeDrawers());
+  document.getElementById('navAbout').addEventListener('click', () => {
+    toast('Orivon Mentor v1.0 — fully offline');
+    closeDrawers();
+  });
+  document.getElementById('viewDashboardShortcut').addEventListener('click', () => {
+    window.location.href = 'interview-prep.html';
+  });
+
+  /* =========================================================
+     Auth + Profile loading
+  ========================================================= */
+  let currentUser = null;
+  let currentProfile = null;
+
+  function initials(first, last, email){
+    if(first || last) return ((first||'')[0] || '' + (last||'')[0] || '').toUpperCase() || (first||last||'?')[0].toUpperCase();
+    if(email) return email[0].toUpperCase();
+    return 'U';
+  }
+
+  function applyProfileToUI(user, profile){
+    // Fall back to auth metadata (always present from signup) if the profiles
+    // table row is missing or incomplete — e.g. the DB trigger hasn't been set up yet.
+    const meta = user?.user_metadata || {};
+    const first = profile?.first_name || meta.first_name || '';
+    const last = profile?.last_name || meta.last_name || '';
+    const fullName = (first + ' ' + last).trim() || 'Orivon User';
+    const email = user?.email || '—';
+    const role = profile?.role || meta.role || 'student';
+    const bio = profile?.bio || '';
+    const initial = (first[0] || last[0] || email[0] || 'U').toUpperCase();
+
+    document.getElementById('sidebarName').textContent = fullName;
+    document.getElementById('sidebarEmail').textContent = email;
+    document.getElementById('sidebarAvatar').textContent = initial;
+
+    document.getElementById('headName').textContent = fullName;
+    document.getElementById('headEmail').textContent = email;
+    document.getElementById('avatarLg').firstChild.textContent = initial + ' ';
+    const roleLabels = {student:'Student', mentor:'Mentor', founder:'Founder', professional:'Professional'};
+    document.getElementById('headRoleText').textContent = roleLabels[role] || role;
+
+    document.getElementById('firstName').value = first;
+    document.getElementById('lastName').value = last;
+    document.getElementById('emailField').value = email;
+    document.getElementById('roleField').value = role;
+    document.getElementById('bioField').value = bio;
+
+    // If we had to lean on metadata because there's no profiles row yet,
+    // quietly create one now so future loads (and the profiles table) are in sync.
+    if(!profile || (!profile.first_name && !profile.last_name && (meta.first_name || meta.last_name))){
+      window._sb.from('profiles').upsert({
+        id: user.id,
+        first_name: first,
+        last_name: last,
+        role: role,
+        email: user.email
+      }).then(({ error }) => {
+        if(error) console.warn('Could not backfill profiles row:', error.message);
+      });
+    }
+  }
+
+  async function loadProfile(){
+    document.getElementById('loadErrorCard').style.display = 'none';
+
+    // Guard: the Supabase SDK failed to load from the CDN (network blocked, ad-blocker, offline, etc.)
+    if(typeof supabase === 'undefined' || !window._sb){
+      console.error('Supabase SDK did not load (window._sb missing).');
+      showLoadError("We couldn't connect to the server. Check your internet connection and try again.");
+      return;
+    }
+
+    let user;
+    try{
+      const { data, error: userErr } = await window._sb.auth.getUser();
+      if(userErr) throw userErr;
+      user = data?.user;
+    }catch(err){
+      console.error('getUser() threw:', err);
+      showLoadError("We couldn't verify your session. Check your connection and try again.");
+      return;
+    }
+
+    if(!user){
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = user;
+
+    try{
+      const { data: profile, error: profileErr } = await window._sb
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+      if(profileErr) throw profileErr;
+      currentProfile = profile || {};
+      if(!profile){
+        console.warn('No profiles row returned for id ' + user.id + '. If Table Editor shows a row with this exact id, this is likely an RLS SELECT policy problem.');
+      }
+    }catch(err){
+      console.error('profiles select threw:', err);
+      toast("Couldn't read your saved profile data (permissions issue) — showing what we have from your account.", true);
+      currentProfile = {};
+    }
+
+    applyProfileToUI(user, currentProfile);
+
+    // Mock activity stats — replace with real queries once those tables exist
+    document.getElementById('statInterviews').textContent = '0';
+    document.getElementById('statCVs').textContent = '0';
+    document.getElementById('statChats').textContent = '0';
+    const createdAt = user.created_at ? new Date(user.created_at) : new Date();
+    const daysActive = Math.max(1, Math.ceil((Date.now() - createdAt.getTime()) / 86400000));
+    document.getElementById('statDays').textContent = daysActive;
+  }
+
+  function showLoadError(message){
+    document.getElementById('loadErrorMsg').textContent = message;
+    document.getElementById('loadErrorCard').style.display = 'block';
+    // Replace the stuck "Loading…" placeholders with something less alarming
+    ['sidebarName','headName'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = 'Orivon User'; });
+  }
+
+  document.getElementById('retryLoadBtn').addEventListener('click', loadProfile);
+
+  // Also catch any script-level failure (e.g. CDN totally blocked) so the page never hangs silently
+  window.addEventListener('error', (e) => {
+    if(e.message && e.message.includes('supabase')){
+      showLoadError("We couldn't connect to the server. Check your internet connection and try again.");
+    }
+  });
+
+  loadProfile();
+
+  /* =========================================================
+     Save profile
+  ========================================================= */
+  const profileForm = document.getElementById('profileForm');
+  const saveProfileBtn = document.getElementById('saveProfileBtn');
+
+  profileForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(!currentUser) return;
+
+    const updates = {
+      id: currentUser.id,
+      first_name: document.getElementById('firstName').value.trim(),
+      last_name: document.getElementById('lastName').value.trim(),
+      role: document.getElementById('roleField').value,
+      bio: document.getElementById('bioField').value.trim(),
+      email: currentUser.email
+    };
+
+    saveProfileBtn.classList.add('loading');
+    saveProfileBtn.disabled = true;
+
+    const { error } = await window._sb.from('profiles').upsert(updates);
+
+    saveProfileBtn.classList.remove('loading');
+    saveProfileBtn.disabled = false;
+
+    if(error){
+      toast('Could not save profile: ' + error.message, true);
+      return;
+    }
+    currentProfile = { ...currentProfile, ...updates };
+    applyProfileToUI(currentUser, currentProfile);
+    toast('Profile updated successfully.');
+  });
+
+  document.getElementById('resetFormBtn').addEventListener('click', () => {
+    if(currentUser) applyProfileToUI(currentUser, currentProfile);
+  });
+
+  /* =========================================================
+     Update password
+  ========================================================= */
+  document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pw = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const btn = document.getElementById('savePasswordBtn');
+
+    if(pw.length < 8){
+      toast('Password must be at least 8 characters.', true);
+      return;
+    }
+    if(pw !== confirm){
+      toast('Passwords do not match.', true);
+      return;
+    }
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    const { error } = await window._sb.auth.updateUser({ password: pw });
+
+    btn.classList.remove('loading');
+    btn.disabled = false;
+
+    if(error){
+      toast('Could not update password: ' + error.message, true);
+      return;
+    }
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    toast('Password updated successfully.');
+
+    // Fire-and-forget the security notification email — never block or
+    // fail the password change itself if this doesn't succeed.
+    try{
+      await window._sb.functions.invoke('send-password-changed-email', {
+        body: { email: currentUser.email }
+      });
+    }catch(notifyErr){
+      console.warn('Password changed, but the notification email failed to send:', notifyErr);
+    }
+  });
+
+  /* =========================================================
+     Sign out / delete account
+  ========================================================= */
+  async function signOut(){
+    await window._sb.auth.signOut();
+    window.location.href = 'login.html';
+  }
+  document.getElementById('navSignOut').addEventListener('click', signOut);
+  document.getElementById('signOutBtn2').addEventListener('click', signOut);
+
+  document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+    toast('Account deletion requires admin confirmation — contact support.', true);
+  });
+
+  /* =========================================================
+     Theme + Settings modal
+  ========================================================= */
+  function setTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    const knob = document.querySelector('#darkModeToggle .knob');
+    if(knob) knob.textContent = mode === 'light' ? '☀️' : '🌙';
+  }
+  document.getElementById('darkModeToggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    setTheme(current === 'light' ? 'dark' : 'light');
+  });
+  const settingsBackdrop = document.getElementById('settingsModalBackdrop');
+  function openSettings(){ settingsBackdrop.classList.add('show'); }
+  function closeSettings(){ settingsBackdrop.classList.remove('show'); }
+  document.getElementById('settingsModalClose').addEventListener('click', closeSettings);
+  settingsBackdrop.addEventListener('click', e => { if(e.target === settingsBackdrop) closeSettings(); });
+  document.getElementById('navSettings').addEventListener('click', () => { openSettings(); closeDrawers(); });
+</script>
+</body>
+</html>

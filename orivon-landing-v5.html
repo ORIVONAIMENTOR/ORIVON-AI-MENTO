@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orivon — One Platform. Unlimited Human Potential.</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = "https://mkuklkqvatequxvlpncm.supabase.co";
+  const supabaseKey = "sb_publishable_amstxWXd3Vt19V7um1YMsw_gw-keZHT";
+
+  const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  window._sb = supabaseClient; // expose globally for DB object below
+</script>
+<style>
+  :root{
+    --bg:#08070d;
+    --bg-soft:#0e0c17;
+    --card:#12101d;
+    --card-border:#232037;
+    --text:#f5f4fa;
+    --muted:#9490a8;
+    --purple:#8b5cf6;
+    --purple-2:#a855f7;
+    --orange:#f0a94e;
+    --green:#34d399;
+    --blue:#60a5fa;
+    --pink:#ec4899;
+    --radius:16px;
+    --maxw:1200px;
+  }
+  html[data-theme="light"]{
+    --bg:#faf9fc;
+    --bg-soft:#f1eff8;
+    --card:#ffffff;
+    --card-border:#e4e1ee;
+    --text:#17151f;
+    --muted:#6b6680;
+  }
+  html{transition:background-color .2s ease;}
+  body{transition:background-color .2s ease,color .2s ease;}
+
+  /* ---------- Theme toggle switch ---------- */
+  .theme-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--bg-soft);
+    border:1px solid var(--card-border);
+    border-radius:100px;
+    padding:4px;
+    cursor:pointer;
+  }
+  .theme-toggle .track{
+    position:relative;
+    width:42px;height:22px;
+    border-radius:100px;
+    background:var(--card-border);
+    transition:background .2s ease;
+  }
+  .theme-toggle .knob{
+    position:absolute;
+    top:2px;left:2px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    transition:transform .2s ease;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;
+  }
+  html[data-theme="light"] .theme-toggle .knob{transform:translateX(20px);}
+
+  /* ---------- Settings button + popover ---------- */
+  .settings-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--bg-soft);border:1px solid var(--card-border);
+    color:var(--muted);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:background .15s,color .15s,border-color .15s;
+    position:relative;
+  }
+  .settings-btn:hover{background:var(--card);color:var(--text);border-color:var(--purple-2);}
+  .settings-popover{
+    position:absolute;
+    top:calc(100% + 10px);
+    right:0;
+    width:230px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:14px;
+    padding:16px;
+    box-shadow:0 16px 40px -12px rgba(0,0,0,.5);
+    opacity:0;visibility:hidden;transform:translateY(-6px);
+    transition:opacity .15s,transform .15s,visibility .15s;
+    z-index:60;
+  }
+  .settings-popover.show{opacity:1;visibility:visible;transform:translateY(0);}
+  .settings-popover-title{font-size:12.5px;font-weight:700;color:var(--text);margin:0 0 12px;}
+  .settings-popover-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font-size:13px;color:var(--text);
+  }
+  .settings-anchor{position:relative;display:inline-flex;}
+  .profile-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--bg-soft);border:1px solid var(--card-border);color:var(--muted);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .15s,color .15s,border-color .15s;text-decoration:none;
+  }
+  .profile-btn:hover{background:var(--card);color:var(--text);border-color:var(--purple-2);}
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;overflow-x:hidden;width:100%;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;display:block;}
+  a{color:inherit;text-decoration:none;}
+  ul{margin:0;padding:0;list-style:none;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    justify-content:center;
+    padding:12px 22px;
+    border-radius:100px;
+    font-size:0.95rem;
+    font-weight:600;
+    border:1px solid transparent;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    color:#fff;
+    box-shadow:0 8px 24px -8px rgba(139,92,246,.6);
+  }
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-outline{
+    background:rgba(255,255,255,.03);
+    border-color:var(--card-border);
+    color:var(--text);
+  }
+  .btn-outline:hover{background:rgba(255,255,255,.07);}
+  .btn-sm{padding:10px 16px;font-size:.85rem;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(8,7,13,.85);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--card-border);
+  }
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 24px;
+    max-width:var(--maxw);
+    margin:0 auto;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:700;
+    font-size:1.1rem;
+    letter-spacing:.5px;
+  }
+  .logoimg{
+    width:40px;
+  }
+  .logo .mark{color:var(--purple-2);font-size:1.3rem;}
+  .nav-links{
+    display:flex;
+    gap:28px;
+    font-size:.92rem;
+    color:var(--muted);
+  }
+  .nav-links a:hover{color:var(--text);}
+  .nav-cta{display:flex;align-items:center;gap:12px;}
+
+  .burger{
+    display:none;
+    flex-direction:column;
+    gap:5px;
+    background:none;
+    border:none;
+    padding:6px;
+  }
+  .burger span{
+    width:22px;height:2px;background:var(--text);border-radius:2px;
+    transition:.25s;
+  }
+  .mobile-menu{
+    display:none;
+    flex-direction:column;
+    gap:4px;
+    padding:8px 24px 20px;
+    border-top:1px solid var(--card-border);
+  }
+  .mobile-menu a{
+    padding:12px 4px;
+    color:var(--muted);
+    border-bottom:1px solid var(--card-border);
+    font-size:.95rem;
+  }
+  .mobile-menu.open{display:flex;}
+  .mobile-menu .btn{margin-top:12px;width:100%;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:72px 0 56px;
+    position:relative;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+    align-items:center;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem,4.5vw,3.4rem);
+    line-height:1.1;
+    font-weight:800;
+    margin:0 0 20px;
+  }
+  .hero h1 .grad{
+    background:linear-gradient(90deg,var(--purple-2),var(--orange));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .hero p{
+    color:var(--muted);
+    font-size:1.05rem;
+    max-width:480px;
+    margin-bottom:28px;
+  }
+  .hero-actions{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+  }
+  .hero-social{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:var(--muted);
+    font-size:.85rem;
+    flex-wrap:wrap;
+  }
+  .avatars{display:flex;}
+  .avatars span{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,var(--purple),var(--blue));
+    border:2px solid var(--bg);
+    margin-left:-10px;
+  }
+  .avatars span:first-child{margin-left:0;}
+  .stars{color:var(--orange);letter-spacing:2px;}
+
+  /* Orbit graphic */
+  .orbit{
+    position:relative;
+    width:100%;
+    max-width:480px;
+    aspect-ratio:1/1;
+    margin:0 auto;
+  }
+  .orbit-ring{
+    position:absolute;
+    inset:0;
+    border:1px dashed rgba(139,92,246,.25);
+    border-radius:50%;
+  }
+  .orbit-core{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:38%;
+    aspect-ratio:1/1;
+    border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, rgba(168,85,247,.9), rgba(76,29,149,.4) 60%, transparent 80%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#fff;
+    font-weight:700;
+    box-shadow:0 0 80px 10px rgba(139,92,246,.45);
+  }
+  .orbit-core .core-inner{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .orbit-core .core-icon{font-size:1.4rem;}
+  .orbit-node{
+    position:absolute;
+    width:44%;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:12px;
+    padding:10px 12px;
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    font-size:.72rem;
+    color:var(--muted);
+  }
+  .orbit-node strong{display:block;color:var(--text);font-size:.8rem;margin-bottom:2px;}
+  .orbit-node .icn{
+    width:28px;height:28px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    flex:none;font-size:.9rem;
+  }
+  .n1{top:-4%;left:26%;} .n1 .icn{background:rgba(240,169,78,.15);color:var(--orange);}
+  .n2{top:16%;right:-6%;} .n2 .icn{background:rgba(139,92,246,.15);color:var(--purple-2);}
+  .n3{top:58%;right:-10%;} .n3 .icn{background:rgba(96,165,250,.15);color:var(--blue);}
+  .n4{top:78%;left:22%;} .n4 .icn{background:rgba(240,169,78,.15);color:var(--orange);}
+  .n5{top:58%;left:-12%;} .n5 .icn{background:rgba(52,211,153,.15);color:var(--green);}
+  .n6{top:16%;left:-8%;} .n6 .icn{background:rgba(96,165,250,.15);color:var(--blue);}
+
+  /* ---------- Trust bar ---------- */
+  .trust{
+    padding:28px 0;
+  }
+  .trust-label{
+    text-align:center;
+    color:var(--muted);
+    font-size:.72rem;
+    letter-spacing:2px;
+    margin-bottom:20px;
+  }
+  .trust-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:20px 28px;
+    flex-wrap:wrap;
+    color:var(--muted);
+    font-size:.9rem;
+  }
+  .trust-row span{display:flex;align-items:center;gap:8px;white-space:nowrap;max-width:100%;}
+
+  /* ---------- Section heading ---------- */
+  .section{padding:64px 0;}
+  .section-head{
+    text-align:center;
+    margin-bottom:40px;
+  }
+  .section-head h2{
+    font-size:clamp(1.6rem,3vw,2.2rem);
+    font-weight:700;
+    margin:0;
+  }
+  .section-head .accent{color:var(--purple-2);}
+
+  /* ---------- Feature grid ---------- */
+  .feature-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:16px;
+  }
+  .feature-card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    padding:22px 18px;
+  }
+  .feature-icon{
+    width:38px;height:38px;
+    border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:16px;
+    font-size:1.05rem;
+  }
+  .feature-card h3{margin:0 0 10px;font-size:1.02rem;}
+  .feature-card ul{color:var(--muted);font-size:.85rem;display:flex;flex-direction:column;gap:4px;margin-bottom:14px;}
+  .feature-arrow{color:var(--purple-2);font-weight:700;}
+
+  .c1 .feature-icon{background:rgba(139,92,246,.15);color:var(--purple-2);}
+  .c2 .feature-icon{background:rgba(96,165,250,.15);color:var(--blue);}
+  .c3 .feature-icon{background:rgba(52,211,153,.15);color:var(--green);}
+  .c4 .feature-icon{background:rgba(240,169,78,.15);color:var(--orange);}
+  .c5 .feature-icon{background:rgba(240,169,78,.15);color:var(--orange);}
+  .c6 .feature-icon{background:rgba(236,72,153,.15);color:var(--pink);}
+
+  /* ---------- AI Mentor / chat section ---------- */
+  .split-card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:24px;
+    padding:36px;
+    display:grid;
+    grid-template-columns:.8fr 1.2fr;
+    gap:36px;
+    align-items:center;
+  }
+  .eyebrow{
+    color:var(--purple-2);
+    font-size:.75rem;
+    font-weight:700;
+    letter-spacing:1px;
+    margin-bottom:10px;
+  }
+  .split-card h3{font-size:1.8rem;margin:0 0 14px;}
+  .split-card h3 .accent{color:var(--purple-2);}
+  .split-card p{color:var(--muted);font-size:.95rem;}
+
+  .chat-panel{
+    display:grid;
+    grid-template-columns:1fr 1.3fr;
+    gap:16px;
+  }
+  .timeline{
+    background:var(--bg-soft);
+    border:1px solid var(--card-border);
+    border-radius:14px;
+    padding:16px;
+    font-size:.78rem;
+    color:var(--muted);
+  }
+  .timeline .t-title{font-weight:600;color:var(--text);margin-bottom:12px;font-size:.8rem;}
+  .t-item{display:flex;gap:10px;padding:8px 0;position:relative;}
+  .t-item .dot{width:8px;height:8px;border-radius:50%;background:var(--card-border);margin-top:4px;flex:none;}
+  .t-item.active .dot{background:var(--purple-2);}
+
+  .chat-window{
+    background:var(--bg-soft);
+    border:1px solid var(--card-border);
+    border-radius:14px;
+    display:flex;
+    flex-direction:column;
+    min-height:260px;
+  }
+  .chat-head{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 16px;border-bottom:1px solid var(--card-border);
+    font-size:.85rem;
+  }
+  .chat-head .dot-status{width:8px;height:8px;border-radius:50%;background:var(--green);}
+  .chat-body{flex:1;padding:16px;display:flex;flex-direction:column;gap:12px;}
+  .bubble{
+    max-width:80%;
+    padding:10px 14px;
+    border-radius:12px;
+    font-size:.85rem;
+  }
+  .bubble.user{
+    align-self:flex-end;
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    color:#fff;
+  }
+  .bubble.bot{
+    align-self:flex-start;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    color:var(--text);
+  }
+  .bubble .btn{margin-top:10px;}
+  .chat-input{
+    display:flex;gap:10px;align-items:center;
+    padding:12px 16px;border-top:1px solid var(--card-border);
+  }
+  .chat-input input{
+    flex:1;background:transparent;border:none;color:var(--text);
+    font-size:.85rem;outline:none;
+  }
+  .chat-input button{
+    width:34px;height:34px;border-radius:50%;border:none;
+    background:linear-gradient(135deg,var(--purple),var(--purple-2));
+    color:#fff;display:flex;align-items:center;justify-content:center;
+  }
+
+  /* ---------- How it works + ecosystem ---------- */
+  .two-col{
+    display:grid;
+    grid-template-columns:1fr 1.2fr;
+    gap:48px;
+  }
+  .steps{display:flex;flex-direction:column;gap:0;}
+  .step{
+    display:flex;gap:16px;position:relative;padding-bottom:34px;
+  }
+  .step:last-child{padding-bottom:0;}
+  .step-num{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;font-weight:700;color:#fff;flex:none;
+    position:relative;z-index:1;
+  }
+  .step:nth-child(1) .step-num{background:var(--purple-2);}
+  .step:nth-child(2) .step-num{background:var(--orange);}
+  .step:nth-child(3) .step-num{background:var(--green);}
+  .step:not(:last-child)::before{
+    content:"";
+    position:absolute;
+    left:15px;top:32px;bottom:0;
+    width:1px;
+    background:var(--card-border);
+  }
+  .step h4{margin:0 0 6px;font-size:1rem;}
+  .step p{margin:0;color:var(--muted);font-size:.88rem;}
+
+  .ecosystem{
+    position:relative;
+    aspect-ratio:1/1;
+    max-width:440px;
+    margin:0 auto;
+  }
+  .eco-core{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:34%;aspect-ratio:1/1;border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, rgba(168,85,247,.9), rgba(76,29,149,.4) 60%, transparent 80%);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:.85rem;
+    text-align:center;
+    box-shadow:0 0 60px 6px rgba(139,92,246,.4);
+  }
+  .eco-node{
+    position:absolute;
+    display:flex;align-items:center;gap:6px;
+    font-size:.78rem;color:var(--muted);
+    white-space:nowrap;
+    max-width:38%;
+  }
+  .eco-node .icn{
+    width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--card);border:1px solid var(--card-border);
+    font-size:.9rem;
+  }
+  .e1{top:0%;left:50%;transform:translate(-50%,0);} .e1 .icn{color:var(--blue);}
+  .e2{top:22%;left:2%;} .e2 .icn{color:var(--green);}
+  .e3{top:22%;right:2%;} .e3 .icn{color:var(--orange);}
+  .e4{bottom:16%;left:0%;} .e4 .icn{color:var(--blue);}
+  .e5{bottom:16%;right:0%;} .e5 .icn{color:var(--purple-2);}
+  .e6{bottom:-2%;left:50%;transform:translate(-50%,0);} .e6 .icn{color:var(--purple-2);}
+
+  /* ---------- Testimonials ---------- */
+  .testi-head{
+    text-align:center;font-weight:700;font-size:1.2rem;margin-bottom:28px;
+  }
+  .testi-row{
+    display:flex;
+    gap:20px;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    padding-bottom:8px;
+  }
+  .testi-row::-webkit-scrollbar{display:none;}
+  .testi-card{
+    flex:0 0 320px;
+    scroll-snap-align:start;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:16px;
+    padding:24px;
+  }
+  .testi-card .quote-mark{font-size:1.8rem;color:var(--purple-2);line-height:1;margin-bottom:8px;}
+  .testi-card p{color:var(--text);font-size:.95rem;margin:0 0 18px;}
+  .testi-person{display:flex;align-items:center;gap:10px;}
+  .testi-person .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));flex:none;}
+  .testi-person strong{display:block;font-size:.88rem;}
+  .testi-person span{color:var(--muted);font-size:.78rem;}
+
+  /* ---------- Stats ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    text-align:center;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:20px;
+    padding:36px 20px;
+  }
+  .stats .num{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:var(--purple-2);}
+  .stats .lbl{color:var(--muted);font-size:.85rem;margin-top:4px;}
+
+  /* ---------- Final CTA ---------- */
+  .final-cta{
+    text-align:center;
+    padding:80px 0 90px;
+    background:radial-gradient(ellipse at 50% 100%, rgba(139,92,246,.25), transparent 70%);
+  }
+  .final-cta h2{
+    font-size:clamp(1.5rem,3.4vw,2.1rem);
+    font-weight:700;
+    margin:0 0 28px;
+    line-height:1.4;
+  }
+  .final-cta .accent{color:var(--purple-2);}
+
+  /* ---------- Footer ---------- */
+  footer{
+    border-top:1px solid var(--card-border);
+    padding:56px 0 28px;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;
+    gap:32px;
+    margin-bottom:36px;
+  }
+  .footer-brand p{color:var(--muted);font-size:.85rem;margin-top:14px;max-width:280px;}
+  .footer-col h5{font-size:.85rem;margin:0 0 14px;}
+  .footer-col a{display:block;color:var(--muted);font-size:.85rem;margin-bottom:10px;}
+  .footer-col a:hover{color:var(--text);}
+  .footer-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    padding-top:24px;
+    border-top:1px solid var(--card-border);
+    color:var(--muted);
+    font-size:.8rem;
+  }
+  .social-icons{display:flex;gap:14px;}
+
+  /* ---------- Carousel arrows for testimonials on desktop ---------- */
+  .testi-wrap{position:relative;}
+  .testi-arrow{
+    display:none;
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:36px;height:36px;border-radius:50%;
+    background:var(--card);border:1px solid var(--card-border);
+    align-items:center;justify-content:center;color:var(--text);
+    z-index:2;
+  }
+  .testi-arrow.left{left:-18px;}
+  .testi-arrow.right{right:-18px;}
+
+  /* =====================================================
+     RESPONSIVE BREAKPOINTS
+     ===================================================== */
+
+  /* Large tablets / small desktops */
+  @media (max-width:1024px){
+    .two-col{grid-template-columns:1fr;}
+    .two-col > div{min-width:0;}
+    .split-card{grid-template-columns:1fr;}
+    .chat-panel{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr 1fr;row-gap:28px;}
+    .footer-brand{grid-column:1 / -1;}
+  }
+
+  /* Tablets */
+  @media (max-width:860px){
+    .hero-grid{grid-template-columns:1fr;}
+    .hero-grid > div{min-width:0;}
+    .hero{padding: 10px;}
+    .nav-links{display:none;}
+    .burger{display:flex;}
+    .nav-cta .btn-outline{display:none;}
+    .nav-cta .settings-anchor{display:none;}
+    .nav-cta .profile-btn{display:none;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .testi-arrow{display:none !important;}
+  }
+
+  /* Phones */
+  @media (max-width:640px){
+    .wrap{padding:0 18px;}
+    .hero{padding:0px 10px 05px;}
+    .hero h1{font-size:2rem;}
+    .hero p{font-size:.95rem;max-width:100%;}
+    .hero-actions .btn{width:100%;}
+    .hero-actions{flex-direction:column;}
+    .trust-row{justify-content:center;gap:14px 22px;padding:18px;}
+    .trust-row span{font-size:.8rem;}
+    .feature-card{padding:18px 14px;}
+    .split-card{padding:22px;border-radius:18px;}
+    .split-card h3{font-size:1.4rem;}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+    .footer-brand{grid-column:1 / -1;}
+    .stats{grid-template-columns:repeat(2,1fr);padding:26px 16px;gap:24px;}
+    .final-cta{padding:56px 0 64px;}
+    .testi-card{flex:0 0 82vw;}
+  }
+
+  @media (max-width:420px){
+    .stats{grid-template-columns:1fr 1fr;}
+    .hero h1{font-size:1.7rem;}
+  }
+
+  /* ---------- Horizontal scroll for "Everything you need to grow",
+     "ORIVON AI" orbit, and "A Connected Ecosystem" on mobile/tablet ---------- */
+  @media (max-width:1024px){
+
+    /* shared horizontal-scroll-row behavior */
+    .feature-grid,
+    .orbit,
+    .ecosystem{
+      display:flex;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      overflow-y:visible;
+      gap:14px;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+      padding:6px 4px 16px;
+      margin:0 -4px;
+      position:static;
+      aspect-ratio:auto;
+      max-width:100%;
+      width:auto;
+      min-width:0;
+    }
+    .feature-grid::-webkit-scrollbar,
+    .orbit::-webkit-scrollbar,
+    .ecosystem::-webkit-scrollbar{display:none;height:0;}
+
+    /* Feature cards */
+    .feature-card{
+      flex:0 0 220px;
+      scroll-snap-align:start;
+    }
+
+    /* Orbit (ORIVON AI) */
+    .orbit-ring{display:none;}
+    .orbit-core{
+      position:static;
+      flex:0 0 0px;
+      width:0px;
+      aspect-ratio:1/1;
+      transform:none;
+      scroll-snap-align:start;
+    }
+    .orbit-node{
+      position:static;
+      flex:0 0 190px;
+      width:190px;
+      transform:none !important;
+      scroll-snap-align:start;
+      white-space:normal;
+    }
+
+    /* Ecosystem */
+    .eco-core{
+      position:static;
+      flex:0 0 150px;
+      width:150px;
+      aspect-ratio:1/1;
+      transform:none;
+      scroll-snap-align:start;
+    }
+    .eco-node{
+      position:static;
+      flex:0 0 180px;
+      width:180px;
+      transform:none !important;
+      scroll-snap-align:start;
+      white-space:normal;
+      justify-content:flex-start;
+      background:var(--card);
+      border:1px solid var(--card-border);
+      border-radius:12px;
+      padding:12px 14px;
+    }
+  }
+
+  @media (max-width:480px){
+    .feature-card{flex-basis:190px;}
+    .orbit-node,
+    .eco-node{flex-basis:170px;}
+    .orbit-core{flex-basis:150px;width:150px;}
+    .eco-core{flex-basis:130px;width:130px;}
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+
+  :focus-visible{
+    outline:2px solid var(--purple-2);
+    outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav">
+    <div class="logo"><span class="mark"><img class="logoimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png"></span> ORIVON</div>
+    <ul class="nav-links">
+      <li><a href="#features">Product</a></li>
+      <li><a href="#ai-mentor">AI Mentor</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="profile-btn" href="profile.html" aria-label="Profile">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
+      <div class="settings-anchor">
+        <button class="settings-btn" id="settingsBtn" aria-label="Settings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <div class="settings-popover" id="settingsPopover">
+          <p class="settings-popover-title">Appearance</p>
+          <div class="settings-popover-row">
+            <span>Dark Mode</span>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">
+              <div class="track"><div class="knob">🌙</div></div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <a class="btn btn-outline btn-sm" href="register.html">Get Early Access</a>
+      <a class="btn btn-outline btn-sm" href="login.html" style="margin-left:8px;">Log In</a>
+      <button class="burger" id="burgerBtn" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#features">Product</a>
+    <a href="#ai-mentor">AI Mentor</a>
+    <a href="#opportunities">Opportunities</a>
+    <a href="#">Careers</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="#">About</a>
+    <a href="profile.html" class="nav-item" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    <button class="nav-item" id="settingsBtnMobile" style="display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--card-border);border-radius:10px;padding:10px 12px;color:var(--muted);font-size:.9rem;margin-top:6px;width:100%;text-align:left;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </button>
+    <div class="settings-popover" id="settingsPopoverMobile" style="position:static;width:100%;opacity:1;visibility:visible;transform:none;box-shadow:none;display:none;margin-top:4px;">
+      <p class="settings-popover-title">Appearance</p>
+      <div class="settings-popover-row">
+        <span>Dark Mode</span>
+        <button class="theme-toggle" id="themeToggleMobile" aria-label="Toggle dark/light mode">
+          <div class="track"><div class="knob">🌙</div></div>
+        </button>
+      </div>
+    </div>
+    <a class="btn btn-primary" href="register.html">Get Early Access →</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero wrap">
+    <div class="hero-grid">
+      <div>
+        <h1>One Platform.<br>Unlimited<br><span class="grad">Human Potential.</span></h1>
+        <p>Discover opportunities, learn from mentors, build your career, connect with the right people, and grow with AI — all in one ecosystem.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="register.html">Get Early Access →</a>
+          <button class="btn btn-outline">▶ Watch Demo</button>
+        </div>
+        <div class="hero-social">
+          <div class="avatars">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <span class="stars">★★★★★</span>
+          <span>Loved by 10,000+ early members</span>
+        </div>
+      </div>
+
+      <div class="orbit" aria-hidden="true">
+        <div class="orbit-ring"></div>
+        <div class="orbit-core">
+          <div class="core-inner">
+            <span class="core-icon"><img class="logoimage" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png"></span>
+            <span>ORIVON AI</span>
+          </div>
+        </div>
+        <div class="orbit-node n1"><span class="icn">$</span><div><strong>Funding</strong>Find grants, investors and accelerators</div></div>
+        <div class="orbit-node n2"><span class="icn">👥</span><div><strong>Mentorship</strong>Learn from experts</div></div>
+        <div class="orbit-node n3"><span class="icn">📖</span><div><strong>Learning</strong>Courses, projects and resources</div></div>
+        <div class="orbit-node n4"><span class="icn">🏆</span><div><strong>Opportunities</strong>Scholarships, hackathons and global programs</div></div>
+        <div class="orbit-node n5"><span class="icn">🌐</span><div><strong>Networking</strong>Connect with peers &amp; leaders</div></div>
+        <div class="orbit-node n6"><span class="icn">💼</span><div><strong>Career</strong>Plan your career and get hired</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BAR -->
+  <section class="trust wrap">
+    <div class="trust-label">TRUSTED BY LEADERS AND INSTITUTIONS WORLDWIDE</div>
+    <div class="trust-row">
+      <span>🎓 Students</span>
+      <span>🚀 Founders</span>
+      <span>💻 Professionals</span>
+      <span>🎨 Creators</span>
+      <span>🏛 Universities</span>
+      <span>🏢 Organizations</span>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section wrap" id="features">
+    <div class="section-head">
+      <h2>Everything you need to <span class="accent">grow.</span></h2>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card c1">
+        <div class="feature-icon">✦</div>
+        <h3>AI Mentor</h3>
+        <ul><li>Ask questions.</li><li>Get career guidance.</li><li>Receive personalized roadmaps.</li></ul>
+        <span class="feature-arrow">→</span>
+      </div>
+      <div class="feature-card c2">
+        <div class="feature-icon">📖</div>
+        <h3>Learn</h3>
+        <ul><li>Courses</li><li>Roadmaps</li><li>Projects</li><li>Research</li></ul>
+        <span class="feature-arrow">→</span>
+      </div>
+      <div class="feature-card c3">
+        <div class="feature-icon">👥</div>
+        <h3>Connect</h3>
+        <ul><li>Mentors</li><li>Peers</li><li>Communities</li><li>Events</li></ul>
+        <span class="feature-arrow">→</span>
+      </div>
+      <div class="feature-card c4">
+        <div class="feature-icon">💼</div>
+        <h3>Careers</h3>
+        <ul><li>Jobs</li><li>Internships</li><li>CV Reviews</li><li>Interview Prep</li></ul>
+        <span class="feature-arrow">→</span>
+      </div>
+      <div class="feature-card c5">
+        <div class="feature-icon">$</div>
+        <h3>Funding</h3>
+        <ul><li>Scholarships</li><li>Grants</li><li>Accelerators</li><li>Investor Matching</li></ul>
+        <span class="feature-arrow">→</span>
+      </div>
+      <div class="feature-card c6" id="opportunities">
+        <div class="feature-icon">🏆</div>
+        <h3>Opportunities</h3>
+        <ul><li>Competitions</li><li>Hackathons</li><li>Conferences</li><li>Global Programs</li></ul>
+        <span class="feature-arrow">→</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI MENTOR SPLIT -->
+  <section class="section wrap" id="ai-mentor">
+    <div class="split-card">
+      <div>
+        <div class="eyebrow">AI MENTOR</div>
+        <h3>Your personal AI mentor, <span class="accent">24/7.</span></h3>
+        <p>Get intelligent guidance tailored to your goals. Orivon AI analyzes your interests, skills, and ambitions to create a path unique to you.</p>
+      </div>
+      <div class="chat-panel">
+        <div class="timeline">
+          <div class="t-title">Conversation</div>
+          <div class="t-item active"><span class="dot"></span><div>How can I become an AI Engineer?<br><small>10:30 AM</small></div></div>
+          <div class="t-item"><span class="dot"></span><div>Personal roadmap generated</div></div>
+          <div class="t-item"><span class="dot"></span><div>Courses recommended</div></div>
+          <div class="t-item"><span class="dot"></span><div>Projects suggested</div></div>
+          <div class="t-item"><span class="dot"></span><div>Mentors matched</div></div>
+          <div class="t-item"><span class="dot"></span><div>Scholarships available</div></div>
+        </div>
+        <div class="chat-window">
+          <div class="chat-head"><span class="dot-status"></span> Orivon AI · Online</div>
+          <div class="chat-body">
+            <div class="bubble user">How can I become an AI Engineer?<br><small>10:30 AM</small></div>
+            <div class="bubble bot">
+              Here's your personalized roadmap to become an AI Engineer.
+              <button class="btn btn-outline btn-sm">↻ View Roadmap</button>
+            </div>
+          </div>
+          <div class="chat-input">
+            <input type="text" placeholder="Ask anything...">
+            <button aria-label="Send">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS + ECOSYSTEM -->
+  <section class="section wrap">
+    <div class="two-col">
+      <div>
+        <h2 style="font-size:1.5rem;margin-bottom:28px;">How Orivon Works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div><h4>Discover</h4><p>Tell Orivon your goals and interests.</p></div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div><h4>Learn &amp; Connect</h4><p>Get AI guidance and connect with mentors and peers.</p></div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div><h4>Build Your Future</h4><p>Apply for opportunities and track your growth.</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section wrap">
+    <div class="testi-head">Loved by our community</div>
+    <div class="testi-wrap">
+      <button class="testi-arrow left" id="testiLeft" aria-label="Previous">‹</button>
+      <div class="testi-row" id="testiRow">
+        <div class="testi-card">
+          <div class="quote-mark">"</div>
+          <p>Orivon gave me a roadmap I wish I had years ago.</p>
+          <div class="testi-person"><span class="av"></span><div><strong>Arjun Mehta</strong><span>AI/ML Student</span></div></div>
+        </div>
+        <div class="testi-card">
+          <div class="quote-mark">"</div>
+          <p>The AI mentor helped me prepare for interviews in days.</p>
+          <div class="testi-person"><span class="av"></span><div><strong>Zara Khan</strong><span>Software Engineer</span></div></div>
+        </div>
+        <div class="testi-card">
+          <div class="quote-mark">"</div>
+          <p>Finally, one platform for growth.</p>
+          <div class="testi-person"><span class="av"></span><div><strong>Kartik Sharma</strong><span>Founder</span></div></div>
+        </div>
+      </div>
+      <button class="testi-arrow right" id="testiRight" aria-label="Next">›</button>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="section wrap">
+    <div class="stats">
+      <div><div class="num">100K+</div><div class="lbl">Students</div></div>
+      <div><div class="num">5K+</div><div class="lbl">Mentors</div></div>
+      <div><div class="num">20K+</div><div class="lbl">Opportunities</div></div>
+      <div><div class="num">100+</div><div class="lbl">Countries</div></div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta wrap">
+    <h2>Your future shouldn't depend on who you know.<br>It should depend on <span class="accent">your potential.</span></h2>
+    <a class="btn btn-primary" href="register.html">Get Early Access →</a>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><span class="mark"><img class="logoimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png"></span> ORIVON</div>
+        <p>An intelligent ecosystem that empowers you to learn, connect, and grow — without limits.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#features">Overview</a><a href="#features">Features</a><a href="pricing.html">Pricing</a>
+      </div>
+      <div class="footer-col">
+        <h5>AI Mentor</h5>
+        <a href="#">How it Works</a><a href="#">Roadmaps</a><a href="#">Ask AI</a>
+      </div>
+      <div class="footer-col">
+        <h5>Careers</h5>
+        <a href="#">Jobs</a><a href="#">Internships</a><a href="#">Career Resources</a>
+      </div>
+      <div class="footer-col">
+        <h5>Opportunities</h5>
+        <a href="#">Scholarships</a><a href="#">Hackathons</a><a href="#">Programs</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="social-icons">
+        <a href="#" aria-label="Twitter">🐦</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Instagram">📷</a>
+        <a href="#" aria-label="YouTube">▶</a>
+        <a href="#" aria-label="Discord">🎮</a>
+      </div>
+      <div>© 2024 Orivon. All rights reserved.</div>
+      <div>Privacy Policy &nbsp; Terms of Service</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle (light/dark)
+  function setTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    document.querySelectorAll('.theme-toggle .knob').forEach(k => k.textContent = mode === 'light' ? '☀️' : '🌙');
+  }
+  function toggleTheme(){
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    setTheme(current === 'light' ? 'dark' : 'light');
+  }
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+  document.getElementById('themeToggleMobile').addEventListener('click', toggleTheme);
+
+  // Settings popover (desktop) — toggle switch only visible after pressing Settings
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPopover = document.getElementById('settingsPopover');
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    settingsPopover.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if(!settingsPopover.contains(e.target) && e.target !== settingsBtn){
+      settingsPopover.classList.remove('show');
+    }
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') settingsPopover.classList.remove('show'); });
+
+  // Settings panel (mobile menu) — same idea, inline instead of floating
+  const settingsBtnMobile = document.getElementById('settingsBtnMobile');
+  const settingsPopoverMobile = document.getElementById('settingsPopoverMobile');
+  settingsBtnMobile.addEventListener('click', () => {
+    const isOpen = settingsPopoverMobile.style.display === 'block';
+    settingsPopoverMobile.style.display = isOpen ? 'none' : 'block';
+  });
+
+  // Mobile nav toggle
+  const burgerBtn = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  burgerBtn.addEventListener('click', () => {
+    const open = mobileMenu.classList.toggle('open');
+    burgerBtn.setAttribute('aria-expanded', open);
+  });
+  // Close mobile menu after clicking a link
+  mobileMenu.querySelectorAll('a').forEach(a=>{
+    a.addEventListener('click', ()=> mobileMenu.classList.remove('open'));
+  });
+
+  // Testimonial carousel arrows (desktop convenience)
+  const testiRow = document.getElementById('testiRow');
+  document.getElementById('testiLeft').addEventListener('click', ()=>{
+    testiRow.scrollBy({left:-340, behavior:'smooth'});
+  });
+  document.getElementById('testiRight').addEventListener('click', ()=>{
+    testiRow.scrollBy({left:340, behavior:'smooth'});
+  });
+
+  // Show/hide arrows based on viewport width
+  function updateArrows(){
+    const show = window.innerWidth > 860;
+    document.querySelectorAll('.testi-arrow').forEach(a=>{
+      a.style.display = show ? 'flex' : 'none';
+    });
+  }
+  window.addEventListener('resize', updateArrows);
+  updateArrows();
+</script>
+
+</body>
+</html>

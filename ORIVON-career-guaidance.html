@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Career Guidance — Orivon Mentor</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = "https://mkuklkqvatequxvlpncm.supabase.co";
+  const supabaseKey = "sb_publishable_amstxWXd3Vt19V7um1YMsw_gw-keZHT";
+  try{ window._sb = supabase.createClient(supabaseUrl, supabaseKey); }
+  catch(err){ console.error('Supabase failed to initialize:', err); }
+</script>
+<style>
+  :root{
+    --bg:#0b0b10;
+    --bg-elevated:#111116;
+    --panel:#15151b;
+    --panel-2:#1a1a22;
+    --border:#262630;
+    --border-soft:#1e1e26;
+    --text:#f2f2f5;
+    --text-dim:#9a9aa7;
+    --text-faint:#65656f;
+    --accent:#7c5cff;
+    --accent-2:#6a47ef;
+    --accent-soft:rgba(124,92,255,.14);
+    --accent-soft-strong:rgba(124,92,255,.22);
+    --green:#34d399;
+    --green-soft:rgba(52,211,153,.13);
+    --teal:#22d3ee;
+    --teal-soft:rgba(34,211,238,.13);
+    --amber:#f59e0b;
+    --amber-soft:rgba(245,158,11,.13);
+    --pink:#ec4899;
+    --pink-soft:rgba(236,72,153,.13);
+    --blue:#3b82f6;
+    --blue-soft:rgba(59,130,246,.13);
+    --red:#f0654c;
+    --radius-lg:18px;
+    --radius-md:13px;
+    --radius-sm:9px;
+    --shadow-pop:0 16px 40px -12px rgba(0,0,0,.55);
+    --dur:.22s;
+  }
+  html[data-theme="light"]{
+    --bg:#f6f6fa;
+    --bg-elevated:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#f1f1f6;
+    --border:#e4e4ec;
+    --border-soft:#ececf3;
+    --text:#15151b;
+    --text-dim:#54545f;
+    --text-faint:#84848f;
+    --accent-soft:rgba(124,92,255,.10);
+    --accent-soft-strong:rgba(124,92,255,.18);
+    --green-soft:rgba(52,211,153,.14);
+    --shadow-pop:0 16px 40px -12px rgba(0,0,0,.12);
+  }
+  html{transition:background-color .2s ease;}
+  body{transition:background-color .2s ease,color .2s ease;}
+
+  /* ---------- Settings modal ---------- */
+  .settings-modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:95;
+    display:flex;align-items:center;justify-content:center;padding:18px;
+    opacity:0;visibility:hidden;transition:opacity var(--dur);
+  }
+  .settings-modal-backdrop.show{opacity:1;visibility:visible;}
+  .settings-modal{
+    background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);
+    width:100%;max-width:400px;padding:22px;box-shadow:var(--shadow-pop);
+  }
+  .settings-modal h3{margin:0 0 4px;font-size:16px;font-weight:750;}
+  .settings-modal .sub{margin:0 0 20px;font-size:12.5px;color:var(--text-faint);}
+  .settings-row{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:13px 14px;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-md);
+  }
+  .settings-row .s-label{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:650;}
+  .settings-row .s-label svg{color:var(--accent);}
+  .settings-row .s-desc{font-size:11.5px;color:var(--text-faint);margin-top:2px;font-weight:400;}
+  .settings-toggle{
+    position:relative;width:44px;height:24px;border-radius:100px;background:var(--border);
+    border:none;cursor:pointer;flex-shrink:0;transition:background .2s ease;
+  }
+  .settings-toggle .knob{
+    position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    transition:transform .2s ease;display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  html[data-theme="light"] .settings-toggle .knob{transform:translateX(20px);}
+  .settings-modal-close{
+    width:32px;height:32px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;float:right;
+  }
+  .settings-modal-close:hover{color:var(--text);border-color:var(--accent);}
+  .settings-modal-head{display:flex;justify-content:space-between;align-items:flex-start;}
+
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  button,input{font-family:inherit;}
+  ::selection{background:var(--accent-soft-strong);}
+  *:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px;}
+  a{color:inherit;text-decoration:none;}
+
+  svg.icon{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* ---------- App shell ---------- */
+  .app{display:flex;height:100vh;height:100dvh;width:100%;position:relative;}
+
+  .mobile-bar{
+    display:none;align-items:center;justify-content:space-between;gap:8px;height:56px;padding:0 12px;
+    border-bottom:1px solid var(--border);background:var(--bg-elevated);position:fixed;top:0;left:0;right:0;z-index:40;
+  }
+  .mobile-bar .brand-mini{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;overflow:hidden;white-space:nowrap;}
+  .icon-btn{
+    width:38px;height:38px;border-radius:var(--radius-sm);background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    transition:background var(--dur),color var(--dur),border-color var(--dur);
+  }
+  .icon-btn:hover{background:var(--accent-soft);color:var(--text);border-color:var(--accent);}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:45;opacity:0;visibility:hidden;transition:opacity var(--dur);}
+  .overlay.show{opacity:1;visibility:visible;}
+
+  .sidebar{height:100vh;height:100dvh;overflow-y:auto;background:var(--bg-elevated);display:flex;flex-direction:column;scrollbar-width:thin;}
+  .sidebar::-webkit-scrollbar{width:8px;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+
+  /* ---------- Left sidebar ---------- */
+  .sidebar-left{width:266px;flex:0 0 266px;border-right:1px solid var(--border);padding:18px 14px 16px;}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 16px;}
+  .brand .hex{width:34px;height:34px;flex-shrink:0;color:var(--accent);}
+  .brand-text h1{font-size:15.5px;margin:0;line-height:1.2;font-weight:750;letter-spacing:-.2px;}
+  .brand-text p{font-size:11.5px;margin:1px 0 0;color:var(--text-faint);}
+
+  .search-box{
+    display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);
+    border-radius:var(--radius-sm);padding:9px 11px;margin-bottom:16px;color:var(--text-faint);
+    transition:border-color var(--dur);
+  }
+  .search-box:focus-within{border-color:var(--accent);}
+  .search-box input{
+    flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font-size:13px;
+  }
+  .search-box input::placeholder{color:var(--text-faint);}
+  .kbd-hint{font-size:10.5px;color:var(--text-faint);background:var(--panel-2);border:1px solid var(--border);border-radius:5px;padding:2px 5px;flex-shrink:0;}
+
+  nav.nav-list{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--radius-sm);
+    color:var(--text-dim);font-size:13.5px;font-weight:560;cursor:pointer;border:1px solid transparent;
+    background:none;text-align:left;width:100%;transition:background var(--dur),color var(--dur);
+  }
+  .nav-item svg{color:var(--text-faint);transition:color var(--dur);}
+  .nav-item:hover{background:var(--panel);color:var(--text);}
+  .nav-item:hover svg{color:var(--text-dim);}
+  .nav-item.active{background:var(--accent-soft-strong);color:#fff;}
+  .nav-item.active svg{color:var(--accent);}
+
+  .sidebar-divider{height:1px;background:var(--border-soft);margin:6px 4px 12px;}
+  .eyebrow{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;padding:0 11px;margin-bottom:6px;}
+  .sidebar-spacer{flex:1 1 auto;min-height:14px;}
+
+  .privacy-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:13px;margin:10px 0 14px;}
+  .privacy-box .top{display:flex;gap:9px;align-items:flex-start;}
+  .privacy-box .lock{width:28px;height:28px;border-radius:8px;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .privacy-box h3{font-size:13px;margin:0 0 3px;font-weight:650;}
+  .privacy-box p{font-size:11.5px;color:var(--text-faint);margin:0;line-height:1.4;}
+  .privacy-box .badge{display:flex;align-items:center;gap:5px;color:var(--green);font-size:12px;font-weight:650;margin-top:10px;}
+
+  .sidebar-foot{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px solid var(--border-soft);}
+
+  /* ---------- Main column ---------- */
+  .main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;height:100vh;height:100dvh;}
+  .main-scroll{flex:1 1 auto;overflow-y:auto;padding:26px 30px 40px;scrollbar-width:thin;}
+  .main-scroll::-webkit-scrollbar{width:9px;}
+  .main-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+  .main-inner{max-width:1040px;margin:0 auto;}
+
+  /* page header */
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+  .ph-left{display:flex;gap:14px;align-items:flex-start;min-width:0;}
+  .ph-icon{width:46px;height:46px;border-radius:13px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .ph-left h2{font-size:23px;margin:0 0 4px;font-weight:750;letter-spacing:-.3px;}
+  .ph-left p{margin:0;color:var(--text-dim);font-size:13.5px;max-width:520px;}
+  .ph-actions{display:flex;gap:8px;flex-shrink:0;}
+  .btn-outline-accent{
+    display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:var(--radius-sm);
+    background:var(--accent-soft);border:1px solid var(--accent);color:#cfc2ff;font-size:13px;font-weight:650;
+    cursor:pointer;white-space:nowrap;transition:background var(--dur);
+  }
+  .btn-outline-accent:hover{background:var(--accent-soft-strong);color:#fff;}
+
+  /* tabs */
+  .tabs{
+    display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:22px;
+    overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    display:flex;align-items:center;gap:7px;padding:11px 14px;background:none;border:none;
+    color:var(--text-dim);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+    border-bottom:2px solid transparent;margin-bottom:-1px;flex-shrink:0;transition:color var(--dur);
+  }
+  .tab svg{color:var(--text-faint);}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:#fff;border-bottom-color:var(--accent);}
+  .tab.active svg{color:var(--accent);}
+
+  /* hero banner */
+  .hero{
+    position:relative;border-radius:var(--radius-lg);padding:30px 32px;margin-bottom:30px;overflow:hidden;
+    background:linear-gradient(125deg,#5d3df0 0%,#4327b8 65%,#33208f 100%);
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+  }
+  .hero-text{position:relative;z-index:2;max-width:430px;}
+  .hero-text h3{font-size:21px;margin:0 0 8px;font-weight:750;letter-spacing:-.2px;}
+  .hero-text p{margin:0 0 18px;color:rgba(255,255,255,.78);font-size:13.8px;line-height:1.5;}
+  .hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .btn-light{
+    display:flex;align-items:center;gap:7px;background:#fff;color:#3a2188;border:none;border-radius:var(--radius-sm);
+    padding:10px 16px;font-size:13.5px;font-weight:700;cursor:pointer;transition:transform var(--dur);
+  }
+  .btn-light:hover{transform:translateY(-1px);}
+  .pill-time{background:rgba(255,255,255,.14);color:#fff;font-size:12px;font-weight:600;padding:8px 13px;border-radius:99px;}
+  .hero-art{position:relative;z-index:1;width:170px;height:170px;flex-shrink:0;opacity:.9;}
+  .hero-art svg{width:100%;height:100%;}
+
+  /* section headers */
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .sec-head .left{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+  .sec-head h3{font-size:16.5px;margin:0;font-weight:700;}
+  .sec-head .tag{font-size:11.5px;color:var(--text-faint);background:var(--panel-2);border:1px solid var(--border);padding:3px 9px;border-radius:99px;}
+  .sec-head .view-all{font-size:12.5px;color:var(--accent);font-weight:650;display:flex;align-items:center;gap:3px;cursor:pointer;background:none;border:none;}
+  .sec-head .view-all:hover{text-decoration:underline;}
+
+  section.block{margin-bottom:32px;}
+
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  /* match cards */
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+  .match-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;
+    display:flex;flex-direction:column;gap:12px;transition:border-color var(--dur),transform var(--dur);
+  }
+  .match-card:hover{transform:translateY(-2px);}
+  .match-card.c-purple{border-top:2px solid var(--accent);}
+  .match-card.c-teal{border-top:2px solid var(--teal);}
+  .match-card.c-amber{border-top:2px solid var(--amber);}
+  .mc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .mc-id{display:flex;gap:11px;align-items:center;}
+  .mc-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .c-purple .mc-icon{background:var(--accent-soft);color:var(--accent);}
+  .c-teal .mc-icon{background:var(--teal-soft);color:var(--teal);}
+  .c-amber .mc-icon{background:var(--amber-soft);color:var(--amber);}
+  .mc-id h4{margin:0 0 4px;font-size:15px;font-weight:700;}
+  .match-badge{display:inline-flex;font-size:11px;font-weight:700;color:var(--green);background:var(--green-soft);padding:2px 9px;border-radius:99px;}
+  .mc-desc{font-size:12.8px;color:var(--text-dim);line-height:1.5;margin:0;}
+  .mc-fits{font-size:11.5px;color:var(--text-faint);font-weight:650;text-transform:uppercase;letter-spacing:.03em;margin:2px 0 0;}
+  .mc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;}
+  .mc-list li{display:flex;align-items:center;gap:7px;font-size:12.8px;color:var(--text-dim);}
+  .mc-list svg{color:var(--green);width:14px;height:14px;flex-shrink:0;}
+  .mc-btn{
+    margin-top:4px;width:100%;padding:9px;border-radius:var(--radius-sm);background:transparent;
+    font-size:12.8px;font-weight:700;cursor:pointer;transition:background var(--dur);
+  }
+  .c-purple .mc-btn{border:1px solid var(--accent);color:#cfc2ff;}
+  .c-purple .mc-btn:hover{background:var(--accent-soft);}
+  .c-teal .mc-btn{border:1px solid var(--teal);color:var(--teal);}
+  .c-teal .mc-btn:hover{background:var(--teal-soft);}
+  .c-amber .mc-btn{border:1px solid var(--amber);color:var(--amber);}
+  .c-amber .mc-btn:hover{background:var(--amber-soft);}
+
+  /* explore paths - horizontal scroll */
+  .paths-wrap{position:relative;}
+  .paths-row{
+    display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;
+    scrollbar-width:none;-ms-overflow-style:none;
+  }
+  .paths-row::-webkit-scrollbar{display:none;}
+  .path-chip{
+    flex:0 0 auto;scroll-snap-align:start;width:160px;background:var(--panel);border:1px solid var(--border);
+    border-radius:var(--radius-md);padding:14px;cursor:pointer;transition:border-color var(--dur),transform var(--dur);
+  }
+  .path-chip:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .path-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+  .path-chip h5{margin:0 0 2px;font-size:13.3px;font-weight:650;}
+  .path-chip span{font-size:11.5px;color:var(--text-faint);}
+  .scroll-chevron{
+    position:absolute;top:50%;right:-6px;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;
+    background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim);display:flex;align-items:center;
+    justify-content:center;cursor:pointer;box-shadow:var(--shadow-pop);
+  }
+  .scroll-chevron:hover{color:var(--text);border-color:var(--accent);}
+
+  /* insights */
+  .insight-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .insight-card .ins-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .insight-card .ins-title{display:flex;align-items:center;gap:9px;}
+  .insight-card .ins-ic{width:30px;height:30px;border-radius:9px;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .insight-card h4{margin:0;font-size:14.5px;font-weight:700;}
+  .insight-card ul{margin:0;padding-left:18px;}
+  .insight-card li{font-size:13px;color:var(--text-dim);line-height:1.5;}
+
+  /* ---------- Right sidebar ---------- */
+  .sidebar-right{width:330px;flex:0 0 330px;border-left:1px solid var(--border);padding:18px 16px;}
+  .panel-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;}
+  .panel-card:last-child{margin-bottom:0;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
+  .panel-head h3{font-size:13.8px;margin:0;font-weight:650;}
+  .link-btn{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--accent);font-weight:650;background:none;border:none;cursor:pointer;}
+  .link-btn:hover{text-decoration:underline;}
+
+  .profile-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .ring-wrap{position:relative;width:128px;height:128px;flex-shrink:0;}
+  .ring-wrap svg{width:100%;height:100%;}
+  .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring-center .pct{font-size:24px;font-weight:800;}
+  .ring-label{text-align:center;font-size:11px;color:var(--text-faint);margin-top:8px;}
+  .skill-bars{flex:1 1 140px;display:flex;flex-direction:column;gap:10px;min-width:140px;}
+  .skill-row .top-line{display:flex;justify-content:space-between;font-size:11.8px;margin-bottom:4px;}
+  .skill-row .top-line span:first-child{color:var(--text-dim);}
+  .skill-row .top-line span:last-child{font-weight:700;}
+  .skill-track{height:5px;border-radius:99px;background:var(--panel-2);overflow:hidden;}
+  .skill-fill{display:block;height:100%;background:var(--accent);border-radius:99px;}
+
+  .profile-note{font-size:11.5px;color:var(--text-faint);line-height:1.5;margin:14px 0 10px;}
+  .btn-primary-full{
+    width:100%;padding:10px;border-radius:var(--radius-sm);background:var(--accent);border:none;color:#fff;
+    font-size:13px;font-weight:700;cursor:pointer;transition:background var(--dur);
+  }
+  .btn-primary-full:hover{background:var(--accent-2);}
+
+  .qa-list{display:flex;flex-direction:column;gap:4px;}
+  .qa-item{
+    display:flex;align-items:center;gap:11px;padding:9px 6px;border-radius:var(--radius-sm);cursor:pointer;
+    background:none;border:none;width:100%;text-align:left;transition:background var(--dur);
+  }
+  .qa-item:hover{background:var(--panel-2);}
+  .qa-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .qa-text{flex:1;min-width:0;}
+  .qa-text .t1{font-size:12.8px;font-weight:650;}
+  .qa-text .t2{font-size:11px;color:var(--text-faint);}
+  .qa-item svg.chev{color:var(--text-faint);flex-shrink:0;width:15px;height:15px;}
+
+  .saved-list{display:flex;flex-direction:column;gap:10px;}
+  .saved-item{display:flex;align-items:center;gap:10px;}
+  .saved-ic{width:32px;height:32px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .saved-meta{flex:1;min-width:0;}
+  .saved-meta .t1{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .saved-meta .t2{font-size:10.8px;color:var(--text-faint);}
+  .bookmark-toggle{background:none;border:none;color:var(--accent);cursor:pointer;flex-shrink:0;display:flex;}
+  .bookmark-toggle svg{width:16px;height:16px;}
+
+  .recommend-card{display:flex;gap:12px;}
+  .rec-thumb{
+    width:62px;height:84px;border-radius:8px;flex-shrink:0;background:linear-gradient(160deg,#1d8a85,#0f4f4c);
+    display:flex;align-items:center;justify-content:center;text-align:center;color:#bff5f0;font-size:8.5px;
+    font-weight:800;letter-spacing:.02em;padding:5px;line-height:1.3;
+  }
+  .rec-meta .tag-pill{display:inline-block;font-size:10.5px;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:99px;font-weight:650;margin:3px 0 6px;}
+  .rec-meta h4{margin:0;font-size:13.3px;font-weight:700;}
+  .rec-meta p{margin:0 0 6px;font-size:11.8px;color:var(--text-dim);line-height:1.4;}
+  .rec-meta .meta-line{font-size:10.8px;color:var(--text-faint);}
+
+  /* toast */
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translate(-50%,12px);background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text);padding:10px 16px;border-radius:99px;font-size:13px;font-weight:560;box-shadow:var(--shadow-pop);
+    opacity:0;visibility:hidden;transition:all var(--dur);z-index:80;display:flex;align-items:center;gap:7px;max-width:88vw;
+  }
+  .toast.show{opacity:1;visibility:visible;transform:translate(-50%,0);}
+  .toast svg{color:var(--green);flex-shrink:0;}
+
+  /* =====================================================
+     RESPONSIVE
+     ===================================================== */
+  @media (max-width:1100px){
+    .sidebar-right{width:300px;flex-basis:300px;}
+  }
+
+  @media (max-width:1024px){
+    .mobile-bar{display:flex;}
+    .app{padding-top:56px;}
+    .main{height:calc(100vh - 56px);height:calc(100dvh - 56px);}
+    .sidebar-left,.sidebar-right{
+      position:fixed;top:56px;bottom:0;z-index:50;transition:transform var(--dur) ease;box-shadow:var(--shadow-pop);
+    }
+    .sidebar-left{left:0;transform:translateX(-100%);width:280px;flex-basis:280px;}
+    .sidebar-right{right:0;transform:translateX(100%);width:320px;flex-basis:320px;}
+    .sidebar-left.open,.sidebar-right.open{transform:translateX(0);}
+  }
+  @media (min-width:1025px){.overlay{display:none;}}
+
+  @media (max-width:900px){
+    .main-scroll{padding:20px 18px 32px;}
+    .hero{flex-wrap:wrap;}
+    .hero-art{width:110px;height:110px;}
+  }
+
+  @media (max-width:680px){
+    .ph-left{width:100%;}
+    .ph-actions{width:100%;}
+    .btn-outline-accent{flex:1;justify-content:center;}
+    .hero{padding:24px 20px;}
+    .hero-text{max-width:100%;}
+    .hero-art{display:none;}
+    .match-card{padding:16px;}
+  }
+
+  @media (max-width:560px){
+    .ph-icon{width:40px;height:40px;}
+    .ph-left h2{font-size:20px;}
+    .sidebar-right{width:88vw;flex-basis:88vw;}
+    .sidebar-left{width:84vw;flex-basis:84vw;}
+    .profile-row{justify-content:center;}
+    .ring-wrap{margin:0 auto;}
+    .skill-bars{flex-basis:100%;}
+  }
+
+  @media (max-width:420px){
+    .main-scroll{padding:16px 14px 28px;}
+    .hero{padding:20px 16px;}
+    .pill-time{display:none;}
+    .path-chip{width:140px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="mobile-bar">
+    <button class="icon-btn" id="openLeft" aria-label="Open navigation">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="brand-mini">
+      <svg viewBox="0 0 24 24" width="20" height="20" style="color:var(--accent)"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>
+      Career Guidance
+    </div>
+    <button class="icon-btn" id="openRight" aria-label="Open career profile panel">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+    </button>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ============ LEFT SIDEBAR ============ -->
+  <aside class="sidebar sidebar-left" id="sidebarLeft">
+    <a href="orivon-landing-v5.html" class="brand" style="text-decoration:none;color:inherit;">
+      <svg class="hex" viewBox="0 0 24 24"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg>
+      <div class="brand-text"><h1>Orivon Mentor</h1><p>Your Offline AI Mentor</p></div>
+    </a>
+
+    <div class="search-box">
+      <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Search">
+      <span class="kbd-hint">Ctrl+K</span>
+    </div>
+
+    <nav class="nav-list" id="navList">
+      <button class="nav-item" data-name="Chat">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2 8.5 8.5 0 0 1-7.5 4.3 8.4 8.4 0 0 1-4.2-1.1L3 21l2.1-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.4 3a8.5 8.5 0 0 1 8.5 8.5z"/></svg>
+        Chat
+      </button>
+      <button class="nav-item active" data-name="Career Guidance">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg>
+        Career Guidance
+      </button>
+      <button class="nav-item" data-name="CV Review">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        CV Review
+      </button>
+      <button class="nav-item" data-name="Interview Prep">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Interview Prep
+      </button>
+      <button class="nav-item" data-name="Learning Roadmaps">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7.5" x2="10.3" y2="16"/><line x1="16" y1="7.5" x2="13.7" y2="16"/></svg>
+        Learning Roadmaps
+      </button>
+      <button class="nav-item" data-name="Programming Help">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Programming Help
+      </button>
+      <button class="nav-item" data-name="Startup Advice">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>
+        Startup Advice
+      </button>
+      <button class="nav-item" data-name="Scholarships">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+        Scholarships
+      </button>
+      <button class="nav-item" data-name="Research Assistant">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        Research Assistant
+      </button>
+      <button class="nav-item" data-name="Explore Life Coach/Mentors">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        Explore Life Coach/Mentors
+      </button>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+    <div class="eyebrow">My Library</div>
+    <nav class="nav-list">
+      <button class="nav-item" id="navUploads">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Uploads
+      </button>
+      <button class="nav-item" id="navNotes">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Notes
+      </button>
+      <button class="nav-item" id="navBookmarks">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        Bookmarks
+      </button>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="privacy-box">
+      <div class="top">
+        <div class="lock"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <div><h3>Everything is offline</h3><p>All data stays on your device. No internet, no tracking.</p></div>
+      </div>
+      <div class="badge"><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>100% Private</div>
+    </div>
+
+    <div class="sidebar-foot">
+      <button class="nav-item" id="navProfile" onclick="window.location.href='profile.html'">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </button>
+      <button class="nav-item" id="navSettings">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+      <button class="nav-item" id="navAbout">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        About
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="main-scroll" id="mainScroll">
+      <div class="main-inner">
+
+        <div class="page-header">
+          <div class="ph-left">
+            <div class="ph-icon"><svg class="icon" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg></div>
+            <div>
+              <h2>Career Guidance</h2>
+              <p>Discover the best career paths for you. Get personalized insights, roadmaps and actionable steps.</p>
+            </div>
+          </div>
+          <div class="ph-actions">
+            <button class="btn-outline-accent" id="btnAssessment">
+              <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Start New Assessment
+            </button>
+            <button class="icon-btn" id="btnMore" aria-label="More options">
+              <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="5" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.4" fill="currentColor" stroke="none"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="tabs" id="tabs">
+          <button class="tab active" data-tab="Overview"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg>Overview</button>
+          <button class="tab" data-tab="Assessments"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Assessments</button>
+          <button class="tab" data-tab="Career Paths"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>Career Paths</button>
+          <button class="tab" data-tab="Roadmaps"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7.5" x2="10.3" y2="16"/><line x1="16" y1="7.5" x2="13.7" y2="16"/></svg>Roadmaps</button>
+          <button class="tab" data-tab="Skills"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polygon points="12 2 15.1 8.6 22 9.6 17 14.4 18.2 21.2 12 17.9 5.8 21.2 7 14.4 2 9.6 8.9 8.6 12 2"/></svg>Skills</button>
+          <button class="tab" data-tab="Job Roles"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Job Roles</button>
+          <button class="tab" data-tab="Industries"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h1m4 0h1M9 13h1m4 0h1M9 17h1m4 0h1"/></svg>Industries</button>
+        </div>
+
+        <!-- ===== OVERVIEW TAB PANEL ===== -->
+        <div class="tab-panel active" id="panel-Overview" data-panel="Overview">
+
+        <!-- HERO -->
+        <div class="hero">
+          <div class="hero-text">
+            <h3>Let's find the right career path for you</h3>
+            <p>Answer a few questions about your interests, strengths and goals.</p>
+            <div class="hero-actions">
+              <button class="btn-light" id="btnStartAssessment">
+                Start Career Assessment
+                <svg class="icon" viewBox="0 0 24 24" width="14" height="14" stroke="#3a2188"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+              <span class="pill-time">Takes ~ 5–7 min</span>
+            </div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <svg viewBox="0 0 200 200">
+              <circle cx="100" cy="100" r="95" fill="rgba(255,255,255,.06)"/>
+              <circle cx="100" cy="100" r="72" fill="rgba(255,255,255,.07)"/>
+              <circle cx="100" cy="100" r="49" fill="rgba(255,255,255,.09)"/>
+              <circle cx="100" cy="100" r="26" fill="rgba(255,255,255,.12)"/>
+              <circle cx="100" cy="100" r="6" fill="rgba(255,255,255,.5)"/>
+              <line x1="160" y1="35" x2="106" y2="92" stroke="rgba(255,255,255,.55)" stroke-width="4" stroke-linecap="round"/>
+              <polygon points="160,35 145,38 157,50" fill="rgba(255,255,255,.55)"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- TOP MATCHES -->
+        <section class="block">
+          <div class="sec-head">
+            <div class="left"><h3>Top Career Matches</h3><span class="tag" id="topMatchesTag"></span></div>
+            <button class="view-all" data-view="Top Career Matches">View All <svg class="icon" viewBox="0 0 24 24" width="13" height="13"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+          </div>
+          <div class="match-grid" id="topMatchesGrid"></div>
+        </section>
+
+        <!-- EXPLORE PATHS -->
+        <section class="block">
+          <div class="sec-head">
+            <div class="left"><h3>Explore Career Paths</h3></div>
+            <button class="view-all" data-view="Career Paths">View All Paths <svg class="icon" viewBox="0 0 24 24" width="13" height="13"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+          </div>
+          <div class="paths-wrap">
+            <div class="paths-row" id="pathsRow">
+              <div class="path-chip" data-path="Engineering"><div class="path-ic" style="background:var(--teal-soft);color:var(--teal)"><svg class="icon" viewBox="0 0 24 24" width="17" height="17"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div><h5>Engineering</h5><span>24 Paths</span></div>
+              <div class="path-chip" data-path="Data Science"><div class="path-ic" style="background:var(--blue-soft);color:var(--blue)"><svg class="icon" viewBox="0 0 24 24" width="17" height="17"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg></div><h5>Data Science</h5><span>18 Paths</span></div>
+              <div class="path-chip" data-path="Business"><div class="path-ic" style="background:var(--amber-soft);color:var(--amber)"><svg class="icon" viewBox="0 0 24 24" width="17" height="17"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><h5>Business</h5><span>16 Paths</span></div>
+              <div class="path-chip" data-path="Design"><div class="path-ic" style="background:var(--pink-soft);color:var(--pink)"><svg class="icon" viewBox="0 0 24 24" width="17" height="17"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="11" r="1.3" fill="currentColor" stroke="none"/><circle cx="12.5" cy="8" r="1.3" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1.3" fill="currentColor" stroke="none"/><path d="M9 16a3 3 0 0 0 5.5 1.8"/></svg></div><h5>Design</h5><span>14 Paths</span></div>
+              <div class="path-chip" data-path="Product"><div class="path-ic" style="background:var(--blue-soft);color:var(--blue)"><svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><h5>Product</h5><span>12 Paths</span></div>
+              <div class="path-chip" data-path="Research"><div class="path-ic" style="background:var(--green-soft);color:var(--green)"><svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M9 2v6L4 18a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-10V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="7" y1="15" x2="17" y2="15"/></svg></div><h5>Research</h5><span>10 Paths</span></div>
+            </div>
+            <button class="scroll-chevron" id="pathsNext" aria-label="Scroll for more paths">
+              <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+        </section>
+
+        <!-- RECENT INSIGHTS -->
+        <section class="block" style="margin-bottom:8px;">
+          <div class="insight-card">
+            <div class="ins-head">
+              <div class="ins-title">
+                <div class="ins-ic"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8v.5h6v-.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg></div>
+                <h4>Recent Insights</h4>
+              </div>
+              <button class="view-all" data-view="Insights">View All Insights <svg class="icon" viewBox="0 0 24 24" width="13" height="13"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+            </div>
+            <ul><li>You have strong analytical skills. Roles in Data, AI/ML and Software Engineering are great fits.</li></ul>
+          </div>
+        </section>
+
+        </div>
+        <!-- ===== END OVERVIEW TAB PANEL ===== -->
+
+        <!-- ===== ASSESSMENTS TAB PANEL ===== -->
+        <div class="tab-panel" id="panel-Assessments" data-panel="Assessments">
+          <div class="sec-head"><div class="left"><h3>Your Assessments</h3><span class="tag">3 completed</span></div></div>
+          <div class="match-grid" style="margin-bottom:26px;">
+            <div class="match-card c-purple">
+              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg></div><div><h4>Career Interest Profiler</h4><span class="match-badge">Completed</span></div></div></div>
+              <p class="mc-desc">Maps your interests against career clusters to surface roles you're likely to enjoy.</p>
+              <button class="mc-btn" data-assessment="Career Interest Profiler">Retake Assessment</button>
+            </div>
+            <div class="match-card c-teal">
+              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><h4>Skills Strength Test</h4><span class="match-badge">Completed</span></div></div></div>
+              <p class="mc-desc">Benchmarks your technical and soft skills against industry expectations.</p>
+              <button class="mc-btn" data-assessment="Skills Strength Test">Retake Assessment</button>
+            </div>
+            <div class="match-card c-amber">
+              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8v.5h6v-.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg></div><div><h4>Values &amp; Goals Survey</h4><span class="match-badge" style="background:var(--amber-soft);color:var(--amber)">In Progress</span></div></div></div>
+              <p class="mc-desc">Clarifies what matters most to you at work so recommendations match your priorities.</p>
+              <button class="mc-btn" data-assessment="Values & Goals Survey">Continue Assessment</button>
+            </div>
+          </div>
+          <div class="sec-head"><div class="left"><h3>Take a New Assessment</h3></div></div>
+          <div class="insight-card">
+            <div class="ins-head">
+              <div class="ins-title"><div class="ins-ic"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><h4>Full Career Assessment</h4></div>
+            </div>
+            <p style="font-size:13px;color:var(--text-dim);margin:0 0 12px;">A 6-question quiz covering interests, skills, values and goals. Updates your Career Profile instantly.</p>
+            <button class="btn-light" style="background:var(--accent);color:#fff;" id="btnAssessmentInline">Start Full Assessment</button>
+          </div>
+        </div>
+
+        <!-- ===== CAREER PATHS TAB PANEL ===== -->
+        <div class="tab-panel" id="panel-Career Paths" data-panel="Career Paths">
+          <div class="sec-head"><div class="left"><h3>All Career Paths</h3><span class="tag" id="pathsCountTag"></span></div></div>
+          <div class="match-grid" id="allPathsGrid"></div>
+        </div>
+
+        <!-- ===== ROADMAPS TAB PANEL ===== -->
+        <div class="tab-panel" id="panel-Roadmaps" data-panel="Roadmaps">
+          <div class="sec-head"><div class="left"><h3>Your Roadmaps</h3></div></div>
+          <div class="match-grid" id="roadmapsGrid"></div>
+        </div>
+
+        <!-- ===== SKILLS TAB PANEL ===== -->
+        <div class="tab-panel" id="panel-Skills" data-panel="Skills">
+          <div class="sec-head"><div class="left"><h3>Your Skill Levels</h3><span class="tag" id="skillsSourceTag"></span></div></div>
+          <div class="insight-card" style="gap:14px;" id="skillLevelsContainer"></div>
+          <div class="sec-head" style="margin-top:26px;"><div class="left"><h3>Recommended Next Skills</h3></div></div>
+          <div class="match-grid" id="recommendedSkillsGrid"></div>
+        </div>
+
+        <!-- ===== JOB ROLES TAB PANEL ===== -->
+        <div class="tab-panel" id="panel-Job Roles" data-panel="Job Roles">
+          <div class="sec-head"><div class="left"><h3>Job Roles for You</h3></div></div>
+          <div class="match-grid" id="jobRolesGrid"></div>
+        </div>
+
+        <!-- ===== INDUSTRIES TAB PANEL ===== -->
+        <div class="tab-panel" id="panel-Industries" data-panel="Industries">
+          <div class="sec-head"><div class="left"><h3>Industries to Explore</h3></div></div>
+          <div class="match-grid" id="industriesGrid"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ RIGHT SIDEBAR ============ -->
+  <aside class="sidebar sidebar-right" id="sidebarRight">
+
+    <div class="panel-card">
+      <div class="panel-head">
+        <h3>Your Career Profile</h3>
+        <button class="link-btn" id="btnEditProfile"><svg class="icon" viewBox="0 0 24 24" width="13" height="13"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit</button>
+      </div>
+      <div class="profile-row">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 128 128">
+            <circle cx="64" cy="64" r="54" fill="none" stroke="var(--panel-2)" stroke-width="11"/>
+            <circle id="ringFill" cx="64" cy="64" r="54" fill="none" stroke="var(--accent)" stroke-width="11"
+              stroke-linecap="round" stroke-dasharray="339.3" stroke-dashoffset="339.3"
+              transform="rotate(-90 64 64)"/>
+          </svg>
+          <div class="ring-center"><span class="pct" id="pctLabel">0%</span></div>
+        </div>
+        <div class="skill-bars" id="profileSubBars"></div>
+      </div>
+      <div class="ring-label" style="text-align:left;margin-top:14px;">Profile Strength</div>
+      <p class="profile-note" id="profileNote"></p>
+      <button class="btn-primary-full" id="btnCompleteProfile">Complete Profile</button>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-head"><h3>Quick Actions</h3></div>
+      <div class="qa-list">
+        <button class="qa-item" data-action="Take Career Assessment">
+          <div class="qa-ic" style="background:var(--accent-soft);color:var(--accent)"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg></div>
+          <div class="qa-text"><div class="t1">Take Career Assessment</div><div class="t2">Discover your strengths and interests</div></div>
+          <svg class="chev icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="qa-item" data-action="Explore Job Roles">
+          <div class="qa-ic" style="background:var(--amber-soft);color:var(--amber)"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+          <div class="qa-text"><div class="t1">Explore Job Roles</div><div class="t2">Browse roles and responsibilities</div></div>
+          <svg class="chev icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="qa-item" data-action="Skill Gap Analysis">
+          <div class="qa-ic" style="background:var(--pink-soft);color:var(--pink)"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <div class="qa-text"><div class="t1">Skill Gap Analysis</div><div class="t2">Find skills to achieve your goals</div></div>
+          <svg class="chev icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button class="qa-item" data-action="Industry Explorer">
+          <div class="qa-ic" style="background:var(--blue-soft);color:var(--blue)"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg></div>
+          <div class="qa-text"><div class="t1">Industry Explorer</div><div class="t2">Explore industries and trends</div></div>
+          <svg class="chev icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-head"><h3>Saved Items</h3><button class="link-btn" data-view="Saved Items">View All</button></div>
+      <div class="saved-list" id="savedList">
+        <div class="saved-item">
+          <div class="saved-ic"><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7.5" x2="10.3" y2="16"/><line x1="16" y1="7.5" x2="13.7" y2="16"/></svg></div>
+          <div class="saved-meta"><div class="t1">Data Scientist Roadmap</div><div class="t2">Saved on 12 May 2025</div></div>
+          <button class="bookmark-toggle" data-saved="true" aria-label="Toggle bookmark"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+        </div>
+        <div class="saved-item">
+          <div class="saved-ic"><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="2" x2="9" y2="6"/><line x1="15" y1="2" x2="15" y2="6"/></svg></div>
+          <div class="saved-meta"><div class="t1">AI Engineer Roadmap</div><div class="t2">Saved on 10 May 2025</div></div>
+          <button class="bookmark-toggle" data-saved="true" aria-label="Toggle bookmark"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+        </div>
+        <div class="saved-item">
+          <div class="saved-ic"><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+          <div class="saved-meta"><div class="t1">Product Manager Notes</div><div class="t2">Saved on 8 May 2025</div></div>
+          <button class="bookmark-toggle" data-saved="true" aria-label="Toggle bookmark"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-head"><h3>Recommended for You</h3><svg class="icon" viewBox="0 0 24 24" width="14" height="14" style="color:var(--text-faint)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+      <div class="recommend-card" id="recommendCard" role="button" tabindex="0">
+        <div class="rec-thumb">SYSTEM<br>DESIGN<br>BASICS</div>
+        <div class="rec-meta">
+          <span class="tag-pill">Learning Resource</span>
+          <h4>System Design Basics</h4>
+          <p>Build scalable systems. A must-have skill for backend roles.</p>
+          <span class="meta-line">Book · 45 pages</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<div class="toast" id="toast">
+  <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Saved</span>
+</div>
+
+<div class="modal-backdrop" id="quizBackdrop" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:flex;align-items:center;justify-content:center;padding:18px;transition:opacity .22s;">
+  <div class="modal" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;width:100%;max-width:460px;padding:22px;box-shadow:0 16px 40px -12px rgba(0,0,0,.55);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="font-size:11.5px;color:var(--text-faint);font-weight:650;" id="quizProgress">Question 1 of 6</span>
+      <button class="icon-btn" id="quizClose" aria-label="Close" style="width:28px;height:28px;"><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="height:5px;border-radius:99px;background:var(--panel-2);overflow:hidden;margin-bottom:18px;">
+      <div id="quizBar" style="height:100%;width:16.6%;background:var(--accent);border-radius:99px;transition:width .25s;"></div>
+    </div>
+    <h3 id="quizQuestion" style="margin:0 0 16px;font-size:16px;">Question</h3>
+    <div id="quizOptions" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="resultBackdrop" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:flex;align-items:center;justify-content:center;padding:18px;transition:opacity .22s;">
+  <div class="modal" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;width:100%;max-width:420px;padding:24px;text-align:center;box-shadow:0 16px 40px -12px rgba(0,0,0,.55);">
+    <div style="width:54px;height:54px;border-radius:50%;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+      <svg class="icon" viewBox="0 0 24 24" width="26" height="26"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3 style="margin:0 0 8px;font-size:17px;">Assessment Complete</h3>
+    <p style="font-size:13px;color:var(--text-dim);margin:0 0 6px;" id="resultSummaryText">Your Career Profile has been updated with your new responses.</p>
+    <p style="font-size:12px;color:var(--text-faint);margin:0 0 18px;" id="resultTopMatchText"></p>
+    <button class="btn-primary-full" id="resultClose" style="width:100%;padding:10px;border-radius:9px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;">View Updated Profile</button>
+    <button class="btn-primary-full" id="resultViewRoadmap" style="width:100%;margin-top:8px;padding:10px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;">View My Learning Roadmap</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="detailBackdrop" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:flex;align-items:center;justify-content:center;padding:18px;transition:opacity .22s;">
+  <div class="modal" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;width:100%;max-width:440px;padding:22px;box-shadow:0 16px 40px -12px rgba(0,0,0,.55);">
+    <h3 id="detailTitle" style="margin:0 0 8px;font-size:16px;">Title</h3>
+    <p id="detailBody" style="font-size:13.3px;color:var(--text-dim);line-height:1.6;margin:0 0 18px;">Body</p>
+    <div style="display:flex;justify-content:flex-end;gap:8px;">
+      <button id="detailClose" style="padding:8px 16px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text-dim);">Close</button>
+    </div>
+  </div>
+</div>
+<style>
+  .modal-backdrop{opacity:0;visibility:hidden;}
+  .modal-backdrop.show{opacity:1 !important;visibility:visible !important;}
+</style>
+
+<script>
+(function(){
+  "use strict";
+
+  const sidebarLeft = document.getElementById('sidebarLeft');
+  const sidebarRight = document.getElementById('sidebarRight');
+  const overlay = document.getElementById('overlay');
+  const mainScroll = document.getElementById('mainScroll');
+
+  function openDrawer(el){ el.classList.add('open'); overlay.classList.add('show'); }
+  function closeDrawers(){
+    sidebarLeft.classList.remove('open');
+    sidebarRight.classList.remove('open');
+    overlay.classList.remove('show');
+  }
+  document.getElementById('openLeft').addEventListener('click', () => openDrawer(sidebarLeft));
+  document.getElementById('openRight').addEventListener('click', () => openDrawer(sidebarRight));
+  overlay.addEventListener('click', closeDrawers);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawers(); });
+  window.addEventListener('resize', () => { if (window.innerWidth > 1024) closeDrawers(); });
+
+  /* ---------- Toast ---------- */
+  let toastTimer = null;
+  function toast(msg){
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  function showModal(id){ document.getElementById(id).classList.add('show'); }
+  function hideModal(id){ document.getElementById(id).classList.remove('show'); }
+
+  /* ---------- Tab switching (now drives real content) ---------- */
+  function switchTab(name){
+    document.querySelectorAll('#tabs .tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+    mainScroll.scrollTo({top:0, behavior:'smooth'});
+    closeDrawers();
+  }
+  document.querySelectorAll('#tabs .tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  /* ---------- Left nav: Chat, Career Guidance and CV Review are built; others say so honestly ---------- */
+    const PAGE_LINKS = { 'Chat':'orivon-ai-mentor.html', 'Career Guidance':'ORIVON-career-guaidance.html', 'CV Review':'orivon-cvreview.html', 'Interview Prep':'interview-prep.html', 'Learning Roadmaps':'learning-roadmaps.html', 'Profile':'profile.html' };
+  document.querySelectorAll('#navList .nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.dataset.name;
+      if (PAGE_LINKS[name] && name !== 'Career Guidance'){
+        window.location.href = PAGE_LINKS[name];
+        return;
+      }
+      document.querySelectorAll('#navList .nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (name !== 'Career Guidance') toast(name + ' page isn\'t built in this preview yet');
+      else switchTab('Overview');
+      closeDrawers();
+    });
+  });
+  ['navUploads','navNotes','navBookmarks','navAbout'].forEach(id => {
+    document.getElementById(id).addEventListener('click', () => {
+      const labels = {navUploads:'Uploads page isn\'t built in this preview yet', navNotes:'Notes page isn\'t built in this preview yet', navBookmarks:'Bookmarks page isn\'t built in this preview yet', navAbout:'Orivon Mentor v1.0 — fully offline'};
+      toast(labels[id]);
+      closeDrawers();
+    });
+  });
+
+  /* ---------- Search: live-filters the left nav ---------- */
+  const searchInput = document.getElementById('searchInput');
+  const allNavItems = Array.from(document.querySelectorAll('.sidebar-left .nav-item'));
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    allNavItems.forEach(item => {
+      const label = item.textContent.trim().toLowerCase();
+      item.style.display = (!q || label.includes(q)) ? '' : 'none';
+    });
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){
+      e.preventDefault();
+      if (window.innerWidth <= 1024) openDrawer(sidebarLeft);
+      searchInput.focus();
+    }
+  });
+
+  /* ---------- Header / hero actions -> open real quiz ---------- */
+  document.getElementById('btnAssessment').addEventListener('click', startQuiz);
+  document.getElementById('btnStartAssessment').addEventListener('click', startQuiz);
+  document.getElementById('btnAssessmentInline').addEventListener('click', startQuiz);
+  document.getElementById('btnMore').addEventListener('click', () => toast('More options — duplicate, export PDF, share link'));
+
+  /* ---------- Save the recommended career so Learning Roadmaps can use it ---------- */
+  // Maps this page's match-card role names to the exact career keys the
+  // Learning Roadmaps page knows how to render.
+  const ROADMAP_CAREER_MAP = {
+    'Software Engineer': 'Software Engineer',
+    'Data Scientist': 'Data Scientist',
+    'AI/ML Engineer': 'AI/ML Engineer',
+    'Product Manager': 'Product Manager',
+    'UX Designer': 'UX Designer'
+  };
+
+  async function persistCareerRecommendation(role, pct, share){
+    const mappedRole = ROADMAP_CAREER_MAP[role] || role;
+    if(!window._sb) return; // Supabase failed to load — fail silently, quiz still works locally
+    try{
+      const { data: { user } } = await window._sb.auth.getUser();
+      if(!user) return; // not logged in — nothing to persist, that's fine
+      const { error } = await window._sb.from('profiles').upsert({
+        id: user.id,
+        recommended_career: mappedRole,
+        career_match_pct: Math.round(pct),
+        career_scores: share,
+        career_updated_at: new Date().toISOString()
+      });
+      if(error) console.warn('Could not save career recommendation:', error.message);
+    }catch(err){
+      console.warn('Could not save career recommendation:', err.message);
+    }
+  }
+
+  /* ---------- Match cards -> jump to the real Learning Roadmaps page ---------- */
+  // Delegated on document (not bound per-element) so it also works for
+  // match cards that get injected dynamically after the assessment.
+  document.addEventListener('click', e => {
+    const roleBtn = e.target.closest('.mc-btn[data-role]');
+    if (roleBtn){
+      const mappedRole = ROADMAP_CAREER_MAP[roleBtn.dataset.role] || roleBtn.dataset.role;
+      window.location.href = 'learning-roadmaps.html?career=' + encodeURIComponent(mappedRole);
+    }
+  });
+
+  /* ---------- "View All" buttons -> jump to the real tab ---------- */
+  const viewAllMap = {
+    'Top Career Matches':'Career Paths',
+    'Career Paths':'Career Paths',
+    'Insights':'Skills',
+    'Saved Items':'Roadmaps'
+  };
+  document.querySelectorAll('.view-all').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = viewAllMap[btn.dataset.view] || 'Overview';
+      switchTab(target);
+    });
+  });
+
+  /* ---------- Explore paths: horizontal scroll + open Career Paths tab filtered ---------- */
+  const pathsRow = document.getElementById('pathsRow');
+  document.getElementById('pathsNext').addEventListener('click', () => pathsRow.scrollBy({left: 220, behavior:'smooth'}));
+  document.querySelectorAll('.path-chip').forEach(chip => {
+    chip.addEventListener('click', () => { switchTab('Career Paths'); toast('Filtered to ' + chip.dataset.path); });
+  });
+
+  /* ---------- Right panel: Quick Actions now route to real tabs ---------- */
+  document.getElementById('btnEditProfile').addEventListener('click', () => {
+    document.getElementById('detailTitle').textContent = 'Edit Career Profile';
+    document.getElementById('detailBody').textContent = 'Your interests, skills, values and goals scores come from your assessment answers. Retake any assessment from the Assessments tab to update these numbers.';
+    showModal('detailBackdrop');
+  });
+  document.getElementById('btnCompleteProfile').addEventListener('click', startQuiz);
+
+  const qaTabMap = {
+    'Take Career Assessment': 'quiz',
+    'Explore Job Roles': 'Job Roles',
+    'Skill Gap Analysis': 'Skills',
+    'Industry Explorer': 'Industries'
+  };
+  document.querySelectorAll('.qa-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = qaTabMap[item.dataset.action];
+      if (target === 'quiz') startQuiz(); else switchTab(target);
+    });
+  });
+
+  document.querySelectorAll('.bookmark-toggle').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const saved = btn.dataset.saved === 'true';
+      btn.dataset.saved = (!saved).toString();
+      btn.style.color = saved ? 'var(--text-faint)' : 'var(--accent)';
+      toast(saved ? 'Removed from saved items' : 'Added to saved items');
+    });
+  });
+
+  const recCard = document.getElementById('recommendCard');
+  function openRecommend(){
+    document.getElementById('detailTitle').textContent = 'System Design Basics';
+    document.getElementById('detailBody').textContent = 'A 45-page primer covering load balancing, caching, database scaling and API design — the core concepts behind most backend interview questions.';
+    showModal('detailBackdrop');
+  }
+  recCard.addEventListener('click', openRecommend);
+  recCard.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRecommend(); } });
+
+  document.getElementById('detailClose').addEventListener('click', () => hideModal('detailBackdrop'));
+  document.getElementById('detailBackdrop').addEventListener('click', e => { if (e.target.id === 'detailBackdrop') hideModal('detailBackdrop'); });
+
+  /* ---------- Skills tab: resource buttons ---------- */
+  document.addEventListener('click', e => {
+    const resBtn = e.target.closest('[data-resource]');
+    if (resBtn){
+      document.getElementById('detailTitle').textContent = resBtn.dataset.resource + ' Resources';
+      document.getElementById('detailBody').textContent = 'We matched 4 offline resources in your Knowledge Base for ' + resBtn.dataset.resource + ', plus 2 recommended roadcards from your Notes. Open the Chat tab and ask "help me learn ' + resBtn.dataset.resource + '" to get a personalized plan.';
+      showModal('detailBackdrop');
+    }
+    const assessBtn = e.target.closest('[data-assessment]');
+    if (assessBtn){ startQuiz(); }
+  });
+
+  /* ---------- Animate profile ring + bars ---------- */
+  const circumference = 339.3;
+  const ringFill = document.getElementById('ringFill');
+  const pctLabel = document.getElementById('pctLabel');
+  let profileScore = 0;
+
+  function animateRingTo(target){
+    const startVal = profileScore;
+    const start = performance.now();
+    const duration = 900;
+    function step(ts){
+      const t = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = Math.round(startVal + (target - startVal) * eased);
+      pctLabel.textContent = current + '%';
+      const offset = circumference * (1 - (startVal + (target - startVal) * eased) / 100);
+      ringFill.style.strokeDashoffset = offset;
+      if (t < 1) requestAnimationFrame(step); else profileScore = target;
+    }
+    requestAnimationFrame(step);
+  }
+  // No fake baseline on load — the ring stays at 0 until a real assessment
+  // is completed, so what's shown is never a placeholder number.
+  pctLabel.textContent = '—';
+
+  /* ---------- Assessment quiz (fully functional, updates profile) ---------- */
+  // Each answer carries weights across four skill/interest categories:
+  // eng = engineering/coding, data = data & analytical work,
+  // design = design/product, people = communication/leadership.
+  // These weights are summed across every question answered and used to
+  // compute real skill bars, career match %, and profile scores below —
+  // nothing here is randomized or hardcoded after the quiz is taken.
+  const QUIZ = [
+    {q:"Which kind of task energizes you most?", opts:[
+      {label:"Solving a tricky logic puzzle", w:{eng:2}},
+      {label:"Spotting patterns in a messy dataset", w:{data:2}},
+      {label:"Sketching how a new product should work", w:{design:2}},
+      {label:"Explaining an idea so others get excited about it", w:{people:2}}
+    ]},
+    {q:"When learning something new, you prefer to:", opts:[
+      {label:"Build a small project right away", w:{eng:2}},
+      {label:"Read the theory deeply first", w:{data:1, eng:1}},
+      {label:"Watch someone else do it, then copy them", w:{design:1, people:1}},
+      {label:"Discuss it with a group", w:{people:2}}
+    ]},
+    {q:"Pick the work environment that sounds best:", opts:[
+      {label:"Heads-down, deep focus time", w:{eng:1, data:1}},
+      {label:"Fast-moving startup with shifting priorities", w:{people:1, design:1}},
+      {label:"Structured team with clear processes", w:{data:1, eng:1}},
+      {label:"Mix of solo work and collaboration", w:{design:1, people:1}}
+    ]},
+    {q:"What matters most to you in a job?", opts:[
+      {label:"Constant intellectual challenge", w:{data:2}},
+      {label:"Visible impact on real people", w:{people:2}},
+      {label:"Stability and predictable growth", w:{eng:1, data:1}},
+      {label:"Creative freedom", w:{design:2}}
+    ]},
+    {q:"Rate your comfort with math & statistics:", opts:[
+      {label:"Very comfortable", w:{data:2, eng:1}},
+      {label:"Fairly comfortable", w:{data:1, eng:1}},
+      {label:"A bit rusty", w:{design:1}},
+      {label:"Not my strong suit", w:{people:1}}
+    ]},
+    {q:"Which skill are you most interested in getting better at?", opts:[
+      {label:"Coding & software development", w:{eng:3}},
+      {label:"Data analysis & machine learning", w:{data:3}},
+      {label:"Design & user experience", w:{design:3}},
+      {label:"Communication & leadership", w:{people:3}}
+    ]},
+    {q:"If you had a free weekend to learn one thing, you'd pick:", opts:[
+      {label:"A new programming language or framework", w:{eng:2}},
+      {label:"Statistics, Excel, or a data tool", w:{data:2}},
+      {label:"A design tool like Figma", w:{design:2}},
+      {label:"Public speaking or writing", w:{people:2}}
+    ]},
+    {q:"In 5 years, you'd like to be known as someone who:", opts:[
+      {label:"Builds elegant, reliable systems", w:{eng:2}},
+      {label:"Uncovers insights nobody else saw", w:{data:2}},
+      {label:"Leads and grows a team", w:{people:2}},
+      {label:"Ships products people love", w:{design:1, eng:1}}
+    ]}
+  ];
+  let quizIndex = 0;
+  let quizAnswers = [];
+  let lastRecommendedRole = null;
+
+  function startQuiz(){
+    quizIndex = 0;
+    quizAnswers = [];
+    renderQuizQuestion();
+    showModal('quizBackdrop');
+  }
+  function renderQuizQuestion(){
+    const item = QUIZ[quizIndex];
+    document.getElementById('quizProgress').textContent = 'Question ' + (quizIndex+1) + ' of ' + QUIZ.length;
+    document.getElementById('quizBar').style.width = (((quizIndex) / QUIZ.length) * 100) + '%';
+    document.getElementById('quizQuestion').textContent = item.q;
+    const optsWrap = document.getElementById('quizOptions');
+    optsWrap.innerHTML = '';
+    item.opts.forEach(opt => {
+      const b = document.createElement('button');
+      b.textContent = opt.label;
+      b.style.cssText = 'text-align:left;padding:11px 14px;border-radius:9px;background:var(--panel);border:1px solid var(--border);color:var(--text);font-size:13.3px;cursor:pointer;transition:border-color .2s,background .2s;';
+      b.addEventListener('mouseenter', () => b.style.borderColor = 'var(--accent)');
+      b.addEventListener('mouseleave', () => b.style.borderColor = 'var(--border)');
+      b.addEventListener('click', () => {
+        quizAnswers.push(opt.w || {});
+        quizIndex++;
+        if (quizIndex < QUIZ.length){
+          renderQuizQuestion();
+        } else {
+          document.getElementById('quizBar').style.width = '100%';
+          setTimeout(finishQuiz, 220);
+        }
+      });
+      optsWrap.appendChild(b);
+    });
+  }
+  // Converts a 0-100 "share of interest" into a believable skill/match
+  // percentage — real answers still map through a curve (nobody scores a
+  // literal 0% or 100%), but the input driving it is always real.
+  function scoreFromShare(sharePct){
+    return Math.round(Math.min(97, Math.max(18, 22 + sharePct * 0.75)));
+  }
+  function matchFromShare(sharePct){
+    return Math.round(Math.min(97, Math.max(38, 40 + sharePct * 0.7)));
+  }
+
+  const FOURTH_CARD_INFO = {
+    people: {
+      title: 'Product Manager', role: 'Product Manager',
+      desc: 'Define product strategy and coordinate teams to ship the right thing.',
+      icon: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+      color: 'var(--blue)', colorSoft: 'var(--blue-soft)',
+      fits: ['Enjoys leading and aligning teams', 'Comfortable with ambiguity', 'Strong communicator']
+    },
+    design: {
+      title: 'UX Designer', role: 'UX Designer',
+      desc: 'Research and design intuitive, accessible product experiences.',
+      icon: '<circle cx="12" cy="12" r="10"/><circle cx="8" cy="11" r="1.3" fill="currentColor" stroke="none"/><circle cx="12.5" cy="8" r="1.3" fill="currentColor" stroke="none"/><circle cx="16.5" cy="11" r="1.3" fill="currentColor" stroke="none"/><path d="M9 16a3 3 0 0 0 5.5 1.8"/>',
+      color: 'var(--pink)', colorSoft: 'var(--pink-soft)',
+      fits: ['Enjoys visual and interaction design', 'User-centered thinking', 'Creative problem solver']
+    }
+  };
+
+  const MAIN_MATCH_CARDS = [
+    { role:'Software Engineer', className:'c-purple', color:'var(--accent)',
+      icon:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+      desc:'Design, build and maintain software solutions that solve real-world problems.',
+      fits:['Strong problem solving skills','Interest in programming','Enjoys logical thinking'],
+      matchFn: share => matchFromShare(share.eng) },
+    { role:'Data Scientist', className:'c-teal', color:'var(--teal)',
+      icon:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+      desc:'Extract insights from data and build models that drive decisions.',
+      fits:['Analytical mindset','Love for data and patterns','Curious about trends'],
+      matchFn: share => matchFromShare(share.data) },
+    { role:'AI/ML Engineer', className:'c-amber', color:'var(--amber)',
+      icon:'<rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="2" x2="9" y2="6"/><line x1="15" y1="2" x2="15" y2="6"/><line x1="9" y1="18" x2="9" y2="22"/><line x1="15" y1="18" x2="15" y2="22"/><line x1="2" y1="9" x2="6" y2="9"/><line x1="2" y1="15" x2="6" y2="15"/><line x1="18" y1="9" x2="22" y2="9"/><line x1="18" y1="15" x2="22" y2="15"/>',
+      desc:'Build intelligent systems using machine learning and deep learning.',
+      fits:['Interest in AI technologies','Strong math &amp; programming','Builds innovative solutions'],
+      matchFn: share => matchFromShare(share.data * 0.6 + share.eng * 0.4) }
+  ];
+
+  function finishQuiz(){
+    hideModal('quizBackdrop');
+
+    // Sum every answer's category weights across the whole quiz.
+    const totals = { eng: 0, data: 0, design: 0, people: 0 };
+    quizAnswers.forEach(w => {
+      totals.eng += w.eng || 0;
+      totals.data += w.data || 0;
+      totals.design += w.design || 0;
+      totals.people += w.people || 0;
+    });
+    const sum = totals.eng + totals.data + totals.design + totals.people || 1;
+    const share = {
+      eng: (totals.eng / sum) * 100,
+      data: (totals.data / sum) * 100,
+      design: (totals.design / sum) * 100,
+      people: (totals.people / sum) * 100
+    };
+    const topCategory = Object.keys(share).reduce((a, b) => share[b] > share[a] ? b : a);
+
+    // ---- Build the 6 named skill bars (container was empty until now) ----
+    const skillFormulas = {
+      'Python Programming': { val: scoreFromShare(share.eng), color:'var(--accent)' },
+      'Data Analysis': { val: scoreFromShare(share.data), color:'var(--teal)' },
+      'Problem Solving': { val: scoreFromShare((share.eng + share.data) / 2), color:'var(--green)' },
+      'Machine Learning': { val: scoreFromShare(Math.max(0, share.data - 8)), color:'var(--amber)' },
+      'Communication': { val: scoreFromShare(share.people), color:'var(--pink)' },
+      'System Design': { val: scoreFromShare(share.eng * 0.7 + share.design * 0.3), color:'var(--blue)' }
+    };
+    document.getElementById('skillLevelsContainer').innerHTML = Object.entries(skillFormulas).map(([name, s]) =>
+      `<div class="skill-row" data-skill="${name}"><div class="top-line"><span>${name}</span><span class="skill-pct">${s.val}%</span></div><div class="skill-track"><span class="skill-fill" style="width:${s.val}%;background:${s.color}"></span></div></div>`
+    ).join('');
+    document.getElementById('skillsSourceTag').textContent = 'Based on your assessment results';
+
+    // ---- Recommended Next Skills: genuinely the 2 lowest-scoring skills ----
+    const SKILL_META = {
+      'Python Programming': { desc: 'A foundational skill for almost every engineering and data role — worth strengthening if it scored low.', icon:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>', color:'var(--accent)', colorSoft:'var(--accent-soft)' },
+      'Data Analysis': { desc: 'Being able to work with data is valuable across almost every career path you matched with.', icon:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>', color:'var(--teal)', colorSoft:'var(--teal-soft)' },
+      'Problem Solving': { desc: 'Structured problem solving underpins interviews and real work in every technical path.', icon:'<circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/>', color:'var(--green)', colorSoft:'var(--green-soft)' },
+      'Machine Learning': { desc: 'Core requirement if you\'re leaning toward Data Science or AI/ML Engineer paths.', icon:'<circle cx="12" cy="12" r="9"/>', color:'var(--amber)', colorSoft:'var(--amber-soft)' },
+      'Communication': { desc: 'Explaining your work clearly matters in interviews, reviews, and leadership tracks alike.', icon:'<path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2 8.5 8.5 0 0 1-7.5 4.3 8.4 8.4 0 0 1-4.2-1.1L3 21l2.1-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.4 3a8.5 8.5 0 0 1 8.5 8.5z"/>', color:'var(--pink)', colorSoft:'var(--pink-soft)' },
+      'System Design': { desc: 'Closing this gap unlocks senior engineering and architecture-level roles.', icon:'<rect x="6" y="6" width="12" height="12" rx="2"/>', color:'var(--blue)', colorSoft:'var(--blue-soft)' }
+    };
+    const weakestSkills = Object.entries(skillFormulas).sort((a, b) => a[1].val - b[1].val).slice(0, 2);
+    document.getElementById('recommendedSkillsGrid').innerHTML = weakestSkills.map(([name, s]) => {
+      const meta = SKILL_META[name];
+      const gap = 100 - s.val;
+      return `<div class="match-card" style="border-top:2px solid ${meta.color}">
+        <div class="mc-top"><div class="mc-id"><div class="mc-icon" style="background:${meta.colorSoft};color:${meta.color}"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${meta.icon}</svg></div>
+        <div><h4>${name}</h4><span class="match-badge" style="background:var(--amber-soft);color:var(--amber)">Gap: ${gap}%</span></div></div></div>
+        <p class="mc-desc">${meta.desc}</p>
+        <button class="mc-btn" style="border:1px solid ${meta.color};color:${meta.color};" data-resource="${name}">Find Resources</button>
+      </div>`;
+    }).join('');
+    // Clicks on these buttons are handled by the existing document-level
+    // [data-resource] delegated listener — no extra binding needed.
+
+    // ---- Build the profile ring sub-bars (Interests/Skills/Values/Goals) ----
+    const overallScore = Math.round(Math.min(97, Math.max(40, 58 + (share[topCategory] - 25) * 0.9)));
+    animateRingTo(overallScore);
+    const subBars = {
+      Interests: scoreFromShare(share[topCategory]),
+      Skills: scoreFromShare((share.eng + share.data) / 2),
+      Values: scoreFromShare((share.people + share.design) / 2),
+      Goals: scoreFromShare((share.eng + share.people) / 2)
+    };
+    document.getElementById('profileSubBars').innerHTML = Object.entries(subBars).map(([label, val]) =>
+      `<div class="skill-row"><div class="top-line"><span>${label}</span><span>${val}%</span></div><div class="skill-track"><span class="skill-fill" style="width:${val}%"></span></div></div>`
+    ).join('');
+    document.getElementById('profileNote').textContent = 'This profile reflects your latest assessment answers — retake it anytime as your interests change.';
+
+    // ---- Build Top Career Matches (container was empty until now) ----
+    let matchesHtml = MAIN_MATCH_CARDS.map(card => {
+      const pct = card.matchFn(share);
+      return `<div class="match-card ${card.className}">
+        <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${card.icon}</svg></div>
+        <div><h4>${card.role}</h4><span class="match-badge">${pct}% Match</span></div></div></div>
+        <p class="mc-desc">${card.desc}</p>
+        <p class="mc-fits">Why it fits you:</p>
+        <ul class="mc-list">${card.fits.map(f => '<li><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' + f + '</li>').join('')}</ul>
+        <button class="mc-btn" data-role="${card.role}">View Roadmap</button>
+      </div>`;
+    }).join('');
+
+    // Add a 4th, non-technical match card only when it's genuinely the
+    // person's strongest area — otherwise the 3 technical cards stand alone.
+    if (topCategory === 'people' || topCategory === 'design'){
+      const info = FOURTH_CARD_INFO[topCategory];
+      const fourthMatch = matchFromShare(share[topCategory]);
+      matchesHtml += `<div class="match-card" style="border-top:2px solid ${info.color}">
+        <div class="mc-top"><div class="mc-id"><div class="mc-icon" style="background:${info.colorSoft};color:${info.color}"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${info.icon}</svg></div>
+        <div><h4>${info.title}</h4><span class="match-badge">${fourthMatch}% Match</span></div></div></div>
+        <p class="mc-desc">${info.desc}</p>
+        <p class="mc-fits">Why it fits you:</p>
+        <ul class="mc-list">${info.fits.map(f => '<li><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' + f + '</li>').join('')}</ul>
+        <button class="mc-btn" data-role="${info.role}">View Roadmap</button>
+      </div>`;
+    }
+    document.getElementById('topMatchesGrid').innerHTML = matchesHtml;
+    document.getElementById('topMatchesTag').textContent = 'Based on your assessment results';
+
+    // ---- Work out the single best-matching career across ALL cards
+    //      (the 3 main cards plus the 4th card when it's shown) and
+    //      persist it so the Learning Roadmaps page can pick it up. ----
+    let bestRole = null, bestPct = -1;
+    MAIN_MATCH_CARDS.forEach(card => {
+      const pct = card.matchFn(share);
+      if(pct > bestPct){ bestPct = pct; bestRole = card.role; }
+    });
+    if(topCategory === 'people' || topCategory === 'design'){
+      const info = FOURTH_CARD_INFO[topCategory];
+      const fourthPct = matchFromShare(share[topCategory]);
+      if(fourthPct > bestPct){ bestPct = fourthPct; bestRole = info.role; }
+    }
+    persistCareerRecommendation(bestRole, bestPct, share);
+    lastRecommendedRole = bestRole;
+
+    // ---- Populate Career Paths / Roadmaps / Job Roles / Industries tabs ----
+    // These stayed completely empty until now — first population happens
+    // only once the assessment is actually completed.
+    renderPathsGrid();
+    renderRoadmapsGrid();
+    renderJobRolesGrid();
+    renderIndustriesGrid();
+
+    // ---- Personalized result modal ----
+    const topLabelMap = { eng:'Software Engineering', data:'Data & AI', design:'Design & Product', people:'Leadership & Communication' };
+    document.getElementById('resultSummaryText').textContent = 'Your Career Profile has been updated with your ' + QUIZ.length + ' new responses.';
+    document.getElementById('resultTopMatchText').textContent = 'Your strongest area right now: ' + topLabelMap[topCategory] + ' (' + Math.round(share[topCategory]) + '% of your answers).';
+
+    showModal('resultBackdrop');
+  }
+  document.getElementById('quizClose').addEventListener('click', () => hideModal('quizBackdrop'));
+  document.getElementById('quizBackdrop').addEventListener('click', e => { if (e.target.id === 'quizBackdrop') hideModal('quizBackdrop'); });
+  document.getElementById('resultClose').addEventListener('click', () => { hideModal('resultBackdrop'); switchTab('Overview'); document.querySelector('.sidebar-right').scrollTo?.({top:0}); });
+  document.getElementById('resultViewRoadmap').addEventListener('click', () => {
+    const mappedRole = ROADMAP_CAREER_MAP[lastRecommendedRole] || lastRecommendedRole || 'Software Engineer';
+    window.location.href = 'learning-roadmaps.html?career=' + encodeURIComponent(mappedRole);
+  });
+
+  /* ---------- Build data-driven grids for Career Paths / Roadmaps / Job Roles / Industries ---------- */
+  const CATEGORY_ICONS = {
+    Engineering: {bg:'var(--teal-soft)', fg:'var(--teal)', svg:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'},
+    'Data Science': {bg:'var(--blue-soft)', fg:'var(--blue)', svg:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/>'},
+    Business: {bg:'var(--amber-soft)', fg:'var(--amber)', svg:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'},
+    Design: {bg:'var(--pink-soft)', fg:'var(--pink)', svg:'<circle cx="12" cy="12" r="10"/><path d="M9 16a3 3 0 0 0 5.5 1.8"/>'},
+    Product: {bg:'var(--blue-soft)', fg:'var(--blue)', svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
+    Research: {bg:'var(--green-soft)', fg:'var(--green)', svg:'<path d="M9 2v6L4 18a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-10V2"/>'}
+  };
+
+  const ALL_PATHS = [
+    {cat:'Engineering', name:'Software Engineer', match:95, desc:'Design, build and maintain software solutions that solve real-world problems.'},
+    {cat:'Engineering', name:'DevOps Engineer', match:74, desc:'Automate infrastructure and deployment pipelines so teams ship reliably.'},
+    {cat:'Engineering', name:'Mobile Developer', match:69, desc:'Build native or cross-platform apps for iOS and Android.'},
+    {cat:'Data Science', name:'Data Scientist', match:88, desc:'Extract insights from data and build models that drive decisions.'},
+    {cat:'Data Science', name:'AI/ML Engineer', match:85, desc:'Build intelligent systems using machine learning and deep learning.'},
+    {cat:'Data Science', name:'Data Analyst', match:80, desc:'Turn raw data into dashboards and reports that guide business decisions.'},
+    {cat:'Business', name:'Product Manager', match:61, desc:'Define product strategy and coordinate teams to ship the right thing.'},
+    {cat:'Business', name:'Business Analyst', match:58, desc:'Bridge business needs and technical solutions across teams.'},
+    {cat:'Design', name:'UX Designer', match:52, desc:'Research and design intuitive, accessible product experiences.'},
+    {cat:'Product', name:'Technical Product Manager', match:66, desc:'Own the roadmap for technical products, working closely with engineering.'},
+    {cat:'Research', name:'Research Scientist', match:57, desc:'Run experiments and publish findings that push a field forward.'}
+  ];
+
+  function iconHtml(cat, size){
+    const c = CATEGORY_ICONS[cat] || CATEGORY_ICONS.Engineering;
+    return `<div class="mc-icon" style="background:${c.bg};color:${c.fg}"><svg class="icon" viewBox="0 0 24 24" width="${size}" height="${size}">${c.svg}</svg></div>`;
+  }
+
+  function renderPathsGrid(){
+    const grid = document.getElementById('allPathsGrid');
+    grid.innerHTML = ALL_PATHS.map(p => `
+      <div class="match-card c-purple">
+        <div class="mc-top"><div class="mc-id">${iconHtml(p.cat,20)}<div><h4>${p.name}</h4><span class="match-badge">${p.match}% Match</span></div></div></div>
+        <p class="mc-desc">${p.desc}</p>
+        <p class="mc-fits" style="margin-top:0;">${p.cat}</p>
+        <button class="mc-btn" data-role="${p.name}" style="border:1px solid var(--accent);color:#cfc2ff;">View Roadmap</button>
+      </div>`).join('');
+    // Clicks are handled by the document-level .mc-btn[data-role] delegation above.
+    const categoryCount = new Set(ALL_PATHS.map(p => p.cat)).size;
+    document.getElementById('pathsCountTag').textContent = ALL_PATHS.length + ' paths across ' + categoryCount + ' categories';
+  }
+
+  const ROADMAPS = [
+    {name:'Software Engineer', cat:'Engineering', stage:'Foundations', pct:35},
+    {name:'Data Scientist', cat:'Data Science', stage:'ML Basics', pct:20},
+    {name:'AI/ML Engineer', cat:'Data Science', stage:'Not started', pct:0},
+    {name:'Product Manager Notes', cat:'Business', stage:'In review', pct:60}
+  ];
+  function renderRoadmapsGrid(){
+    const grid = document.getElementById('roadmapsGrid');
+    grid.innerHTML = ROADMAPS.map(r => `
+      <div class="match-card c-teal">
+        <div class="mc-top"><div class="mc-id">${iconHtml(r.cat,20)}<div><h4>${r.name}</h4><span class="match-badge" style="background:var(--teal-soft);color:var(--teal)">${r.stage}</span></div></div></div>
+        <p class="mc-desc">${r.pct}% of this roadmap complete.</p>
+        <div class="skill-track" style="margin-bottom:4px;"><span class="skill-fill" style="width:${r.pct}%;background:var(--teal)"></span></div>
+        <button class="mc-btn" style="border:1px solid var(--teal);color:var(--teal);" data-resource="${r.name}">Continue Roadmap</button>
+      </div>`).join('');
+  }
+
+  const JOB_ROLES = [
+    {name:'Junior Software Engineer', cat:'Engineering', salary:'$70k–$95k', desc:'Entry-level engineering role focused on shipping well-tested features.'},
+    {name:'Machine Learning Engineer', cat:'Data Science', salary:'$110k–$150k', desc:'Builds and deploys ML models into production systems.'},
+    {name:'Data Analyst', cat:'Data Science', salary:'$60k–$85k', desc:'Analyzes data to answer specific business questions.'},
+    {name:'Product Designer', cat:'Design', salary:'$80k–$120k', desc:'Designs end-to-end product experiences with research backing.'}
+  ];
+  function renderJobRolesGrid(){
+    const grid = document.getElementById('jobRolesGrid');
+    grid.innerHTML = JOB_ROLES.map(r => `
+      <div class="match-card c-amber">
+        <div class="mc-top"><div class="mc-id">${iconHtml(r.cat,20)}<div><h4>${r.name}</h4><span class="match-badge" style="background:var(--amber-soft);color:var(--amber)">${r.salary}</span></div></div></div>
+        <p class="mc-desc">${r.desc}</p>
+        <button class="mc-btn" style="border:1px solid var(--amber);color:var(--amber);" data-resource="${r.name}">See Requirements</button>
+      </div>`).join('');
+  }
+
+  const INDUSTRIES = [
+    {name:'Technology', desc:'Software, hardware and internet companies building digital products.', growth:'+12% YoY'},
+    {name:'Healthcare', desc:'Hospitals, biotech and health-tech companies improving patient outcomes.', growth:'+8% YoY'},
+    {name:'Finance', desc:'Banks, fintech and investment firms managing capital and risk.', growth:'+5% YoY'},
+    {name:'Education', desc:'Schools and ed-tech companies building learning tools and content.', growth:'+6% YoY'}
+  ];
+  function renderIndustriesGrid(){
+    const grid = document.getElementById('industriesGrid');
+    grid.innerHTML = INDUSTRIES.map(i => `
+      <div class="match-card c-purple">
+        <div class="mc-top"><div class="mc-id"><div class="mc-icon" style="background:var(--accent-soft);color:var(--accent)"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/></svg></div><div><h4>${i.name}</h4><span class="match-badge">${i.growth}</span></div></div></div>
+        <p class="mc-desc">${i.desc}</p>
+        <button class="mc-btn" style="border:1px solid var(--accent);color:#cfc2ff;" data-resource="${i.name}">Explore Roles</button>
+      </div>`).join('');
+  }
+
+  // Career Paths, Roadmaps, Job Roles and Industries grids are intentionally
+  // NOT rendered here on page load — they stay empty until finishQuiz()
+  // populates them, so nothing sample/placeholder is ever shown before the
+  // assessment is taken.
+
+})();
+
+</script>
+
+
+<div class="settings-modal-backdrop" id="settingsModalBackdrop">
+  <div class="settings-modal">
+    <div class="settings-modal-head">
+      <div>
+        <h3>Settings</h3>
+        <p class="sub">Personalize how Orivon Mentor looks.</p>
+      </div>
+      <button class="settings-modal-close" id="settingsModalClose" aria-label="Close settings">
+        <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="settings-row">
+      <div class="s-label">
+        <svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <div>
+          Dark Mode
+          <div class="s-desc">Switch between light and dark appearance</div>
+        </div>
+      </div>
+      <button class="settings-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+        <div class="knob">🌙</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ---------- Theme (light/dark) ---------- */
+  function setTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    const knob = document.querySelector('#darkModeToggle .knob');
+    if(knob) knob.textContent = mode === 'light' ? '☀️' : '🌙';
+  }
+  document.getElementById('darkModeToggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    setTheme(current === 'light' ? 'dark' : 'light');
+  });
+  const settingsBackdrop = document.getElementById('settingsModalBackdrop');
+  function openSettings(){ settingsBackdrop.classList.add('show'); }
+  function closeSettings(){ settingsBackdrop.classList.remove('show'); }
+  document.getElementById('settingsModalClose').addEventListener('click', closeSettings);
+  settingsBackdrop.addEventListener('click', e => { if(e.target === settingsBackdrop) closeSettings(); });
+  document.getElementById('navSettings').addEventListener('click', () => { openSettings(); closeDrawers(); });
+</script>
+</body>
+</html>

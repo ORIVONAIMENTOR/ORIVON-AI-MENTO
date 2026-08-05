@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Learning Roadmaps — Orivon Mentor</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = "https://mkuklkqvatequxvlpncm.supabase.co";
+  const supabaseKey = "sb_publishable_amstxWXd3Vt19V7um1YMsw_gw-keZHT";
+  try{ window._sb = supabase.createClient(supabaseUrl, supabaseKey); }
+  catch(err){ console.error('Supabase failed to initialize:', err); }
+</script>
+<style>
+  :root{
+    --bg:#0b0b10;
+    --bg-elevated:#111116;
+    --panel:#15151b;
+    --panel-2:#1a1a22;
+    --border:#262630;
+    --border-soft:#1e1e26;
+    --text:#f2f2f5;
+    --text-dim:#9a9aa7;
+    --text-faint:#65656f;
+    --accent:#7c5cff;
+    --accent-2:#6a47ef;
+    --accent-soft:rgba(124,92,255,.14);
+    --accent-soft-strong:rgba(124,92,255,.22);
+    --green:#34d399;
+    --green-soft:rgba(52,211,153,.12);
+    --orange:#f0a94e;
+    --orange-soft:rgba(240,169,78,.14);
+    --red:#f0654c;
+    --red-soft:rgba(240,101,76,.14);
+    --blue:#60a5fa;
+    --blue-soft:rgba(96,165,250,.14);
+    --radius-lg:18px;
+    --radius-md:13px;
+    --radius-sm:9px;
+    --shadow-pop:0 16px 40px -12px rgba(0,0,0,.55);
+    --dur:.22s;
+  }
+  html[data-theme="light"]{
+    --bg:#f6f6fa;
+    --bg-elevated:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#f1f1f6;
+    --border:#e4e4ec;
+    --border-soft:#ececf3;
+    --text:#15151b;
+    --text-dim:#54545f;
+    --text-faint:#84848f;
+    --accent-soft:rgba(124,92,255,.10);
+    --accent-soft-strong:rgba(124,92,255,.18);
+    --green-soft:rgba(52,211,153,.14);
+    --shadow-pop:0 16px 40px -12px rgba(0,0,0,.12);
+  }
+  html{transition:background-color .2s ease;}
+  body{transition:background-color .2s ease,color .2s ease;}
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  button,select,textarea,input{font-family:inherit;}
+  ::selection{background:var(--accent-soft-strong);}
+  *:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px;}
+  svg.icon{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* ---------- App shell ---------- */
+  .app{display:flex;height:100vh;height:100dvh;width:100%;position:relative;}
+
+  /* ---------- Mobile top bar ---------- */
+  .mobile-bar{
+    display:none;align-items:center;justify-content:space-between;gap:8px;
+    height:56px;padding:0 12px;border-bottom:1px solid var(--border);
+    background:var(--bg-elevated);position:fixed;top:0;left:0;right:0;z-index:40;
+  }
+  .mobile-bar .brand-mini{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14.5px;overflow:hidden;white-space:nowrap;}
+  .mobile-bar .logoimg{width:24px;}
+  .icon-btn{
+    width:38px;height:38px;border-radius:var(--radius-sm);
+    background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text-dim);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:background var(--dur),color var(--dur),border-color var(--dur);flex-shrink:0;
+  }
+  .icon-btn:hover{background:var(--accent-soft);color:var(--text);border-color:var(--accent);}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:45;opacity:0;visibility:hidden;transition:opacity var(--dur);}
+  .overlay.show{opacity:1;visibility:visible;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{height:100vh;height:100dvh;overflow-y:auto;background:var(--bg-elevated);display:flex;flex-direction:column;scrollbar-width:thin;}
+  .sidebar::-webkit-scrollbar{width:8px;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+  .sidebar-left{width:266px;flex:0 0 266px;border-right:1px solid var(--border);padding:18px 14px 16px;}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 16px;}
+  .brand .hex{width:34px;height:34px;flex-shrink:0;color:var(--accent);}
+  .brand-text h1{font-size:15.5px;margin:0;line-height:1.2;font-weight:750;letter-spacing:-.2px;}
+  .brand-text p{font-size:11.5px;margin:1px 0 0;color:var(--text-faint);}
+
+  .model-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:11px 12px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;
+  }
+  .model-card .cube{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .model-card .meta{min-width:0;}
+  .model-card .label{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.04em;}
+  .model-card .name{font-size:13px;font-weight:650;margin:1px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .status-dot-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:600;}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft);}
+
+  nav.nav-list{display:flex;flex-direction:column;gap:2px;margin-bottom:14px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--radius-sm);
+    color:var(--text-dim);font-size:13.5px;font-weight:560;cursor:pointer;border:1px solid transparent;
+    background:none;text-align:left;width:100%;transition:background var(--dur),color var(--dur);text-decoration:none;
+  }
+  .nav-item svg{color:var(--text-faint);transition:color var(--dur);}
+  .nav-item:hover{background:var(--panel);color:var(--text);}
+  .nav-item:hover svg{color:var(--text-dim);}
+  .nav-item.active{background:var(--accent-soft-strong);color:#fff;}
+  .nav-item.active svg{color:var(--accent);}
+
+  .sidebar-divider{height:1px;background:var(--border-soft);margin:6px 4px 12px;}
+  .eyebrow{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.07em;padding:0 11px;margin-bottom:6px;}
+  .sidebar-spacer{flex:1 1 auto;min-height:14px;}
+
+  .privacy-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:13px;margin:10px 0 14px;}
+  .privacy-box .top{display:flex;gap:9px;align-items:flex-start;}
+  .privacy-box .lock{width:28px;height:28px;border-radius:8px;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .privacy-box h3{font-size:13px;margin:0 0 3px;font-weight:650;}
+  .privacy-box p{font-size:11.5px;color:var(--text-faint);margin:0;line-height:1.4;}
+  .privacy-box .badge{display:flex;align-items:center;gap:5px;color:var(--green);font-size:12px;font-weight:650;margin-top:10px;}
+
+  .sidebar-foot{display:flex;flex-direction:column;gap:2px;padding-top:6px;border-top:1px solid var(--border-soft);}
+
+  /* ---------- Main column ---------- */
+  .main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;height:100vh;height:100dvh;}
+  .main-scroll{flex:1 1 auto;overflow-y:auto;padding:34px 32px 40px;scrollbar-width:thin;}
+  .main-scroll::-webkit-scrollbar{width:9px;}
+  .main-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+  .main-inner{max-width:1040px;margin:0 auto;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 20px;border-radius:100px;font-size:13.5px;font-weight:700;border:none;cursor:pointer;
+    transition:filter var(--dur),transform var(--dur),background var(--dur),border-color var(--dur),color var(--dur);
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 10px 26px -10px rgba(124,92,255,.7);}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-outline{background:var(--panel-2);border:1px solid var(--border);color:var(--text);}
+  .btn-outline:hover{background:var(--panel);border-color:var(--accent);}
+  .btn-sm{padding:8px 14px;font-size:12.5px;}
+  .btn:disabled{opacity:.55;cursor:not-allowed;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:26px 28px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:16px;
+    position:relative;overflow:hidden;
+  }
+  .hero::before{
+    content:"";position:absolute;top:-40%;right:-10%;width:280px;height:280px;border-radius:50%;
+    background:radial-gradient(circle, var(--accent-soft), transparent 70%);pointer-events:none;
+  }
+  .hero-icon{
+    width:56px;height:56px;border-radius:16px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;
+    box-shadow:0 12px 30px -10px rgba(124,92,255,.7);position:relative;z-index:1;
+  }
+  .hero-meta{flex:1;min-width:200px;position:relative;z-index:1;}
+  .hero-eyebrow{font-size:11px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+  .hero-meta h2{margin:0 0 6px;font-size:22px;font-weight:800;letter-spacing:-.3px;}
+  .hero-meta p{margin:0;color:var(--text-faint);font-size:13px;max-width:480px;line-height:1.5;}
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1;}
+
+  .hero-progress{
+    display:flex;align-items:center;gap:16px;margin-top:18px;position:relative;z-index:1;
+  }
+  .ring{
+    width:64px;height:64px;border-radius:50%;flex-shrink:0;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    background:conic-gradient(var(--accent) calc(var(--pct)*1%), var(--panel-2) 0);
+  }
+  .ring::before{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--panel);}
+  .ring .val{position:relative;z-index:1;font-size:13px;font-weight:800;}
+  .progress-info{flex:1;min-width:160px;}
+  .progress-info .p-top{display:flex;justify-content:space-between;font-size:12px;color:var(--text-faint);margin-bottom:6px;}
+  .progress-info .p-top strong{color:var(--text);font-weight:700;}
+  .progress-track{height:7px;border-radius:100px;background:var(--panel-2);overflow:hidden;}
+  .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .3s ease;}
+
+  /* ---------- Stage tabs ---------- */
+  .stage-tabs{display:flex;gap:8px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+  .stage-tabs::-webkit-scrollbar{display:none;}
+  .stage-tab{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:100px;
+    background:var(--panel);border:1px solid var(--border);color:var(--text-dim);font-size:12.8px;font-weight:650;
+    cursor:pointer;white-space:nowrap;transition:background var(--dur),color var(--dur),border-color var(--dur);
+  }
+  .stage-tab .count{
+    background:var(--panel-2);color:var(--text-faint);font-size:10.5px;font-weight:700;
+    padding:2px 7px;border-radius:100px;
+  }
+  .stage-tab.active{background:var(--accent-soft-strong);border-color:var(--accent);color:#fff;}
+  .stage-tab.active .count{background:rgba(255,255,255,.18);color:#fff;}
+  .stage-tab .stage-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .stage-tab[data-stage="beginner"] .stage-dot{background:var(--green);}
+  .stage-tab[data-stage="intermediate"] .stage-dot{background:var(--orange);}
+  .stage-tab[data-stage="advanced"] .stage-dot{background:var(--red);}
+
+  /* ---------- Timeline ---------- */
+  .timeline{position:relative;}
+  .stage-group{display:none;}
+  .stage-group.active{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .module-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:20px 22px;margin-bottom:14px;position:relative;transition:border-color var(--dur);
+  }
+  .module-card.completed{border-color:rgba(52,211,153,.4);}
+  .module-head{display:flex;align-items:flex-start;gap:14px;cursor:pointer;}
+  .module-check{
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;margin-top:2px;
+    background:var(--panel-2);border:2px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:transparent;font-size:13px;font-weight:800;
+    transition:background var(--dur),border-color var(--dur),color var(--dur);cursor:pointer;
+  }
+  .module-check:hover{border-color:var(--accent);}
+  .module-card.completed .module-check{background:var(--green);border-color:var(--green);color:#fff;}
+  .module-body{flex:1;min-width:0;}
+  .module-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .module-title-row h3{margin:0;font-size:15.5px;font-weight:700;}
+  .module-card.completed .module-title-row h3{color:var(--text-faint);text-decoration:line-through;text-decoration-color:var(--border);}
+  .module-time{
+    display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-faint);font-weight:600;
+    background:var(--panel-2);padding:4px 10px;border-radius:100px;flex-shrink:0;
+  }
+  .module-desc{color:var(--text-dim);font-size:13px;margin:6px 0 0;line-height:1.5;}
+  .module-toggle{
+    width:26px;height:26px;border-radius:8px;flex-shrink:0;background:var(--panel-2);
+    display:flex;align-items:center;justify-content:center;color:var(--text-faint);transition:transform var(--dur);
+  }
+  .module-card.open .module-toggle{transform:rotate(180deg);}
+
+  .module-detail{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .module-card.open .module-detail{max-height:600px;}
+  .module-detail-inner{padding-top:16px;margin-top:16px;border-top:1px solid var(--border-soft);}
+
+  .subsection-label{font-size:11px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;}
+  .subsection-label:not(:first-child){margin-top:18px;}
+
+  .resource-list{display:flex;flex-direction:column;gap:8px;}
+  .resource-item{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);
+    background:var(--panel-2);border:1px solid var(--border);font-size:12.8px;color:var(--text-dim);
+  }
+  .resource-item .r-icon{
+    width:26px;height:26px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-size:12px;
+  }
+  .resource-item.type-course .r-icon{background:var(--accent-soft);color:var(--accent);}
+  .resource-item.type-book .r-icon{background:var(--orange-soft);color:var(--orange);}
+  .resource-item.type-video .r-icon{background:var(--red-soft);color:#ff8a76;}
+  .resource-item.type-project .r-icon{background:var(--green-soft);color:var(--green);}
+  .resource-item .r-title{flex:1;color:var(--text);font-weight:600;}
+  .resource-item .r-type{color:var(--text-faint);font-size:11px;text-transform:capitalize;}
+
+  .task-list{display:flex;flex-direction:column;gap:8px;}
+  .task-item{display:flex;align-items:center;gap:10px;font-size:12.8px;color:var(--text-dim);}
+  .task-check{
+    width:18px;height:18px;border-radius:5px;flex-shrink:0;background:var(--panel-2);border:2px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:transparent;font-size:11px;font-weight:800;cursor:pointer;
+    transition:background var(--dur),border-color var(--dur),color var(--dur);
+  }
+  .task-item.done .task-check{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .task-item.done span{color:var(--text-faint);text-decoration:line-through;}
+
+  /* ---------- AI recommendation ---------- */
+  .ai-rec{
+    background:linear-gradient(135deg, var(--accent-soft), transparent);
+    border:1px solid var(--accent-soft-strong);border-radius:var(--radius-lg);
+    padding:18px 20px;display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;
+  }
+  .ai-rec .ai-icon{
+    width:34px;height:34px;border-radius:10px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:15px;
+  }
+  .ai-rec-body{flex:1;min-width:0;}
+  .ai-rec-label{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+  .ai-rec p{margin:0;font-size:13px;color:var(--text-dim);line-height:1.55;}
+
+  /* ---------- Stats strip ---------- */
+  .stat-strip{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .stat-pill{
+    flex:1;min-width:130px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:14px 16px;
+  }
+  .stat-pill .sp-val{font-size:19px;font-weight:800;}
+  .stat-pill .sp-label{font-size:11px;color:var(--text-faint);margin-top:2px;}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    padding:12px 18px;border-radius:12px;font-size:13.3px;box-shadow:var(--shadow-pop);
+    opacity:0;visibility:hidden;transition:opacity var(--dur),transform var(--dur);z-index:100;
+    display:flex;align-items:center;gap:8px;
+  }
+  #toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+  #toast svg{color:var(--green);flex-shrink:0;}
+
+  /* ---------- Settings modal ---------- */
+  .settings-modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:95;
+    display:flex;align-items:center;justify-content:center;padding:18px;
+    opacity:0;visibility:hidden;transition:opacity var(--dur);
+  }
+  .settings-modal-backdrop.show{opacity:1;visibility:visible;}
+  .settings-modal{
+    background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);
+    width:100%;max-width:400px;padding:22px;box-shadow:var(--shadow-pop);
+  }
+  .settings-modal h3{margin:0 0 4px;font-size:16px;font-weight:750;}
+  .settings-modal .sub{margin:0 0 20px;font-size:12.5px;color:var(--text-faint);}
+  .settings-row{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:13px 14px;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-md);
+  }
+  .settings-row .s-label{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:650;}
+  .settings-row .s-label svg{color:var(--accent);}
+  .settings-row .s-desc{font-size:11.5px;color:var(--text-faint);margin-top:2px;font-weight:400;}
+  .settings-toggle{
+    position:relative;width:44px;height:24px;border-radius:100px;background:var(--border);
+    border:none;cursor:pointer;flex-shrink:0;transition:background .2s ease;
+  }
+  .settings-toggle .knob{
+    position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    transition:transform .2s ease;display:flex;align-items:center;justify-content:center;font-size:11px;
+  }
+  html[data-theme="light"] .settings-toggle .knob{transform:translateX(20px);}
+  .settings-modal-close{
+    width:32px;height:32px;border-radius:9px;background:var(--panel-2);border:1px solid var(--border);
+    color:var(--text-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;float:right;
+  }
+  .settings-modal-close:hover{color:var(--text);border-color:var(--accent);}
+  .settings-modal-head{display:flex;justify-content:space-between;align-items:flex-start;}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:1024px){
+    .mobile-bar{display:flex;}
+    .app{padding-top:56px;}
+    .sidebar-left{
+      position:fixed;top:0;left:0;bottom:0;z-index:50;transform:translateX(-100%);
+      transition:transform var(--dur);box-shadow:var(--shadow-pop);
+    }
+    .sidebar-left.open{transform:translateX(0);}
+    .main-scroll{padding:22px 16px 34px;}
+  }
+  @media (max-width:640px){
+    .hero{padding:20px;flex-direction:column;align-items:flex-start;}
+    .hero-progress{width:100%;}
+    .module-time{display:none;}
+    .stat-strip{flex-direction:column;}
+    .module-head{gap:10px;}
+    .module-title-row h3{font-size:14px;}
+  }
+  @media (max-width:420px){
+    .hero-meta h2{font-size:19px;}
+    .stage-tab{padding:8px 12px;font-size:12px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Mobile top bar -->
+  <header class="mobile-bar">
+    <button class="icon-btn" id="openLeft" aria-label="Open navigation">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="brand-mini">
+      <img class="logoimg" src="https://mkuklkqvatequxvlpncm.supabase.co/storage/v1/object/public/local%20images/Artboard%203.png">
+      Learning Roadmaps
+    </div>
+    <div style="width:38px;"></div>
+  </header>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ============ LEFT SIDEBAR ============ -->
+  <aside class="sidebar sidebar-left" id="sidebarLeft">
+    <a href="orivon-landing-v5.html" class="brand" style="text-decoration:none;color:inherit;">
+      <svg class="hex" viewBox="0 0 24 24"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg>
+      <div class="brand-text">
+        <h1>Orivon Mentor</h1>
+        <p>Your Offline AI Mentor</p>
+      </div>
+    </a>
+
+    <div class="model-card">
+      <div class="cube">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+      </div>
+      <div class="meta">
+        <div class="label">AI Model</div>
+        <div class="name">Qwen 3 4B (GGUF)</div>
+        <div class="status-dot-row"><span class="status-dot"></span> Running Locally</div>
+      </div>
+    </div>
+
+    <nav class="nav-list" id="navList">
+      <button class="nav-item" data-name="Chat">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2 8.5 8.5 0 0 1-7.5 4.3 8.4 8.4 0 0 1-4.2-1.1L3 21l2.1-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.4 3a8.5 8.5 0 0 1 8.5 8.5z"/></svg>
+        Chat
+      </button>
+      <button class="nav-item" data-name="Career Guidance">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg>
+        Career Guidance
+      </button>
+      <button class="nav-item" data-name="CV Review">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        CV Review
+      </button>
+      <button class="nav-item" data-name="Interview Prep">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Interview Prep
+      </button>
+      <button class="nav-item active" data-name="Learning Roadmaps">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7.5" x2="10.3" y2="16"/><line x1="16" y1="7.5" x2="13.7" y2="16"/></svg>
+        Learning Roadmaps
+      </button>
+      <button class="nav-item" data-name="Programming Help">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Programming Help
+      </button>
+      <button class="nav-item" data-name="Startup Advice">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+        Startup Advice
+      </button>
+      <button class="nav-item" data-name="Scholarships">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+        Scholarships
+      </button>
+      <button class="nav-item" data-name="Research Assistant">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        Research Assistant
+      </button>
+      <button class="nav-item" data-name="Explore Life Coach/Mentors">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="20" y1="20" x2="15.3" y2="15.3"/></svg>
+        Explore Life Coach/Mentors
+      </button>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+    <div class="eyebrow">Account</div>
+    <nav class="nav-list">
+      <button class="nav-item" id="navProfile" onclick="window.location.href='profile.html'">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </button>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="privacy-box">
+      <div class="top">
+        <div class="lock">
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </div>
+        <div>
+          <h3>Everything is offline</h3>
+          <p>All data stays on your device. No internet, no tracking.</p>
+        </div>
+      </div>
+      <div class="badge">
+        <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
+        100% Private
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      <button class="nav-item" id="navSettings">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+      <button class="nav-item" id="navAbout">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        About
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="main-scroll" id="mainScroll">
+      <div class="main-inner">
+
+        <!-- ============ HERO ============ -->
+        <div class="hero">
+          <div class="hero-icon">
+            <svg class="icon" viewBox="0 0 24 24" width="26" height="26"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7.5" x2="10.3" y2="16"/><line x1="16" y1="7.5" x2="13.7" y2="16"/></svg>
+          </div>
+          <div class="hero-meta">
+            <div class="hero-eyebrow">Your Roadmap</div>
+            <h2 id="careerTitle">UI/UX Designer</h2>
+            <p>A personalized path from where you are now to where you want to be — broken into clear stages, tasks, and resources.</p>
+            <div class="hero-actions">
+              <select id="careerSelect" class="btn btn-outline btn-sm" style="cursor:pointer;">
+                <option value="UI/UX Designer">UI/UX Designer</option>
+                <option value="Data Analyst">Data Analyst</option>
+                <option value="Software Engineer">Software Engineer</option>
+                <option value="Product Manager">Product Manager</option>
+                <option value="Data Scientist"> Data Scientist</option>
+              </select>
+              <button class="btn btn-primary btn-sm" id="continueLearningBtn">
+                <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Continue Learning
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ PROGRESS TRACKER ============ -->
+        <div class="hero" style="margin-top:-4px;">
+          <div class="ring" id="progressRing" style="--pct:0;">
+            <div class="val" id="progressPct">0%</div>
+          </div>
+          <div class="progress-info">
+            <div class="p-top"><span>Overall completion</span> <strong id="progressFraction">0 of 0 modules</strong></div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
+          </div>
+        </div>
+
+        <!-- ============ STATS ============ -->
+        <div class="stat-strip">
+          <div class="stat-pill"><div class="sp-val" id="statTotalHours">0h</div><div class="sp-label">Estimated time left</div></div>
+          <div class="stat-pill"><div class="sp-val" id="statModulesDone">0</div><div class="sp-label">Modules completed</div></div>
+          <div class="stat-pill"><div class="sp-val" id="statTasksDone">0</div><div class="sp-label">Tasks completed</div></div>
+          <div class="stat-pill"><div class="sp-val" id="statStageNow">Beginner</div><div class="sp-label">Current stage</div></div>
+        </div>
+
+        <!-- ============ AI RECOMMENDATION ============ -->
+        <div class="ai-rec">
+          <div class="ai-icon">
+            <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
+          </div>
+          <div class="ai-rec-body">
+            <div class="ai-rec-label">AI Recommendation</div>
+            <p id="aiRecText">Complete "Design Fundamentals" to unlock more personalized project suggestions in the Intermediate stage.</p>
+          </div>
+        </div>
+
+        <!-- ============ STAGE TABS ============ -->
+        <div class="stage-tabs" id="stageTabs">
+          <button class="stage-tab active" data-stage="beginner"><span class="stage-dot"></span> Beginner <span class="count" id="countBeginner">0</span></button>
+          <button class="stage-tab" data-stage="intermediate"><span class="stage-dot"></span> Intermediate <span class="count" id="countIntermediate">0</span></button>
+          <button class="stage-tab" data-stage="advanced"><span class="stage-dot"></span> Advanced <span class="count" id="countAdvanced">0</span></button>
+        </div>
+
+        <!-- ============ TIMELINE ============ -->
+        <div class="timeline" id="timeline">
+          <div class="stage-group active" id="group-beginner"></div>
+          <div class="stage-group" id="group-intermediate"></div>
+          <div class="stage-group" id="group-advanced"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg><span id="toastMsg"></span></div>
+
+<div class="settings-modal-backdrop" id="settingsModalBackdrop">
+  <div class="settings-modal">
+    <div class="settings-modal-head">
+      <div>
+        <h3>Settings</h3>
+        <p class="sub">Personalize how Orivon Mentor looks.</p>
+      </div>
+      <button class="settings-modal-close" id="settingsModalClose" aria-label="Close settings">
+        <svg class="icon" viewBox="0 0 24 24" width="15" height="15"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="settings-row">
+      <div class="s-label">
+        <svg class="icon" viewBox="0 0 24 24" width="17" height="17"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <div>
+          Dark Mode
+          <div class="s-desc">Switch between light and dark appearance</div>
+        </div>
+      </div>
+      <button class="settings-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+        <div class="knob">🌙</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* =========================================================
+     Roadmap data — one set per career path
+  ========================================================= */
+  const ROADMAPS = {
+    'UI/UX Designer': {
+      beginner: [
+        {
+          title: 'Design Fundamentals', hours: 6,
+          desc: 'Learn the core principles behind good visual and interaction design.',
+          resources: [
+            {type:'course', title:'Intro to UI/UX Design'},
+            {type:'book', title:'The Design of Everyday Things'},
+            {type:'video', title:'Design Principles Crash Course'}
+          ],
+          tasks: ['Learn color theory basics', 'Study typography fundamentals', 'Understand layout & spacing']
+        },
+        {
+          title: 'Design Tools Setup', hours: 4,
+          desc: 'Get comfortable with the industry-standard design tools.',
+          resources: [
+            {type:'course', title:'Figma for Beginners'},
+            {type:'video', title:'Figma Components & Auto Layout'}
+          ],
+          tasks: ['Install and set up Figma', 'Recreate a simple UI screen', 'Learn frames & components']
+        },
+        {
+          title: 'User Research Basics', hours: 5,
+          desc: 'Understand how to gather and apply insights about real users.',
+          resources: [
+            {type:'course', title:'User Research Fundamentals'},
+            {type:'project', title:'Conduct 3 user interviews'}
+          ],
+          tasks: ['Write a research plan', 'Conduct sample interviews', 'Summarize findings']
+        }
+      ],
+      intermediate: [
+        {
+          title: 'Wireframing & Prototyping', hours: 7,
+          desc: 'Translate ideas into low and high fidelity interactive prototypes.',
+          resources: [
+            {type:'course', title:'Wireframing to Prototyping'},
+            {type:'project', title:'Prototype a mobile app flow'}
+          ],
+          tasks: ['Sketch 3 low-fidelity wireframes', 'Build a clickable prototype', 'Get peer feedback']
+        },
+        {
+          title: 'Design Systems', hours: 6,
+          desc: 'Build and maintain a scalable, reusable design system.',
+          resources: [
+            {type:'course', title:'Building Design Systems in Figma'},
+            {type:'book', title:'Atomic Design'}
+          ],
+          tasks: ['Create a color & type system', 'Build a component library', 'Document usage guidelines']
+        },
+        {
+          title: 'Portfolio Project I', hours: 10,
+          desc: 'Design a complete case study from research to final UI.',
+          resources: [
+            {type:'project', title:'End-to-end app redesign'}
+          ],
+          tasks: ['Define the problem statement', 'Complete research & wireframes', 'Ship final high-fidelity screens']
+        }
+      ],
+      advanced: [
+        {
+          title: 'Advanced Interaction Design', hours: 8,
+          desc: 'Micro-interactions, motion design, and complex UI states.',
+          resources: [
+            {type:'course', title:'Motion Design for UI'},
+            {type:'video', title:'Advanced Prototyping in Figma'}
+          ],
+          tasks: ['Design 3 micro-interactions', 'Prototype an animated onboarding flow']
+        },
+        {
+          title: 'Design Leadership', hours: 5,
+          desc: 'Learn to present, defend, and scale design decisions.',
+          resources: [
+            {type:'book', title:'Articulating Design Decisions'}
+          ],
+          tasks: ['Present a case study to peers', 'Write a design rationale doc']
+        },
+        {
+          title: 'Capstone Portfolio Project', hours: 14,
+          desc: 'A polished, job-ready case study for your portfolio.',
+          resources: [
+            {type:'project', title:'Full product design case study'}
+          ],
+          tasks: ['Finalize case study writeup', 'Publish to portfolio site', 'Get 3 rounds of feedback']
+        }
+      ]
+    },
+    'Data Analyst': {
+      beginner: [
+        {title:'Excel & Spreadsheets', hours:5, desc:'Master spreadsheet fundamentals for data work.', resources:[{type:'course',title:'Excel for Data Analysis'}], tasks:['Learn pivot tables', 'Practice VLOOKUP/XLOOKUP']},
+        {title:'SQL Basics', hours:8, desc:'Query and manipulate relational data.', resources:[{type:'course',title:'SQL Fundamentals'},{type:'project',title:'Query a sample database'}], tasks:['Write basic SELECT queries', 'Practice JOINs', 'Practice GROUP BY & aggregates']},
+        {title:'Statistics Fundamentals', hours:6, desc:'Core statistical concepts used in analysis.', resources:[{type:'book',title:'Naked Statistics'}], tasks:['Learn mean/median/mode', 'Understand distributions']}
+      ],
+      intermediate: [
+        {title:'Python for Data Analysis', hours:10, desc:'Use pandas and numpy for real analysis workflows.', resources:[{type:'course',title:'Python & Pandas Bootcamp'}], tasks:['Clean a messy dataset', 'Build summary statistics']},
+        {title:'Data Visualization', hours:6, desc:'Communicate insights clearly with charts and dashboards.', resources:[{type:'course',title:'Dashboards with Tableau'}], tasks:['Build 3 chart types', 'Create a mini dashboard']},
+        {title:'Portfolio Project I', hours:9, desc:'A full analysis project with a public writeup.', resources:[{type:'project',title:'End-to-end analysis case study'}], tasks:['Pick a public dataset', 'Publish findings']}
+      ],
+      advanced: [
+        {title:'A/B Testing & Experimentation', hours:7, desc:'Design and interpret experiments.', resources:[{type:'course',title:'Experimentation for Analysts'}], tasks:['Design an A/B test', 'Interpret significance results']},
+        {title:'Advanced SQL', hours:6, desc:'Window functions, CTEs, and query optimization.', resources:[{type:'course',title:'Advanced SQL Patterns'}], tasks:['Use window functions', 'Optimize a slow query']},
+        {title:'Capstone Portfolio Project', hours:12, desc:'A polished, job-ready analytics case study.', resources:[{type:'project',title:'Full analytics case study'}], tasks:['Finalize report', 'Publish to portfolio']}
+      ]
+    },
+     'Data Scientist': {
+      beginner: [
+        {title:'Excel & Spreadsheets', hours:5, desc:'Master spreadsheet fundamentals for data work.', resources:[{type:'course',title:'Excel for Data Analysis'}], tasks:['Learn pivot tables', 'Practice VLOOKUP/XLOOKUP']},
+        {title:'SQL Basics', hours:8, desc:'Query and manipulate relational data.', resources:[{type:'course',title:'SQL Fundamentals'},{type:'project',title:'Query a sample database'}], tasks:['Write basic SELECT queries', 'Practice JOINs', 'Practice GROUP BY & aggregates']},
+        {title:'Statistics Fundamentals', hours:6, desc:'Core statistical concepts used in analysis.', resources:[{type:'book',title:'Naked Statistics'}], tasks:['Learn mean/median/mode', 'Understand distributions']}
+      ],
+      intermediate: [
+        {title:'Python for Data Analysis', hours:10, desc:'Use pandas and numpy for real analysis workflows.', resources:[{type:'course',title:'Python & Pandas Bootcamp'}], tasks:['Clean a messy dataset', 'Build summary statistics']},
+        {title:'Data Visualization', hours:6, desc:'Communicate insights clearly with charts and dashboards.', resources:[{type:'course',title:'Dashboards with Tableau'}], tasks:['Build 3 chart types', 'Create a mini dashboard']},
+        {title:'Portfolio Project I', hours:9, desc:'A full analysis project with a public writeup.', resources:[{type:'project',title:'End-to-end analysis case study'}], tasks:['Pick a public dataset', 'Publish findings']}
+      ],
+      advanced: [
+        {title:'A/B Testing & Experimentation', hours:7, desc:'Design and interpret experiments.', resources:[{type:'course',title:'Experimentation for Analysts'}], tasks:['Design an A/B test', 'Interpret significance results']},
+        {title:'Advanced SQL', hours:6, desc:'Window functions, CTEs, and query optimization.', resources:[{type:'course',title:'Advanced SQL Patterns'}], tasks:['Use window functions', 'Optimize a slow query']},
+        {title:'Capstone Portfolio Project', hours:12, desc:'A polished, job-ready analytics case study.', resources:[{type:'project',title:'Full analytics case study'}], tasks:['Finalize report', 'Publish to portfolio']}
+      ]
+    },
+    'Software Engineer': {
+      beginner: [
+        {title:'Programming Fundamentals', hours:10, desc:'Variables, control flow, and functions.', resources:[{type:'course',title:'Intro to Programming'}], tasks:['Complete 20 coding exercises', 'Build a CLI calculator']},
+        {title:'Git & Version Control', hours:3, desc:'Track changes and collaborate on code.', resources:[{type:'video',title:'Git & GitHub Crash Course'}], tasks:['Create a repo', 'Practice branching & merging']},
+        {title:'Data Structures Basics', hours:8, desc:'Arrays, lists, stacks, and queues.', resources:[{type:'course',title:'Data Structures 101'}], tasks:['Implement a linked list', 'Solve 10 array problems']}
+      ],
+      intermediate: [
+        {title:'Algorithms', hours:10, desc:'Sorting, searching, and complexity analysis.', resources:[{type:'course',title:'Algorithms Deep Dive'}], tasks:['Implement quicksort', 'Solve 15 algorithm problems']},
+        {title:'Web Development', hours:12, desc:'Build full-stack web applications.', resources:[{type:'course',title:'Full-Stack Web Dev'},{type:'project',title:'Build a CRUD app'}], tasks:['Build a REST API', 'Connect a frontend to it']},
+        {title:'Portfolio Project I', hours:14, desc:'A complete deployed application.', resources:[{type:'project',title:'Full-stack portfolio app'}], tasks:['Design the architecture', 'Deploy to production']}
+      ],
+      advanced: [
+        {title:'System Design', hours:9, desc:'Design scalable, reliable systems.', resources:[{type:'course',title:'System Design Fundamentals'}], tasks:['Design a URL shortener', 'Design a chat system']},
+        {title:'Testing & CI/CD', hours:6, desc:'Automated testing and deployment pipelines.', resources:[{type:'course',title:'Testing & CI/CD Essentials'}], tasks:['Write unit tests', 'Set up a CI pipeline']},
+        {title:'Capstone Portfolio Project', hours:16, desc:'A production-grade job-ready project.', resources:[{type:'project',title:'Capstone engineering project'}], tasks:['Ship a polished app', 'Write technical documentation']}
+      ]
+    },
+    'Product Manager': {
+      beginner: [
+        {title:'PM Fundamentals', hours:5, desc:'What product managers actually do.', resources:[{type:'course',title:'Intro to Product Management'}], tasks:['Write a sample PRD', 'Study 3 product teardown examples']},
+        {title:'Market & User Research', hours:6, desc:'Understand markets, users, and problems worth solving.', resources:[{type:'course',title:'User & Market Research'}], tasks:['Conduct 3 user interviews', 'Write a market analysis']},
+        {title:'Prioritization Frameworks', hours:4, desc:'RICE, MoSCoW, and other prioritization tools.', resources:[{type:'video',title:'Prioritization Frameworks Explained'}], tasks:['Apply RICE to a backlog', 'Practice trade-off decisions']}
+      ],
+      intermediate: [
+        {title:'Roadmapping', hours:6, desc:'Build and communicate product roadmaps.', resources:[{type:'course',title:'Roadmapping for PMs'}], tasks:['Build a quarterly roadmap', 'Present it to stakeholders']},
+        {title:'Working with Engineering', hours:5, desc:'Collaborate effectively with engineering teams.', resources:[{type:'book',title:'Inspired'}], tasks:['Write 5 user stories', 'Run a sprint planning session']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete product case study.', resources:[{type:'project',title:'Product strategy case study'}], tasks:['Define product strategy', 'Publish case study']}
+      ],
+      advanced: [
+        {title:'Product Analytics', hours:6, desc:'Use data to guide product decisions.', resources:[{type:'course',title:'Product Analytics Fundamentals'}], tasks:['Define key metrics', 'Analyze a feature launch']},
+        {title:'Go-to-Market Strategy', hours:6, desc:'Plan and execute successful product launches.', resources:[{type:'course',title:'GTM Strategy for PMs'}], tasks:['Write a GTM plan', 'Define launch success metrics']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A polished, job-ready PM case study.', resources:[{type:'project',title:'Full product management case study'}], tasks:['Finalize case study', 'Publish to portfolio']}
+      ]
+    }
+  };
+
+  const RESOURCE_ICONS = { course:'🎓', book:'📖', video:'▶', project:'🛠' };
+  const STAGE_LABELS = { beginner:'Beginner', intermediate:'Intermediate', advanced:'Advanced' };
+
+  let completedModules = {};   // key: "career|stage|index" -> true
+  let completedTasks = {};     // key: "career|stage|index|taskIndex" -> true
+  let currentCareer = 'UI/UX Designer';
+  let currentStage = 'beginner';
+
+  /* =========================================================
+     Toast
+  ========================================================= */
+  let toastTimer = null;
+  function toast(msg){
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  /* =========================================================
+     Sidebar / mobile drawer
+  ========================================================= */
+  const sidebarLeft = document.getElementById('sidebarLeft');
+  const overlay = document.getElementById('overlay');
+  function openDrawer(){ sidebarLeft.classList.add('open'); overlay.classList.add('show'); }
+  function closeDrawers(){ sidebarLeft.classList.remove('open'); overlay.classList.remove('show'); }
+  document.getElementById('openLeft').addEventListener('click', openDrawer);
+  overlay.addEventListener('click', closeDrawers);
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeDrawers(); });
+  window.addEventListener('resize', () => { if(window.innerWidth > 1024) closeDrawers(); });
+
+  const PAGE_LINKS = {
+    'Chat':'orivon-ai-mentor.html',
+    'Career Guidance':'ORIVON-career-guaidance.html',
+    'CV Review':'orivon-cvreview.html',
+    'Interview Prep':'interview-prep.html'
+  };
+  document.querySelectorAll('#navList .nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.dataset.name;
+      if(PAGE_LINKS[name]){ window.location.href = PAGE_LINKS[name]; return; }
+      if(name === 'Learning Roadmaps'){ closeDrawers(); return; }
+      toast(name + " page isn't built in this preview yet");
+      closeDrawers();
+    });
+  });
+  document.getElementById('navAbout').addEventListener('click', () => {
+    toast('Orivon Mentor v1.0 — fully offline');
+    closeDrawers();
+  });
+
+  /* =========================================================
+     Render roadmap
+  ========================================================= */
+  function moduleKey(stage, i){ return currentCareer + '|' + stage + '|' + i; }
+  function taskKey(stage, i, ti){ return currentCareer + '|' + stage + '|' + i + '|' + ti; }
+
+  function renderResource(r){
+    return `<div class="resource-item type-${r.type}">
+      <div class="r-icon">${RESOURCE_ICONS[r.type] || '📌'}</div>
+      <div class="r-title">${r.title}</div>
+      <div class="r-type">${r.type}</div>
+    </div>`;
+  }
+
+  function renderModule(mod, stage, i){
+    const key = moduleKey(stage, i);
+    const isDone = !!completedModules[key];
+    const tasksHtml = mod.tasks.map((t, ti) => {
+      const tKey = taskKey(stage, i, ti);
+      const tDone = !!completedTasks[tKey];
+      return `<div class="task-item ${tDone ? 'done' : ''}" data-taskkey="${tKey}">
+        <div class="task-check">✓</div>
+        <span>${t}</span>
+      </div>`;
+    }).join('');
+
+    return `
+      <div class="module-card ${isDone ? 'completed' : ''}" data-modkey="${key}">
+        <div class="module-head" data-toggle="${key}">
+          <div class="module-check" data-checkmod="${key}">✓</div>
+          <div class="module-body">
+            <div class="module-title-row">
+              <h3>${mod.title}</h3>
+              <span class="module-time">
+                <svg class="icon" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${mod.hours}h
+              </span>
+            </div>
+            <p class="module-desc">${mod.desc}</p>
+          </div>
+          <div class="module-toggle">
+            <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="module-detail">
+          <div class="module-detail-inner">
+            <p class="subsection-label">Recommended Resources</p>
+            <div class="resource-list">${mod.resources.map(renderResource).join('')}</div>
+            <p class="subsection-label">Practical Tasks</p>
+            <div class="task-list">${tasksHtml}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderStage(stage){
+    const modules = ROADMAPS[currentCareer][stage];
+    const container = document.getElementById('group-' + stage);
+    container.innerHTML = modules.map((m, i) => renderModule(m, stage, i)).join('');
+  }
+
+  function renderAll(){
+    document.getElementById('careerTitle').textContent = currentCareer;
+    ['beginner','intermediate','advanced'].forEach(renderStage);
+    updateCounts();
+    updateProgress();
+    attachModuleHandlers();
+  }
+
+  function updateCounts(){
+    ['beginner','intermediate','advanced'].forEach(stage => {
+      const modules = ROADMAPS[currentCareer][stage];
+      const doneCount = modules.filter((m, i) => completedModules[moduleKey(stage, i)]).length;
+      document.getElementById('count' + stage.charAt(0).toUpperCase() + stage.slice(1)).textContent = doneCount + '/' + modules.length;
+    });
+  }
+
+  function updateProgress(){
+    let total = 0, done = 0, hoursLeft = 0;
+    let firstIncompleteStage = null;
+
+    ['beginner','intermediate','advanced'].forEach(stage => {
+      const modules = ROADMAPS[currentCareer][stage];
+      modules.forEach((m, i) => {
+        total++;
+        const isDone = !!completedModules[moduleKey(stage, i)];
+        if(isDone) done++; else { hoursLeft += m.hours; if(!firstIncompleteStage) firstIncompleteStage = stage; }
+      });
+    });
+
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById('progressRing').style.setProperty('--pct', pct);
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('progressFraction').textContent = done + ' of ' + total + ' modules';
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    document.getElementById('statTotalHours').textContent = hoursLeft + 'h';
+    document.getElementById('statModulesDone').textContent = done;
+    document.getElementById('statStageNow').textContent = STAGE_LABELS[firstIncompleteStage || 'advanced'];
+
+    let tasksDone = 0;
+    Object.keys(completedTasks).forEach(k => { if(k.startsWith(currentCareer + '|') && completedTasks[k]) tasksDone++; });
+    document.getElementById('statTasksDone').textContent = tasksDone;
+
+    updateAIRecommendation(firstIncompleteStage, pct);
+  }
+
+  function updateAIRecommendation(stage, pct){
+    const el = document.getElementById('aiRecText');
+    if(pct >= 100){
+      el.textContent = "You've completed this roadmap! Consider exploring a specialization or starting a new career path.";
+      return;
+    }
+    if(!stage){ el.textContent = 'Keep going — every completed module sharpens your readiness.'; return; }
+    const modules = ROADMAPS[currentCareer][stage];
+    const nextModule = modules.find((m, i) => !completedModules[moduleKey(stage, i)]);
+    if(nextModule){
+      el.textContent = `Focus on "${nextModule.title}" next — it unlocks the rest of the ${STAGE_LABELS[stage]} stage and keeps your momentum going.`;
+    }
+  }
+
+  function attachModuleHandlers(){
+    document.querySelectorAll('[data-toggle]').forEach(head => {
+      head.addEventListener('click', (e) => {
+        if(e.target.closest('[data-checkmod]')) return;
+        const card = head.closest('.module-card');
+        card.classList.toggle('open');
+      });
+    });
+    document.querySelectorAll('[data-checkmod]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const key = btn.dataset.checkmod;
+        completedModules[key] = !completedModules[key];
+        const card = btn.closest('.module-card');
+        card.classList.toggle('completed', completedModules[key]);
+        updateCounts();
+        updateProgress();
+        if(completedModules[key]) toast('Module marked complete 🎉');
+      });
+    });
+    document.querySelectorAll('[data-taskkey]').forEach(row => {
+      row.addEventListener('click', () => {
+        const key = row.dataset.taskkey;
+        completedTasks[key] = !completedTasks[key];
+        row.classList.toggle('done', completedTasks[key]);
+        updateProgress();
+      });
+    });
+  }
+
+  /* =========================================================
+     Stage tabs
+  ========================================================= */
+  document.getElementById('stageTabs').addEventListener('click', (e) => {
+    const tab = e.target.closest('.stage-tab');
+    if(!tab) return;
+    currentStage = tab.dataset.stage;
+    document.querySelectorAll('.stage-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.stage-group').forEach(g => g.classList.remove('active'));
+    document.getElementById('group-' + currentStage).classList.add('active');
+  });
+
+  /* =========================================================
+     Career switcher
+  ========================================================= */
+  document.getElementById('careerSelect').addEventListener('change', (e) => {
+    currentCareer = e.target.value;
+    renderAll();
+    toast('Roadmap updated for ' + currentCareer);
+  });
+  document.getElementById('careerSelect').value = currentCareer;
+
+  document.getElementById('continueLearningBtn').addEventListener('click', () => {
+    // Jump to the first stage that has an incomplete module
+    for(const stage of ['beginner','intermediate','advanced']){
+      const modules = ROADMAPS[currentCareer][stage];
+      const idx = modules.findIndex((m, i) => !completedModules[moduleKey(stage, i)]);
+      if(idx !== -1){
+        document.querySelector(`.stage-tab[data-stage="${stage}"]`).click();
+        setTimeout(() => {
+          const card = document.querySelectorAll(`#group-${stage} .module-card`)[idx];
+          if(card){
+            card.classList.add('open');
+            card.scrollIntoView({behavior:'smooth', block:'center'});
+          }
+        }, 50);
+        return;
+      }
+    }
+    toast("You've completed every module in this roadmap!");
+  });
+
+  renderAll();
+
+  /* =========================================================
+     Theme + Settings modal
+  ========================================================= */
+  function setTheme(mode){
+    document.documentElement.setAttribute('data-theme', mode);
+    const knob = document.querySelector('#darkModeToggle .knob');
+    if(knob) knob.textContent = mode === 'light' ? '☀️' : '🌙';
+  }
+  document.getElementById('darkModeToggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    setTheme(current === 'light' ? 'dark' : 'light');
+  });
+  const settingsBackdrop = document.getElementById('settingsModalBackdrop');
+  function openSettings(){ settingsBackdrop.classList.add('show'); }
+  function closeSettings(){ settingsBackdrop.classList.remove('show'); }
+  document.getElementById('settingsModalClose').addEventListener('click', closeSettings);
+  settingsBackdrop.addEventListener('click', e => { if(e.target === settingsBackdrop) closeSettings(); });
+  document.getElementById('navSettings').addEventListener('click', () => { openSettings(); closeDrawers(); });
+</script>
+</body>
+</html>
