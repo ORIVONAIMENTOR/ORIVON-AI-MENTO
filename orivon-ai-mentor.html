@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Orivon Mentor — Your Offline AI Mentor</title>
+<title>Orivon Mentor — Your AI Mentor</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const supabaseUrl = "https://mkuklkqvatequxvlpncm.supabase.co";
@@ -11,6 +11,11 @@
   const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
   window._sb = supabaseClient; // expose globally for DB object below
 </script>
+<!-- Read uploaded PDFs/DOCX, and generate downloadable PDFs/DOCX from chat -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   :root{
     --bg:#0b0b10;
@@ -308,6 +313,13 @@
   .bubble .msg-list{margin:0 0 10px;padding-left:20px;}
   .bubble .msg-list:last-of-type{margin-bottom:0;}
   .bubble .msg-list li{margin-bottom:4px;}
+  .msg-export-row{display:flex;gap:6px;margin-top:9px;padding-top:9px;border-top:1px solid var(--border-soft);}
+  .msg-export-btn{
+    display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--text-dim);
+    background:var(--panel-2);border:1px solid var(--border);border-radius:7px;padding:5px 9px;cursor:pointer;
+    transition:border-color var(--dur),color var(--dur);
+  }
+  .msg-export-btn:hover{border-color:var(--accent);color:var(--accent);}
   .bubble .msg-list li:last-child{margin-bottom:0;}
   .msg.bot .bubble .time{color:var(--text-faint);}
 
@@ -447,10 +459,22 @@
   .doc-name{font-size:12.3px;font-weight:560;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
   .doc-size{font-size:10.8px;color:var(--text-faint);}
 
-  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;text-align:center;}
-  .stat-cell .num{font-size:16.5px;font-weight:750;}
-  .stat-cell .lbl{font-size:9.8px;color:var(--text-faint);line-height:1.3;margin-top:2px;}
-  .progress-foot{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green);font-weight:600;justify-content:center;border-top:1px solid var(--border-soft);padding-top:11px;}
+  /* ---- Chat history panel ---- */
+  .history-item{display:flex;align-items:center;gap:9px;cursor:pointer;padding:9px 5px;margin:0 -5px;border-radius:8px;transition:background var(--dur);}
+  .history-item:hover{background:var(--panel-2);}
+  .history-item.active{background:var(--panel-2);}
+  .history-ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--accent-soft);color:var(--accent);}
+  .history-meta{min-width:0;flex:1;}
+  .history-title{font-size:12.3px;font-weight:560;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px;}
+  .history-sub{font-size:10.8px;color:var(--text-faint);}
+  .history-list{display:flex;flex-direction:column;gap:2px;max-height:calc(100vh - 210px);overflow-y:auto;}
+  .history-empty{font-size:12px;color:var(--text-faint);text-align:center;padding:20px 8px;}
+  .new-chat-btn{
+    display:flex;align-items:center;justify-content:center;gap:6px;width:100%;
+    background:var(--accent);color:#fff;border:none;border-radius:10px;padding:9px 12px;
+    font-size:12.5px;font-weight:650;cursor:pointer;margin-bottom:12px;
+  }
+  .new-chat-btn:hover{filter:brightness(1.08);}
 
   /* ---------- Toast ---------- */
   .toast{
@@ -540,8 +564,134 @@
     *{transition:none !important;animation:none !important;}
   }
 </style>
+<style>
+/* === Orivon message system (om-) === */
+.om-toast-stack{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+.om-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:10px;background:#15121f;border:1px solid #241f33;border-left:3px solid #f0574e;border-radius:10px;padding:12px 14px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;}
+.om-toast.om-show{opacity:1;transform:translateY(0);}
+.om-toast.om-warn{border-left-color:#f0a94e;}
+.om-toast.om-ok{border-left-color:#4ecf8f;}
+.om-toast .om-icon{font-size:1.05rem;line-height:1.4;}
+.om-toast .om-body strong{display:block;font-size:.88rem;margin-bottom:2px;color:#f4f2fa;}
+.om-toast .om-body span{font-size:.8rem;color:#9a94ac;}
+
+.om-banner{display:flex;align-items:flex-start;gap:10px;background:rgba(240,87,78,.08);border:1px solid rgba(240,87,78,.3);border-radius:10px;padding:12px 14px;font-size:.85rem;margin-bottom:16px;}
+.om-banner strong{color:#ff8880;}
+.om-banner span{color:#9a94ac;}
+
+.om-empty{text-align:center;padding:40px 24px;background:#0e0c17;border:1px dashed #241f33;border-radius:14px;}
+.om-empty .om-glyph{width:44px;height:44px;border-radius:12px;margin:0 auto 14px;background:linear-gradient(135deg,#8b5cf6,#a855f7);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;}
+.om-empty h3{margin:0 0 6px;font-size:1rem;color:#f4f2fa;}
+.om-empty p{margin:0 0 16px;color:#9a94ac;font-size:.85rem;}
+.om-empty button{background:linear-gradient(135deg,#8b5cf6,#a855f7);border:none;color:#fff;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;}
+
+.om-retry{background:#0e0c17;border:1px solid #241f33;border-radius:14px;padding:28px 24px;text-align:center;}
+.om-retry .om-glyph{width:44px;height:44px;border-radius:12px;margin:0 auto 14px;background:rgba(240,87,78,.15);color:#f0574e;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.om-retry h3{margin:0 0 6px;font-size:1rem;color:#f4f2fa;}
+.om-retry p{margin:0 0 16px;color:#9a94ac;font-size:.85rem;}
+.om-retry button{background:#15121f;border:1px solid #241f33;color:#f4f2fa;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;}
+.om-retry button:hover{border-color:#a855f7;}
+
+.om-skeleton{background:#0e0c17;border:1px solid #241f33;border-radius:14px;padding:20px;}
+.om-sk-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#15121f 25%,#241f33 37%,#15121f 63%);background-size:400% 100%;animation:om-sk 1.4s ease infinite;margin-bottom:10px;}
+.om-sk-line:last-child{margin-bottom:0;}
+@keyframes om-sk{0%{background-position:100% 0;}100%{background-position:0 0;}}
+
+.om-wait{display:flex;align-items:center;gap:10px;color:#9a94ac;font-size:.85rem;background:#0e0c17;border:1px solid #241f33;border-radius:10px;padding:12px 14px;}
+.om-spinner{width:16px;height:16px;border-radius:50%;border:2px solid #241f33;border-top-color:#a855f7;animation:om-spin .8s linear infinite;flex-shrink:0;}
+@keyframes om-spin{to{transform:rotate(360deg);}}
+
+.om-timeout{background:rgba(240,169,78,.06);border:1px solid rgba(240,169,78,.28);border-radius:10px;padding:14px 16px;font-size:.85rem;display:flex;gap:10px;align-items:flex-start;}
+.om-timeout strong{color:#f0a94e;display:block;margin-bottom:2px;}
+.om-timeout span{color:#9a94ac;}
+</style>
+
 </head>
 <body>
+<script>
+/* === Orivon message system helpers (om-) === */
+window.OrivonMsg = (function(){
+  let stack;
+  function getStack(){
+    if (!stack){
+      stack = document.createElement('div');
+      stack.className = 'om-toast-stack';
+      document.body.appendChild(stack);
+    }
+    return stack;
+  }
+  const ICONS = { error:'⚠', warn:'⚠', ok:'✓' };
+
+  function toast(opts){
+    if (typeof opts === 'string') opts = { title: opts };
+    const type = opts.type || 'error';
+    const title = opts.title || 'Something went wrong';
+    const body = opts.body || '';
+    const el = document.createElement('div');
+    el.className = 'om-toast' + (type === 'warn' ? ' om-warn' : type === 'ok' ? ' om-ok' : '');
+    el.innerHTML = '<span class="om-icon">' + (ICONS[type] || ICONS.error) + '</span>' +
+      '<div class="om-body"><strong></strong>' + (body ? '<span></span>' : '') + '</div>';
+    el.querySelector('strong').textContent = title;
+    if (body) el.querySelector('span').textContent = body;
+    getStack().appendChild(el);
+    requestAnimationFrame(() => el.classList.add('om-show'));
+    setTimeout(() => {
+      el.classList.remove('om-show');
+      setTimeout(() => el.remove(), 250);
+    }, opts.duration || 5000);
+  }
+
+  function banner(container, opts){
+    container.innerHTML = '<div class="om-banner"><span>⚠</span><div><strong></strong> <span></span></div></div>';
+    container.querySelector('strong').textContent = opts.title || "We couldn't process that.";
+    container.querySelector('.om-banner span:last-child').textContent = opts.body || 'Please try again.';
+    container.style.display = '';
+  }
+
+  function empty(container, opts){
+    container.innerHTML = '<div class="om-empty"><div class="om-glyph">' + (opts.glyph || '◆') + '</div>' +
+      '<h3></h3><p></p>' + (opts.actionLabel ? '<button type="button"></button>' : '') + '</div>';
+    container.querySelector('h3').textContent = opts.title || 'Nothing here yet';
+    container.querySelector('p').textContent = opts.body || '';
+    if (opts.actionLabel){
+      const btn = container.querySelector('button');
+      btn.textContent = opts.actionLabel;
+      if (opts.onAction) btn.addEventListener('click', opts.onAction);
+    }
+  }
+
+  function retry(container, opts){
+    container.innerHTML = '<div class="om-retry"><div class="om-glyph">!</div>' +
+      '<h3></h3><p></p><button type="button"></button></div>';
+    container.querySelector('h3').textContent = opts.title || "Couldn't load this";
+    container.querySelector('p').textContent = opts.body || 'Something went wrong on our end. Give it another try.';
+    const btn = container.querySelector('button');
+    btn.textContent = opts.actionLabel || 'Retry';
+    if (opts.onRetry) btn.addEventListener('click', opts.onRetry);
+  }
+
+  function skeleton(container, lines){
+    lines = lines || [90, 60, 40];
+    container.innerHTML = '<div class="om-skeleton">' +
+      lines.map(w => '<div class="om-sk-line" style="width:' + w + '%"></div>').join('') +
+      '</div>';
+  }
+
+  function wait(container, message){
+    container.innerHTML = '<div class="om-wait"><div class="om-spinner"></div><span></span></div>';
+    container.querySelector('span').textContent = message || 'Working on it…';
+  }
+
+  function timeout(container, opts){
+    container.innerHTML = '<div class="om-timeout"><span>⏱</span><div><strong></strong> <span></span></div></div>';
+    container.querySelector('strong').textContent = opts.title || 'This is taking longer than usual.';
+    container.querySelector('.om-timeout span:last-child').textContent = opts.body || 'Still working on it — you can wait, or try again in a moment.';
+  }
+
+  return { toast, banner, empty, retry, skeleton, wait, timeout };
+})();
+</script>
+
 
 <div class="app">
 
@@ -651,7 +801,7 @@
           <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
         </div>
         <div>
-          <h3>Everything is offline</h3>
+          <h3>Your data, your privacy</h3>
           <p>All data stays Protected.</p>
           <p>Your progress is Secured</p>
         </div>
@@ -685,7 +835,7 @@
 
         <div class="welcome">
           <h2>Hi, Future Builder! 👋</h2>
-          <p>I'm your offline AI mentor. How can I help you today?</p>
+          <p>I'm your AI mentor. How can I help you today?</p>
         </div>
 
         <div class="feature-grid" id="featureGrid">
@@ -846,73 +996,12 @@
   <aside class="sidebar sidebar-right" id="sidebarRight">
 
     <div class="panel-card">
-      <div class="panel-head">
-        <h3>Local Model Status</h3>
-        <div class="pill-live"><span class="status-dot"></span>Running</div>
-      </div>
-      <div class="stat-rows">
-        <div class="stat-row"><span>Model</span><span>Qwen 3 4B (GGUF)</span></div>
-        <div class="stat-row"><span>Backend</span><span>llama.cpp</span></div>
-        <div class="stat-row"><span>Context Length</span><span>8192 tokens</span></div>
-        <div class="stat-row"><span>GPU Offload</span><span>Enabled</span></div>
-        <div class="stat-row"><span>RAM Usage</span><span>3.2 / 7.8 GB</span></div>
-      </div>
-      <div class="ram-bar"><i style="width:41%"></i></div>
-      <div style="height:13px"></div>
-      <button class="ghost-btn" id="btnModelSettings">
-        <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Model Settings
+      <div class="panel-head"><h3>Chat History</h3></div>
+      <button class="new-chat-btn" id="btnNewChat">
+        <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Chat
       </button>
-    </div>
-
-    <div class="panel-card">
-      <div class="panel-head">
-        <div>
-          <h3>Knowledge Base</h3>
-          <span class="sub" id="docCountLabel">12 Documents</span>
-        </div>
-        <button class="kb-add" id="kbAdd" aria-label="Add document">
-          <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
-      </div>
-      <div class="doc-list" id="docList">
-        <div class="doc-item" data-doc="Machine Learning Roadmap.pdf" data-type="pdf">
-          <div class="doc-ic pdf"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div class="doc-meta"><div class="doc-name">Machine Learning Roadmap.pdf</div><div class="doc-size">2.3 MB</div></div>
-        </div>
-        <div class="doc-item" data-doc="Resume_Review_Guide.pdf" data-type="pdf">
-          <div class="doc-ic pdf"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div class="doc-meta"><div class="doc-name">Resume_Review_Guide.pdf</div><div class="doc-size">1.1 MB</div></div>
-        </div>
-        <div class="doc-item" data-doc="Interview_Questions.pdf" data-type="pdf">
-          <div class="doc-ic pdf"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div class="doc-meta"><div class="doc-name">Interview_Questions.pdf</div><div class="doc-size">3.7 MB</div></div>
-        </div>
-        <div class="doc-item" data-doc="Deep Learning Specialization.pdf" data-type="pdf">
-          <div class="doc-ic pdf"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div class="doc-meta"><div class="doc-name">Deep Learning Specialization.pdf</div><div class="doc-size">12.4 MB</div></div>
-        </div>
-        <div class="doc-item" data-doc="My_Notes.txt" data-type="txt">
-          <div class="doc-ic txt"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
-          <div class="doc-meta"><div class="doc-name">My_Notes.txt</div><div class="doc-size">89 KB</div></div>
-        </div>
-      </div>
-      <button class="ghost-btn" id="btnViewAll">View All</button>
-    </div>
-
-
-    <div class="panel-card">
-      <div class="panel-head"><h3>Today's Progress</h3></div>
-      <div class="stat-grid">
-        <div class="stat-cell"><div class="num" id="statChats">18</div><div class="lbl">Chats</div></div>
-        <div class="stat-cell"><div class="num" id="statSources">12</div><div class="lbl">Sources Used</div></div>
-        <div class="stat-cell"><div class="num" id="statNotes">3</div><div class="lbl">Notes Created</div></div>
-        <div class="stat-cell"><div class="num">2.4h</div><div class="lbl">Time Saved</div></div>
-      </div>
-      <div class="progress-foot">
-        <svg class="icon" viewBox="0 0 24 24" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg>
-        All your progress is stored locally
-      </div>
+      <div class="history-list" id="historyList"></div>
     </div>
 
   </aside>
@@ -929,7 +1018,7 @@
 <div class="modal-backdrop" id="noteModalBackdrop">
   <div class="modal">
     <h3>New Note</h3>
-    <textarea id="noteText" placeholder="Write a quick note to save to your offline library..."></textarea>
+    <textarea id="noteText" placeholder="Write a quick note to save to your library..."></textarea>
     <div class="modal-actions">
       <button class="btn-secondary" id="noteCancel">Cancel</button>
       <button class="btn-primary" id="noteSave">Save Note</button>
@@ -959,7 +1048,7 @@
 <div class="modal-backdrop" id="libraryModalBackdrop">
   <div class="modal" style="max-width:520px;">
     <h3 style="margin:0 0 4px;">Your Library</h3>
-    <p style="margin:0 0 14px;font-size:12px;color:var(--text-faint);">Everything indexed in your offline knowledge base.</p>
+    <p style="margin:0 0 14px;font-size:12px;color:var(--text-faint);">Everything indexed in your knowledge base.</p>
     <div id="libraryFullList" style="display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto;padding-right:4px;"></div>
     <div class="modal-actions">
       <button class="btn-secondary" id="libraryModalClose">Close</button>
@@ -993,12 +1082,9 @@
 
   /* ---------- Toast ---------- */
   let toastTimer = null;
-  function toast(msg){
-    const el = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  function toast(msg, type){
+    if (typeof msg === 'object'){ OrivonMsg.toast(msg); return; }
+    OrivonMsg.toast({ type: type || 'ok', title: msg });
   }
 
   /* ---------- Nav active state ---------- */
@@ -1018,7 +1104,7 @@
   });
   ['navUploads','navNotes','navBookmarks','navAbout'].forEach(id => {
     document.getElementById(id).addEventListener('click', () => {
-      const labels = {navUploads:'Uploads', navNotes:'Notes', navBookmarks:'Bookmarks', navAbout:'Orivon Mentor v1.0 — fully offline'};
+      const labels = {navUploads:'Uploads', navNotes:'Notes', navBookmarks:'Bookmarks', navAbout:'Orivon Mentor v1.0'};
       toast(labels[id]);
       closeDrawers();
     });
@@ -1059,7 +1145,6 @@
   /* ---------- Chat send / simulated reply ---------- */
   const chatLog = document.getElementById('chatLog');
   const mainScroll = document.getElementById('mainScroll');
-  const statChats = document.getElementById('statChats');
 
   function nowLabel(){
     const d = new Date();
@@ -1172,8 +1257,113 @@
     const div = document.createElement('div');
     div.className = 'msg bot';
     div.innerHTML = `<div class="avatar"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke-linejoin="round"/></svg></div>
-      <div class="bubble">${formatMessage(text)}<span class="time">${nowLabel()}</span></div>`;
+      <div class="bubble">${formatMessage(text)}
+        <div class="msg-export-row">
+          <button type="button" class="msg-export-btn" data-export="pdf"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>PDF</button>
+          <button type="button" class="msg-export-btn" data-export="docx"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>DOCX</button>
+        </div>
+        <span class="time">${nowLabel()}</span></div>`;
+    const bubble = div.querySelector('.bubble');
+    bubble.querySelector('[data-export="pdf"]').addEventListener('click', () => exportMessageAsPdf(text));
+    bubble.querySelector('[data-export="docx"]').addEventListener('click', () => exportMessageAsDocx(text));
     chatLog.appendChild(div);
+  }
+
+  /* ---------- Export chat replies as PDF / DOCX ---------- */
+  function exportFileName(ext){
+    const d = new Date();
+    const stamp = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    return 'orivon-mentor-' + stamp + '-' + Date.now().toString().slice(-5) + '.' + ext;
+  }
+
+  function exportMessageAsPdf(text){
+    if (typeof window.jspdf === 'undefined'){
+      OrivonMsg.toast({ type: 'error', title: 'PDF export failed to load', body: 'Try again in a moment.' });
+      return;
+    }
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const margin = 48;
+      const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+      const pageHeight = doc.internal.pageSize.getHeight();
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      const lines = doc.splitTextToSize(text, maxWidth);
+      let y = margin;
+      lines.forEach(line => {
+        if (y > pageHeight - margin){ doc.addPage(); y = margin; }
+        doc.text(line, margin, y);
+        y += 16;
+      });
+      doc.save(exportFileName('pdf'));
+      OrivonMsg.toast({ type: 'ok', title: 'PDF downloaded' });
+    } catch (err) {
+      OrivonMsg.toast({ type: 'error', title: 'Could not generate PDF', body: err.message });
+    }
+  }
+
+  async function exportMessageAsDocx(text){
+    if (typeof window.JSZip === 'undefined'){
+      OrivonMsg.toast({ type: 'error', title: 'DOCX export failed to load', body: 'Try again in a moment.' });
+      return;
+    }
+    try {
+      const blob = await buildSimpleDocx(text);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = exportFileName('docx');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      OrivonMsg.toast({ type: 'ok', title: 'DOCX downloaded' });
+    } catch (err) {
+      OrivonMsg.toast({ type: 'error', title: 'Could not generate DOCX', body: err.message });
+    }
+  }
+
+  // Builds a minimal, valid .docx (Office Open XML) by zipping the required
+  // parts by hand with JSZip — no external docx-building library needed.
+  async function buildSimpleDocx(text){
+    const paragraphs = text.split(/\n{2,}/).map(block =>
+      block.split('\n').map(line =>
+        '<w:p><w:r><w:t xml:space="preserve">' + escapeXml(line) + '</w:t></w:r></w:p>'
+      ).join('')
+    ).join('<w:p/>');
+
+    const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>${paragraphs}<w:sectPr/></w:body>
+</w:document>`;
+
+    const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+
+    const rootRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+
+    const docRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>`;
+
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', contentTypesXml);
+    zip.file('_rels/.rels', rootRelsXml);
+    zip.file('word/document.xml', documentXml);
+    zip.file('word/_rels/document.xml.rels', docRelsXml);
+    return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  }
+
+  function escapeXml(str){
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   function escapeHtml(str){
@@ -1212,6 +1402,79 @@
     return line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   }
 
+  /* ---------- Chat History (right sidebar) ---------- */
+  // In-memory for this session only — resets on page reload, same as the
+  // rest of the chat state (conversationHistory isn't persisted server-side either).
+  let chatSessions = [];
+  let activeSessionId = null;
+
+  function newSessionId(){ return 'session-' + Date.now() + '-' + Math.random().toString(36).slice(2,7); }
+
+  function truncateTitle(text){
+    const clean = text.trim().replace(/\s+/g, ' ');
+    return clean.length > 42 ? clean.slice(0, 42) + '…' : clean;
+  }
+
+  function saveCurrentSession(){
+    if (!activeSessionId) return;
+    const session = chatSessions.find(s => s.id === activeSessionId);
+    if (!session) return;
+    session.chatLogHTML = chatLog.innerHTML;
+    session.conversationHistory = conversationHistory.map(m => ({ ...m }));
+  }
+
+  function renderHistoryList(){
+    const list = document.getElementById('historyList');
+    if (!chatSessions.length){
+      list.innerHTML = '<div class="history-empty">No conversations yet</div>';
+      return;
+    }
+    const sorted = [...chatSessions].sort((a, b) => b.updatedAt - a.updatedAt);
+    list.innerHTML = sorted.map(s => `
+      <div class="history-item${s.id === activeSessionId ? ' active' : ''}" data-session="${s.id}">
+        <div class="history-ic"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="history-meta"><div class="history-title">${escapeHtml(s.title)}</div><div class="history-sub">${s.timeLabel}</div></div>
+      </div>`).join('');
+    list.querySelectorAll('.history-item').forEach(item => {
+      item.addEventListener('click', () => loadSession(item.dataset.session));
+    });
+  }
+
+  function loadSession(id){
+    if (id === activeSessionId) return;
+    saveCurrentSession();
+    const session = chatSessions.find(s => s.id === id);
+    if (!session) return;
+    chatLog.innerHTML = session.chatLogHTML;
+    conversationHistory = session.conversationHistory.map(m => ({ ...m }));
+    activeSessionId = id;
+    renderHistoryList();
+    scrollToBottom();
+  }
+
+  function newChat(){
+    saveCurrentSession();
+    const id = newSessionId();
+    conversationHistory = [{ role: 'system', content: conversationHistory[0]?.content || BASE_SYSTEM_PROMPT }];
+    chatLog.innerHTML = '';
+    chatSessions.unshift({ id, title: 'New Chat', timeLabel: nowLabel(), updatedAt: Date.now(), chatLogHTML: '', conversationHistory: conversationHistory.map(m => ({ ...m })) });
+    activeSessionId = id;
+    renderHistoryList();
+    chatInput.focus();
+  }
+
+  // Register the sample conversation already in the markup as the first session.
+  (function initFirstSession(){
+    const id = newSessionId();
+    const firstUserMsg = chatLog.querySelector('.msg.user .bubble');
+    const title = firstUserMsg ? truncateTitle(firstUserMsg.textContent) : 'New Chat';
+    chatSessions.push({ id, title, timeLabel: nowLabel(), updatedAt: Date.now(), chatLogHTML: chatLog.innerHTML, conversationHistory: conversationHistory.map(m => ({ ...m })) });
+    activeSessionId = id;
+    renderHistoryList();
+  })();
+
+  document.getElementById('btnNewChat').addEventListener('click', newChat);
+
   async function sendMessage(){
     const text = chatInput.value.trim();
     if (!text) return;
@@ -1220,31 +1483,47 @@
     autoResize();
     scrollToBottom();
 
+    const activeSession = chatSessions.find(s => s.id === activeSessionId);
+    if (activeSession && activeSession.title === 'New Chat'){
+      activeSession.title = truncateTitle(text);
+      renderHistoryList();
+    }
+    activeSession && (activeSession.updatedAt = Date.now());
+
     const typingEl = addTyping();
     scrollToBottom();
 
+    const slowNotice = setTimeout(() => {
+      OrivonMsg.timeout(typingEl, {
+        title: 'This is taking longer than usual.',
+        body: 'Still working on it — you can wait, or send it again in a moment.'
+      });
+      scrollToBottom();
+    }, 8000);
+
     try {
       const reply = await callGroq(text);
+      clearTimeout(slowNotice);
       typingEl.remove();
       addBotMessage(reply);
-      statChats.textContent = (parseInt(statChats.textContent,10) + 1);
       scrollToBottom();
+      saveCurrentSession();
     } catch (err) {
+      clearTimeout(slowNotice);
       typingEl.remove();
-      addBotMessage("Something went wrong reaching the AI model: " + err.message);
+      OrivonMsg.toast({ type: 'error', title: "Couldn't reach the AI model", body: err.message });
+      addBotMessage("Something went wrong reaching the AI model. Try sending that again.");
       scrollToBottom();
+      saveCurrentSession();
       console.error(err);
     }
   }
 
   document.getElementById('btnSend').addEventListener('click', sendMessage);
 
-  /* ---------- Knowledge Base: documents, viewer, library ---------- */
+  /* ---------- Knowledge Base: documents, viewer, library (headless — no sidebar list; access via Upload / Library toolbar buttons) ---------- */
   const fileInput = document.getElementById('fileInput');
-  const docList = document.getElementById('docList');
-  const docCountLabel = document.getElementById('docCountLabel');
   const contextLabel = document.getElementById('contextLabel');
-  const statSources = document.getElementById('statSources');
   let docCount = 12;
 
   const DOC_CONTENT = {
@@ -1254,13 +1533,18 @@
     'Deep Learning Specialization.pdf': "Course notes covering neural network fundamentals, forward/backward propagation, CNNs for vision, RNNs and attention for sequences, and practical tips for debugging training (loss curves, learning rate schedules, regularization).",
     'My_Notes.txt': "Personal notes: 'Focus this month on finishing the CNN module and rebuild my portfolio site. Ask mentor about whether to prioritize Kaggle competitions or open-source contributions for visibility.'"
   };
+  const DOC_SIZES = {
+    'Machine Learning Roadmap.pdf': '2.3 MB', 'Resume_Review_Guide.pdf': '1.1 MB',
+    'Interview_Questions.pdf': '3.7 MB', 'Deep Learning Specialization.pdf': '12.4 MB', 'My_Notes.txt': '89 KB'
+  };
 
-  // allDocs holds {name, size, type, content} for everything in the knowledge base
-  const allDocs = Array.from(docList.querySelectorAll('.doc-item')).map(item => ({
-    name: item.dataset.doc,
-    type: item.dataset.type,
-    size: item.querySelector('.doc-size').textContent,
-    content: DOC_CONTENT[item.dataset.doc] || "This file is indexed locally. Open it in your file system to view full contents — Orivon uses it as retrieval context when answering related questions."
+  // allDocs holds {name, size, type, content} for everything in the knowledge base.
+  // No visible sidebar list anymore — reachable via the Upload and Library toolbar buttons.
+  const allDocs = Object.keys(DOC_CONTENT).map(name => ({
+    name,
+    type: /\.pdf$/i.test(name) ? 'pdf' : 'txt',
+    size: DOC_SIZES[name] || '—',
+    content: DOC_CONTENT[name]
   }));
 
   function formatSize(bytes){
@@ -1275,40 +1559,94 @@
       : '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>';
   }
 
-  function addDocToList(file){
+  /* ---------- Real PDF/DOCX text extraction (mirrors orivon-cvreview.html) ---------- */
+  let pdfLibReady = false;
+  try {
+    if (window['pdfjsLib']){
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      pdfLibReady = true;
+    }
+  } catch(e){ pdfLibReady = false; }
+
+  async function extractPdfText(file){
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+    let out = '';
+    const pageCount = Math.min(pdf.numPages, 20); // cap for very long documents
+    for (let i = 1; i <= pageCount; i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      out += content.items.map(it => it.str).join(' ') + '\n';
+    }
+    return out;
+  }
+
+  async function extractDocxText(file){
+    const buf = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({arrayBuffer: buf});
+    return result.value || '';
+  }
+
+  // Returns the doc's real content via extraction (PDF/DOCX/TXT), or a
+  // fallback note for types we can't parse client-side (images, legacy .doc, etc).
+  async function extractFileContent(file){
+    const lowerName = file.name.toLowerCase();
+    const isTxt = /\.(txt|md)$/.test(lowerName) || file.type === 'text/plain';
+    const isPdf = /\.pdf$/.test(lowerName) || file.type === 'application/pdf';
+    const isDocx = /\.docx$/.test(lowerName);
+    const isLegacyDoc = /\.doc$/.test(lowerName) && !isDocx;
+
+    if (isTxt){
+      return await file.text();
+    }
+    if (isPdf){
+      if (!pdfLibReady) throw new Error('PDF reader failed to load — try a different file');
+      const text = await extractPdfText(file);
+      if (text.trim().length < 20){
+        OrivonMsg.toast({ type: 'warn', title: 'Almost no text could be extracted', body: 'This may be a scanned/image PDF.' });
+      }
+      return text;
+    }
+    if (isDocx){
+      if (typeof mammoth === 'undefined') throw new Error('DOCX reader failed to load — try a different file');
+      return await extractDocxText(file);
+    }
+    if (isLegacyDoc){
+      throw new Error("Legacy .doc isn't supported — please save as .docx and try again");
+    }
+    return "This file type can't be read directly — Orivon will treat it as an attachment without extracted text context.";
+  }
+
+  async function addDocToList(file){
     const isPdf = /\.pdf$/i.test(file.name);
     const size = formatSize(file.size);
-    const doc = {
-      name: file.name, type: isPdf ? 'pdf' : 'txt', size,
-      content: "Just added from your device. Once Orivon finishes local indexing, this file's content becomes searchable context for chat answers."
-    };
+    const doc = { name: file.name, type: isPdf ? 'pdf' : 'txt', size, content: 'Reading file…' };
     allDocs.unshift(doc);
-    const item = document.createElement('div');
-    item.className = 'doc-item';
-    item.dataset.doc = file.name;
-    item.dataset.type = doc.type;
-    item.innerHTML = `<div class="doc-ic ${doc.type}"><svg class="icon" viewBox="0 0 24 24" width="15" height="15">${docIconSvg(isPdf)}</svg></div>
-      <div class="doc-meta"><div class="doc-name">${escapeHtml(file.name)}</div><div class="doc-size">${size}</div></div>`;
-    item.addEventListener('click', () => openDocModal(doc));
-    docList.prepend(item);
+    try {
+      doc.content = await extractFileContent(file);
+    } catch (err) {
+      doc.content = "Couldn't extract text from this file: " + err.message;
+      OrivonMsg.toast({ type: 'error', title: "Couldn't read " + file.name, body: err.message });
+    }
+    return doc;
   }
 
   function bumpDocCount(n){
     docCount += n;
-    docCountLabel.textContent = docCount + ' Documents';
     contextLabel.textContent = 'Context: ' + docCount + ' sources';
-    statSources.textContent = docCount;
   }
 
   document.getElementById('btnUpload').addEventListener('click', () => fileInput.click());
-  document.getElementById('kbAdd').addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => {
+  fileInput.addEventListener('change', async () => {
     const files = Array.from(fileInput.files || []);
     if (!files.length) return;
-    files.forEach(addDocToList);
+    fileInput.value = '';
+    OrivonMsg.toast({ type: 'ok', title: 'Reading ' + (files.length === 1 ? files[0].name : files.length + ' files') + '…' });
+    for (const file of files){
+      await addDocToList(file);
+    }
     bumpDocCount(files.length);
     toast(files.length === 1 ? '1 document added to your library' : files.length + ' documents added to your library');
-    fileInput.value = '';
   });
 
   /* ---------- Document viewer modal ---------- */
@@ -1322,23 +1660,11 @@
     document.getElementById('docModalIcon').style.background = isPdf ? 'rgba(240,101,76,.13)' : 'var(--panel-2)';
     document.getElementById('docModalIcon').style.color = isPdf ? 'var(--red)' : 'var(--text-dim)';
     document.getElementById('docModalName').textContent = doc.name;
-    document.getElementById('docModalMeta').textContent = doc.size + ' · Indexed locally';
+    document.getElementById('docModalMeta').textContent = doc.size + ' · Indexed';
     document.getElementById('docModalBody').textContent = doc.content;
     docModalBackdrop.classList.add('show');
   }
   function closeDocModal(){ docModalBackdrop.classList.remove('show'); }
-
-  // delegate clicks for any doc-item (existing + future uploads)
-  docList.addEventListener('click', e => {
-    const item = e.target.closest('.doc-item');
-    if (!item) return;
-    const match = allDocs.find(d => d.name === item.dataset.doc) || {
-      name: item.dataset.doc, type: item.dataset.type,
-      size: item.querySelector('.doc-size').textContent,
-      content: "This file is indexed locally and used as retrieval context when answering related questions."
-    };
-    openDocModal(match);
-  });
 
   document.getElementById('docModalClose').addEventListener('click', closeDocModal);
   docModalBackdrop.addEventListener('click', e => { if (e.target === docModalBackdrop) closeDocModal(); });
@@ -1370,11 +1696,9 @@
   function closeLibraryModal(){ libraryModalBackdrop.classList.remove('show'); }
 
   document.getElementById('btnLibrary').addEventListener('click', openLibraryModal);
-  document.getElementById('btnViewAll').addEventListener('click', openLibraryModal);
   document.getElementById('libraryModalClose').addEventListener('click', closeLibraryModal);
   libraryModalBackdrop.addEventListener('click', e => { if (e.target === libraryModalBackdrop) closeLibraryModal(); });
 
-  document.getElementById('btnModelSettings').addEventListener('click', () => toast('Model settings — demo only'));
   document.getElementById('btnSliders').addEventListener('click', () => toast('Chat preferences — demo only'));
 
   /* ---------- Bookmark ---------- */
@@ -1383,7 +1707,6 @@
   /* ---------- New Note modal ---------- */
   const noteBackdrop = document.getElementById('noteModalBackdrop');
   const noteText = document.getElementById('noteText');
-  const statNotes = document.getElementById('statNotes');
 
   function openNoteModal(){
     noteBackdrop.classList.add('show');
@@ -1398,8 +1721,7 @@
   noteBackdrop.addEventListener('click', e => { if (e.target === noteBackdrop) closeNoteModal(); });
   document.getElementById('noteSave').addEventListener('click', () => {
     if (!noteText.value.trim()){ closeNoteModal(); return; }
-    statNotes.textContent = (parseInt(statNotes.textContent,10) + 1);
-    toast('Note saved to your local library');
+    toast('Note saved to your library');
     closeNoteModal();
   });
 

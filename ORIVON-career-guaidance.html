@@ -37,6 +37,10 @@
     --blue:#3b82f6;
     --blue-soft:rgba(59,130,246,.13);
     --red:#f0654c;
+    --lime:#a3e635;
+    --lime-soft:rgba(163,230,53,.13);
+    --rose:#fb7185;
+    --rose-soft:rgba(251,113,133,.13);
     --radius-lg:18px;
     --radius-md:13px;
     --radius-sm:9px;
@@ -445,8 +449,134 @@
 
   @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
 </style>
+<style>
+/* === Orivon message system (om-) === */
+.om-toast-stack{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+.om-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:10px;background:#15121f;border:1px solid #241f33;border-left:3px solid #f0574e;border-radius:10px;padding:12px 14px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;}
+.om-toast.om-show{opacity:1;transform:translateY(0);}
+.om-toast.om-warn{border-left-color:#f0a94e;}
+.om-toast.om-ok{border-left-color:#4ecf8f;}
+.om-toast .om-icon{font-size:1.05rem;line-height:1.4;}
+.om-toast .om-body strong{display:block;font-size:.88rem;margin-bottom:2px;color:#f4f2fa;}
+.om-toast .om-body span{font-size:.8rem;color:#9a94ac;}
+
+.om-banner{display:flex;align-items:flex-start;gap:10px;background:rgba(240,87,78,.08);border:1px solid rgba(240,87,78,.3);border-radius:10px;padding:12px 14px;font-size:.85rem;margin-bottom:16px;}
+.om-banner strong{color:#ff8880;}
+.om-banner span{color:#9a94ac;}
+
+.om-empty{text-align:center;padding:40px 24px;background:#0e0c17;border:1px dashed #241f33;border-radius:14px;}
+.om-empty .om-glyph{width:44px;height:44px;border-radius:12px;margin:0 auto 14px;background:linear-gradient(135deg,#8b5cf6,#a855f7);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;}
+.om-empty h3{margin:0 0 6px;font-size:1rem;color:#f4f2fa;}
+.om-empty p{margin:0 0 16px;color:#9a94ac;font-size:.85rem;}
+.om-empty button{background:linear-gradient(135deg,#8b5cf6,#a855f7);border:none;color:#fff;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;}
+
+.om-retry{background:#0e0c17;border:1px solid #241f33;border-radius:14px;padding:28px 24px;text-align:center;}
+.om-retry .om-glyph{width:44px;height:44px;border-radius:12px;margin:0 auto 14px;background:rgba(240,87,78,.15);color:#f0574e;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.om-retry h3{margin:0 0 6px;font-size:1rem;color:#f4f2fa;}
+.om-retry p{margin:0 0 16px;color:#9a94ac;font-size:.85rem;}
+.om-retry button{background:#15121f;border:1px solid #241f33;color:#f4f2fa;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;}
+.om-retry button:hover{border-color:#a855f7;}
+
+.om-skeleton{background:#0e0c17;border:1px solid #241f33;border-radius:14px;padding:20px;}
+.om-sk-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#15121f 25%,#241f33 37%,#15121f 63%);background-size:400% 100%;animation:om-sk 1.4s ease infinite;margin-bottom:10px;}
+.om-sk-line:last-child{margin-bottom:0;}
+@keyframes om-sk{0%{background-position:100% 0;}100%{background-position:0 0;}}
+
+.om-wait{display:flex;align-items:center;gap:10px;color:#9a94ac;font-size:.85rem;background:#0e0c17;border:1px solid #241f33;border-radius:10px;padding:12px 14px;}
+.om-spinner{width:16px;height:16px;border-radius:50%;border:2px solid #241f33;border-top-color:#a855f7;animation:om-spin .8s linear infinite;flex-shrink:0;}
+@keyframes om-spin{to{transform:rotate(360deg);}}
+
+.om-timeout{background:rgba(240,169,78,.06);border:1px solid rgba(240,169,78,.28);border-radius:10px;padding:14px 16px;font-size:.85rem;display:flex;gap:10px;align-items:flex-start;}
+.om-timeout strong{color:#f0a94e;display:block;margin-bottom:2px;}
+.om-timeout span{color:#9a94ac;}
+</style>
+
 </head>
 <body>
+<script>
+/* === Orivon message system helpers (om-) === */
+window.OrivonMsg = (function(){
+  let stack;
+  function getStack(){
+    if (!stack){
+      stack = document.createElement('div');
+      stack.className = 'om-toast-stack';
+      document.body.appendChild(stack);
+    }
+    return stack;
+  }
+  const ICONS = { error:'⚠', warn:'⚠', ok:'✓' };
+
+  function toast(opts){
+    if (typeof opts === 'string') opts = { title: opts };
+    const type = opts.type || 'error';
+    const title = opts.title || 'Something went wrong';
+    const body = opts.body || '';
+    const el = document.createElement('div');
+    el.className = 'om-toast' + (type === 'warn' ? ' om-warn' : type === 'ok' ? ' om-ok' : '');
+    el.innerHTML = '<span class="om-icon">' + (ICONS[type] || ICONS.error) + '</span>' +
+      '<div class="om-body"><strong></strong>' + (body ? '<span></span>' : '') + '</div>';
+    el.querySelector('strong').textContent = title;
+    if (body) el.querySelector('span').textContent = body;
+    getStack().appendChild(el);
+    requestAnimationFrame(() => el.classList.add('om-show'));
+    setTimeout(() => {
+      el.classList.remove('om-show');
+      setTimeout(() => el.remove(), 250);
+    }, opts.duration || 5000);
+  }
+
+  function banner(container, opts){
+    container.innerHTML = '<div class="om-banner"><span>⚠</span><div><strong></strong> <span></span></div></div>';
+    container.querySelector('strong').textContent = opts.title || "We couldn't process that.";
+    container.querySelector('.om-banner span:last-child').textContent = opts.body || 'Please try again.';
+    container.style.display = '';
+  }
+
+  function empty(container, opts){
+    container.innerHTML = '<div class="om-empty"><div class="om-glyph">' + (opts.glyph || '◆') + '</div>' +
+      '<h3></h3><p></p>' + (opts.actionLabel ? '<button type="button"></button>' : '') + '</div>';
+    container.querySelector('h3').textContent = opts.title || 'Nothing here yet';
+    container.querySelector('p').textContent = opts.body || '';
+    if (opts.actionLabel){
+      const btn = container.querySelector('button');
+      btn.textContent = opts.actionLabel;
+      if (opts.onAction) btn.addEventListener('click', opts.onAction);
+    }
+  }
+
+  function retry(container, opts){
+    container.innerHTML = '<div class="om-retry"><div class="om-glyph">!</div>' +
+      '<h3></h3><p></p><button type="button"></button></div>';
+    container.querySelector('h3').textContent = opts.title || "Couldn't load this";
+    container.querySelector('p').textContent = opts.body || 'Something went wrong on our end. Give it another try.';
+    const btn = container.querySelector('button');
+    btn.textContent = opts.actionLabel || 'Retry';
+    if (opts.onRetry) btn.addEventListener('click', opts.onRetry);
+  }
+
+  function skeleton(container, lines){
+    lines = lines || [90, 60, 40];
+    container.innerHTML = '<div class="om-skeleton">' +
+      lines.map(w => '<div class="om-sk-line" style="width:' + w + '%"></div>').join('') +
+      '</div>';
+  }
+
+  function wait(container, message){
+    container.innerHTML = '<div class="om-wait"><div class="om-spinner"></div><span></span></div>';
+    container.querySelector('span').textContent = message || 'Working on it…';
+  }
+
+  function timeout(container, opts){
+    container.innerHTML = '<div class="om-timeout"><span>⏱</span><div><strong></strong> <span></span></div></div>';
+    container.querySelector('strong').textContent = opts.title || 'This is taking longer than usual.';
+    container.querySelector('.om-timeout span:last-child').textContent = opts.body || 'Still working on it — you can wait, or try again in a moment.';
+  }
+
+  return { toast, banner, empty, retry, skeleton, wait, timeout };
+})();
+</script>
+
 
 <div class="app">
 
@@ -469,7 +599,7 @@
   <aside class="sidebar sidebar-left" id="sidebarLeft">
     <a href="orivon-landing-v5.html" class="brand" style="text-decoration:none;color:inherit;">
       <svg class="hex" viewBox="0 0 24 24"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg>
-      <div class="brand-text"><h1>Orivon Mentor</h1><p>Your Offline AI Mentor</p></div>
+      <div class="brand-text"><h1>Orivon Mentor</h1><p>Your AI Mentor</p></div>
     </a>
 
     <div class="search-box">
@@ -543,7 +673,7 @@
     <div class="privacy-box">
       <div class="top">
         <div class="lock"><svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
-        <div><h3>Everything is offline</h3><p>All data stays on your device. No internet, no tracking.</p></div>
+        <div><h3>Your data, your privacy</h3><p>Your data is handled securely and never shared without consent.</p></div>
       </div>
       <div class="badge"><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>100% Private</div>
     </div>
@@ -676,22 +806,22 @@
 
         <!-- ===== ASSESSMENTS TAB PANEL ===== -->
         <div class="tab-panel" id="panel-Assessments" data-panel="Assessments">
-          <div class="sec-head"><div class="left"><h3>Your Assessments</h3><span class="tag">3 completed</span></div></div>
+          <div class="sec-head"><div class="left"><h3>Your Assessments</h3><span class="tag" id="assessmentsCompletedTag">0 of 3 completed</span></div></div>
           <div class="match-grid" style="margin-bottom:26px;">
             <div class="match-card c-purple">
-              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg></div><div><h4>Career Interest Profiler</h4><span class="match-badge">Completed</span></div></div></div>
+              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/></svg></div><div><h4>Career Interest Profiler</h4><span class="match-badge" style="background:var(--panel-2);color:var(--text-faint)">Not Started</span></div></div></div>
               <p class="mc-desc">Maps your interests against career clusters to surface roles you're likely to enjoy.</p>
-              <button class="mc-btn" data-assessment="Career Interest Profiler">Retake Assessment</button>
+              <button class="mc-btn" data-assessment="Career Interest Profiler">Start Assessment</button>
             </div>
             <div class="match-card c-teal">
-              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><h4>Skills Strength Test</h4><span class="match-badge">Completed</span></div></div></div>
+              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><h4>Skills Strength Test</h4><span class="match-badge" style="background:var(--panel-2);color:var(--text-faint)">Not Started</span></div></div></div>
               <p class="mc-desc">Benchmarks your technical and soft skills against industry expectations.</p>
-              <button class="mc-btn" data-assessment="Skills Strength Test">Retake Assessment</button>
+              <button class="mc-btn" data-assessment="Skills Strength Test">Start Assessment</button>
             </div>
             <div class="match-card c-amber">
-              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8v.5h6v-.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg></div><div><h4>Values &amp; Goals Survey</h4><span class="match-badge" style="background:var(--amber-soft);color:var(--amber)">In Progress</span></div></div></div>
+              <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20"><path d="M12 2a7 7 0 0 0-4 12.7c.6.4 1 1.1 1 1.8v.5h6v-.5c0-.7.4-1.4 1-1.8A7 7 0 0 0 12 2z"/></svg></div><div><h4>Values &amp; Goals Survey</h4><span class="match-badge" style="background:var(--panel-2);color:var(--text-faint)">Not Started</span></div></div></div>
               <p class="mc-desc">Clarifies what matters most to you at work so recommendations match your priorities.</p>
-              <button class="mc-btn" data-assessment="Values & Goals Survey">Continue Assessment</button>
+              <button class="mc-btn" data-assessment="Values & Goals Survey">Start Assessment</button>
             </div>
           </div>
           <div class="sec-head"><div class="left"><h3>Take a New Assessment</h3></div></div>
@@ -836,6 +966,9 @@
 
 <div class="modal-backdrop" id="quizBackdrop" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;display:flex;align-items:center;justify-content:center;padding:18px;transition:opacity .22s;">
   <div class="modal" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:18px;width:100%;max-width:460px;padding:22px;box-shadow:0 16px 40px -12px rgba(0,0,0,.55);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+      <h4 id="quizTitle" style="margin:0;font-size:13.5px;font-weight:700;">Full Career Assessment</h4>
+    </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <span style="font-size:11.5px;color:var(--text-faint);font-weight:650;" id="quizProgress">Question 1 of 6</span>
       <button class="icon-btn" id="quizClose" aria-label="Close" style="width:28px;height:28px;"><svg class="icon" viewBox="0 0 24 24" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -898,12 +1031,9 @@
 
   /* ---------- Toast ---------- */
   let toastTimer = null;
-  function toast(msg){
-    const el = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  function toast(msg, type){
+    if (typeof msg === 'object'){ OrivonMsg.toast(msg); return; }
+    OrivonMsg.toast({ type: type || 'ok', title: msg });
   }
 
   function showModal(id){ document.getElementById(id).classList.add('show'); }
@@ -938,7 +1068,7 @@
   });
   ['navUploads','navNotes','navBookmarks','navAbout'].forEach(id => {
     document.getElementById(id).addEventListener('click', () => {
-      const labels = {navUploads:'Uploads page isn\'t built in this preview yet', navNotes:'Notes page isn\'t built in this preview yet', navBookmarks:'Bookmarks page isn\'t built in this preview yet', navAbout:'Orivon Mentor v1.0 — fully offline'};
+      const labels = {navUploads:'Uploads page isn\'t built in this preview yet', navNotes:'Notes page isn\'t built in this preview yet', navBookmarks:'Bookmarks page isn\'t built in this preview yet', navAbout:'Orivon Mentor v1.0'};
       toast(labels[id]);
       closeDrawers();
     });
@@ -963,9 +1093,9 @@
   });
 
   /* ---------- Header / hero actions -> open real quiz ---------- */
-  document.getElementById('btnAssessment').addEventListener('click', startQuiz);
-  document.getElementById('btnStartAssessment').addEventListener('click', startQuiz);
-  document.getElementById('btnAssessmentInline').addEventListener('click', startQuiz);
+  document.getElementById('btnAssessment').addEventListener('click', () => startQuiz('Full Career Assessment'));
+  document.getElementById('btnStartAssessment').addEventListener('click', () => switchTab('Assessments'));
+  document.getElementById('btnAssessmentInline').addEventListener('click', () => startQuiz('Full Career Assessment'));
   document.getElementById('btnMore').addEventListener('click', () => toast('More options — duplicate, export PDF, share link'));
 
   /* ---------- Save the recommended career so Learning Roadmaps can use it ---------- */
@@ -1036,7 +1166,7 @@
     document.getElementById('detailBody').textContent = 'Your interests, skills, values and goals scores come from your assessment answers. Retake any assessment from the Assessments tab to update these numbers.';
     showModal('detailBackdrop');
   });
-  document.getElementById('btnCompleteProfile').addEventListener('click', startQuiz);
+  document.getElementById('btnCompleteProfile').addEventListener('click', () => startQuiz('Full Career Assessment'));
 
   const qaTabMap = {
     'Take Career Assessment': 'quiz',
@@ -1047,7 +1177,7 @@
   document.querySelectorAll('.qa-item').forEach(item => {
     item.addEventListener('click', () => {
       const target = qaTabMap[item.dataset.action];
-      if (target === 'quiz') startQuiz(); else switchTab(target);
+      if (target === 'quiz') startQuiz('Full Career Assessment'); else switchTab(target);
     });
   });
 
@@ -1078,11 +1208,11 @@
     const resBtn = e.target.closest('[data-resource]');
     if (resBtn){
       document.getElementById('detailTitle').textContent = resBtn.dataset.resource + ' Resources';
-      document.getElementById('detailBody').textContent = 'We matched 4 offline resources in your Knowledge Base for ' + resBtn.dataset.resource + ', plus 2 recommended roadcards from your Notes. Open the Chat tab and ask "help me learn ' + resBtn.dataset.resource + '" to get a personalized plan.';
+      document.getElementById('detailBody').textContent = 'We matched 4 resources in your Knowledge Base for ' + resBtn.dataset.resource + ', plus 2 recommended roadcards from your Notes. Open the Chat tab and ask "help me learn ' + resBtn.dataset.resource + '" to get a personalized plan.';
       showModal('detailBackdrop');
     }
     const assessBtn = e.target.closest('[data-assessment]');
-    if (assessBtn){ startQuiz(); }
+    if (assessBtn){ startQuiz(assessBtn.dataset.assessment); }
   });
 
   /* ---------- Animate profile ring + bars ---------- */
@@ -1117,7 +1247,7 @@
   // These weights are summed across every question answered and used to
   // compute real skill bars, career match %, and profile scores below —
   // nothing here is randomized or hardcoded after the quiz is taken.
-  const QUIZ = [
+  const FULL_QUIZ = [
     {q:"Which kind of task energizes you most?", opts:[
       {label:"Solving a tricky logic puzzle", w:{eng:2}},
       {label:"Spotting patterns in a messy dataset", w:{data:2}},
@@ -1160,27 +1290,148 @@
       {label:"A design tool like Figma", w:{design:2}},
       {label:"Public speaking or writing", w:{people:2}}
     ]},
-    {q:"In 5 years, you'd like to be known as someone who:", opts:[
-      {label:"Builds elegant, reliable systems", w:{eng:2}},
-      {label:"Uncovers insights nobody else saw", w:{data:2}},
-      {label:"Leads and grows a team", w:{people:2}},
-      {label:"Ships products people love", w:{design:1, eng:1}}
+  ];
+
+  /* ---------- Career Interest Profiler: maps interests to career clusters ---------- */
+  const INTEREST_QUIZ = [
+    {q:"When you imagine your ideal workday, what are you doing?", opts:[
+      {label:"Writing and debugging code", w:{eng:2}},
+      {label:"Digging through numbers to find a story", w:{data:2}},
+      {label:"Sketching and refining a product experience", w:{design:2}},
+      {label:"Running meetings and aligning a team", w:{people:2}}
+    ]},
+    {q:"Which project would you volunteer for first?", opts:[
+      {label:"Building a new internal tool from scratch", w:{eng:2}},
+      {label:"Figuring out why sign-ups dropped last month", w:{data:2}},
+      {label:"Redesigning a confusing onboarding flow", w:{design:2}},
+      {label:"Kicking off a cross-team initiative", w:{people:2}}
+    ]},
+    {q:"What kind of feedback means the most to you?", opts:[
+      {label:"\"Your code is clean and reliable\"", w:{eng:2}},
+      {label:"\"Your analysis changed how we think about this\"", w:{data:2}},
+      {label:"\"That's such an intuitive design\"", w:{design:2}},
+      {label:"\"You brought the team together\"", w:{people:2}}
+    ]},
+    {q:"Pick a hobby you'd actually enjoy learning:", opts:[
+      {label:"Building a small app or game", w:{eng:2}},
+      {label:"Learning to model data in spreadsheets or SQL", w:{data:2}},
+      {label:"Illustration or graphic design", w:{design:2}},
+      {label:"Public speaking or coaching", w:{people:2}}
+    ]},
+    {q:"A friend asks you to help plan a group trip. You immediately:", opts:[
+      {label:"Build a spreadsheet to track logistics automatically", w:{eng:1, data:1}},
+      {label:"Research and compare every option in detail", w:{data:2}},
+      {label:"Design a visual itinerary everyone will love", w:{design:2}},
+      {label:"Get everyone aligned on a plan and lead the group", w:{people:2}}
     ]}
   ];
+
+  /* ---------- Skills Strength Test: direct self-rated skill levels ---------- */
+  const SKILLS_QUIZ = [
+    {q:"How comfortable are you writing code in a language like Python or JavaScript?", skill:"Python Programming", opts:[
+      {label:"Very comfortable — I write code regularly", val:90},
+      {label:"Comfortable — I can build small projects", val:65},
+      {label:"Somewhat comfortable — I know the basics", val:40},
+      {label:"Not comfortable — I'm just starting out", val:20}
+    ]},
+    {q:"How would you rate your ability to analyze and interpret data?", skill:"Data Analysis", opts:[
+      {label:"Very strong — I work with data regularly", val:90},
+      {label:"Solid — I can pull insights with some effort", val:65},
+      {label:"Basic — I understand simple charts and averages", val:40},
+      {label:"Limited — data work isn't my strength yet", val:20}
+    ]},
+    {q:"When facing a new, unfamiliar problem, how confident are you breaking it down and solving it?", skill:"Problem Solving", opts:[
+      {label:"Very confident — I enjoy the challenge", val:90},
+      {label:"Fairly confident — I usually get there", val:65},
+      {label:"Somewhat confident — it takes me a while", val:40},
+      {label:"Not very confident — I get stuck easily", val:20}
+    ]},
+    {q:"How familiar are you with machine learning concepts (models, training, evaluation)?", skill:"Machine Learning", opts:[
+      {label:"Very familiar — I've built or trained models", val:90},
+      {label:"Somewhat familiar — I understand the concepts", val:60},
+      {label:"A little familiar — I've heard the terms", val:35},
+      {label:"Not familiar at all", val:15}
+    ]},
+    {q:"How comfortable are you explaining a technical idea to a non-technical person?", skill:"Communication", opts:[
+      {label:"Very comfortable — I do this often", val:90},
+      {label:"Comfortable — I can usually simplify things", val:65},
+      {label:"A bit uneasy — I tend to over-explain", val:40},
+      {label:"Not comfortable — this is hard for me", val:20}
+    ]},
+    {q:"How confident are you designing the architecture of a larger software system?", skill:"System Design", opts:[
+      {label:"Very confident — I've designed systems before", val:88},
+      {label:"Fairly confident — I understand the fundamentals", val:60},
+      {label:"Limited — I've only seen small examples", val:35},
+      {label:"Not confident — this is new territory", val:15}
+    ]}
+  ];
+
+  /* ---------- Values & Goals Survey: what matters most at work ---------- */
+  const VALUES_QUIZ = [
+    {q:"What would make you turn down a higher-paying offer?", opts:[
+      {label:"Less flexibility over how and when I work", w:{flexibility:2}},
+      {label:"A role with less real-world impact", w:{impact:2}},
+      {label:"Less room to grow and learn", w:{growth:2}},
+      {label:"A less stable or less established company", w:{stability:2}}
+    ]},
+    {q:"Which work environment sounds most appealing?", opts:[
+      {label:"Fully remote, set my own hours", w:{flexibility:2}},
+      {label:"Mission-driven, working on something that matters", w:{impact:2}},
+      {label:"Fast-growing, constantly learning new things", w:{growth:2}},
+      {label:"Established, predictable, well-resourced", w:{stability:2}}
+    ]},
+    {q:"How do you define career success?", opts:[
+      {label:"Having control over my own schedule and life", w:{flexibility:2}},
+      {label:"Knowing my work genuinely helps people", w:{impact:2}},
+      {label:"Constantly leveling up my skills and title", w:{growth:2}},
+      {label:"Financial security and long-term stability", w:{stability:2}}
+    ]},
+    {q:"What worries you most about a job?", opts:[
+      {label:"Being tied to rigid hours or location", w:{flexibility:2}},
+      {label:"Work that feels pointless or disconnected from impact", w:{impact:2}},
+      {label:"Stagnating and not learning anything new", w:{growth:2}},
+      {label:"Layoffs or financial instability", w:{stability:2}}
+    ]},
+    {q:"Pick the perk that matters most to you:", opts:[
+      {label:"Unlimited PTO / flexible schedule", w:{flexibility:2}},
+      {label:"Volunteer days / mission-aligned work", w:{impact:2}},
+      {label:"Learning budget / mentorship program", w:{growth:2}},
+      {label:"Strong retirement plan / job security", w:{stability:2}}
+    ]},
+    {q:"Five years from now, you'd be disappointed if you:", opts:[
+      {label:"Felt stuck in a rigid 9-to-5 structure", w:{flexibility:2}},
+      {label:"Couldn't point to work that mattered", w:{impact:2}},
+      {label:"Hadn't grown much since today", w:{growth:2}},
+      {label:"Still felt financially uncertain", w:{stability:2}}
+    ]}
+  ];
+
+  const QUIZZES = {
+    'Full Career Assessment': FULL_QUIZ,
+    'Career Interest Profiler': INTEREST_QUIZ,
+    'Skills Strength Test': SKILLS_QUIZ,
+    'Values & Goals Survey': VALUES_QUIZ
+  };
+
+  let currentQuizKey = 'Full Career Assessment';
+  let currentQuizQuestions = FULL_QUIZ;
   let quizIndex = 0;
   let quizAnswers = [];
   let lastRecommendedRole = null;
 
-  function startQuiz(){
+  function startQuiz(key){
+    currentQuizKey = QUIZZES[key] ? key : 'Full Career Assessment';
+    currentQuizQuestions = QUIZZES[currentQuizKey];
     quizIndex = 0;
     quizAnswers = [];
+    document.getElementById('quizTitle').textContent = currentQuizKey;
     renderQuizQuestion();
     showModal('quizBackdrop');
   }
   function renderQuizQuestion(){
-    const item = QUIZ[quizIndex];
-    document.getElementById('quizProgress').textContent = 'Question ' + (quizIndex+1) + ' of ' + QUIZ.length;
-    document.getElementById('quizBar').style.width = (((quizIndex) / QUIZ.length) * 100) + '%';
+    const item = currentQuizQuestions[quizIndex];
+    document.getElementById('quizProgress').textContent = 'Question ' + (quizIndex+1) + ' of ' + currentQuizQuestions.length;
+    document.getElementById('quizBar').style.width = (((quizIndex) / currentQuizQuestions.length) * 100) + '%';
     document.getElementById('quizQuestion').textContent = item.q;
     const optsWrap = document.getElementById('quizOptions');
     optsWrap.innerHTML = '';
@@ -1191,13 +1442,13 @@
       b.addEventListener('mouseenter', () => b.style.borderColor = 'var(--accent)');
       b.addEventListener('mouseleave', () => b.style.borderColor = 'var(--border)');
       b.addEventListener('click', () => {
-        quizAnswers.push(opt.w || {});
+        quizAnswers.push(item.skill ? {skill:item.skill, val:opt.val} : (opt.w || {}));
         quizIndex++;
-        if (quizIndex < QUIZ.length){
+        if (quizIndex < currentQuizQuestions.length){
           renderQuizQuestion();
         } else {
           document.getElementById('quizBar').style.width = '100%';
-          setTimeout(finishQuiz, 220);
+          setTimeout(onQuizComplete, 220);
         }
       });
       optsWrap.appendChild(b);
@@ -1248,7 +1499,159 @@
       matchFn: share => matchFromShare(share.data * 0.6 + share.eng * 0.4) }
   ];
 
-  function finishQuiz(){
+  const SKILL_META = {
+    'Python Programming': { desc: 'A foundational skill for almost every engineering and data role — worth strengthening if it scored low.', icon:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>', color:'var(--accent)', colorSoft:'var(--accent-soft)' },
+    'Data Analysis': { desc: 'Being able to work with data is valuable across almost every career path you matched with.', icon:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>', color:'var(--teal)', colorSoft:'var(--teal-soft)' },
+    'Problem Solving': { desc: 'Structured problem solving underpins interviews and real work in every technical path.', icon:'<circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/>', color:'var(--green)', colorSoft:'var(--green-soft)' },
+    'Machine Learning': { desc: 'Core requirement if you\'re leaning toward Data Science or AI/ML Engineer paths.', icon:'<circle cx="12" cy="12" r="9"/>', color:'var(--amber)', colorSoft:'var(--amber-soft)' },
+    'Communication': { desc: 'Explaining your work clearly matters in interviews, reviews, and leadership tracks alike.', icon:'<path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2 8.5 8.5 0 0 1-7.5 4.3 8.4 8.4 0 0 1-4.2-1.1L3 21l2.1-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.4 3a8.5 8.5 0 0 1 8.5 8.5z"/>', color:'var(--pink)', colorSoft:'var(--pink-soft)' },
+    'System Design': { desc: 'Closing this gap unlocks senior engineering and architecture-level roles.', icon:'<rect x="6" y="6" width="12" height="12" rx="2"/>', color:'var(--blue)', colorSoft:'var(--blue-soft)' }
+  };
+  const SKILL_COLORS = { 'Python Programming':'var(--accent)', 'Data Analysis':'var(--teal)', 'Problem Solving':'var(--green)', 'Machine Learning':'var(--amber)', 'Communication':'var(--pink)', 'System Design':'var(--blue)' };
+
+  // Shared renderer: takes {skillName: 0-100} and paints the Skills tab bars + weakest-2 recommendations.
+  function renderSkillsSection(vals, sourceLabel){
+    const skillFormulas = {};
+    Object.keys(SKILL_COLORS).forEach(name => {
+      skillFormulas[name] = { val: Math.round(vals[name] ?? 50), color: SKILL_COLORS[name] };
+    });
+    document.getElementById('skillLevelsContainer').innerHTML = Object.entries(skillFormulas).map(([name, s]) =>
+      `<div class="skill-row" data-skill="${name}"><div class="top-line"><span>${name}</span><span class="skill-pct">${s.val}%</span></div><div class="skill-track"><span class="skill-fill" style="width:${s.val}%;background:${s.color}"></span></div></div>`
+    ).join('');
+    document.getElementById('skillsSourceTag').textContent = sourceLabel;
+
+    const weakestSkills = Object.entries(skillFormulas).sort((a, b) => a[1].val - b[1].val).slice(0, 2);
+    document.getElementById('recommendedSkillsGrid').innerHTML = weakestSkills.map(([name, s]) => {
+      const meta = SKILL_META[name];
+      const gap = 100 - s.val;
+      return `<div class="match-card" style="border-top:2px solid ${meta.color}">
+        <div class="mc-top"><div class="mc-id"><div class="mc-icon" style="background:${meta.colorSoft};color:${meta.color}"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${meta.icon}</svg></div>
+        <div><h4>${name}</h4><span class="match-badge" style="background:var(--amber-soft);color:var(--amber)">Gap: ${gap}%</span></div></div></div>
+        <p class="mc-desc">${meta.desc}</p>
+        <button class="mc-btn" style="border:1px solid ${meta.color};color:${meta.color};" data-resource="${name}">Find Resources</button>
+      </div>`;
+    }).join('');
+  }
+
+  // Shared renderer: rewrites the 4 Career Profile sub-bars (Interests/Skills/Values/Goals).
+  // Pass only the keys you want to change — existing bars for other keys are preserved.
+  let lastSubBars = { Interests: 0, Skills: 0, Values: 0, Goals: 0 };
+  // Most recent eng/data/design/people interest shares from the Full Assessment
+  // or Career Interest Profiler — used to personalize the Career Paths grid.
+  let lastShare = null;
+  const REQUIRED_ASSESSMENTS = ['Career Interest Profiler', 'Skills Strength Test', 'Values & Goals Survey'];
+  let completedAssessments = new Set();
+  function allRequiredAssessmentsDone(){
+    return REQUIRED_ASSESSMENTS.every(name => completedAssessments.has(name));
+  }
+  function lockedStateHtml(message){
+    return `<div class="om-empty" style="grid-column:1/-1;">
+      <div class="om-glyph">🔒</div>
+      <h3>Complete all 3 assessments to unlock this</h3>
+      <p>${message}</p>
+      <button type="button" id="btnGoToAssessments">Go to Assessments</button>
+    </div>`;
+  }
+  function refreshCompatibilityGate(){
+    const tag = document.getElementById('assessmentsCompletedTag');
+    if (tag) tag.textContent = completedAssessments.size + ' of 3 completed';
+
+    if (!allRequiredAssessmentsDone()){
+      const msg = 'Finish the Career Interest Profiler, Skills Strength Test and Values & Goals Survey to see which professions actually fit you.';
+      document.getElementById('topMatchesGrid').innerHTML = lockedStateHtml(msg);
+      document.getElementById('topMatchesTag').textContent = completedAssessments.size + ' of 3 assessments completed';
+      document.getElementById('allPathsGrid').innerHTML = lockedStateHtml(msg);
+      document.getElementById('pathsCountTag').textContent = completedAssessments.size + ' of 3 assessments completed';
+      document.querySelectorAll('#btnGoToAssessments').forEach(btn => btn.addEventListener('click', () => switchTab('Assessments')));
+      return false;
+    }
+    if (lastShare){
+      renderTopMatchesGrid(lastShare, 'Based on your completed assessments');
+    }
+    renderPathsGrid();
+    renderRoadmapsGrid();
+    renderJobRolesGrid();
+    renderIndustriesGrid();
+    return true;
+  }
+
+  function renderTopMatchesGrid(share, sourceLabel){
+    const topCategory = Object.keys(share).reduce((a, b) => share[b] > share[a] ? b : a);
+    let matchesHtml = MAIN_MATCH_CARDS.map(card => {
+      const pct = card.matchFn(share);
+      return `<div class="match-card ${card.className}">
+        <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${card.icon}</svg></div>
+        <div><h4>${card.role}</h4><span class="match-badge">${pct}% Match</span></div></div></div>
+        <p class="mc-desc">${card.desc}</p>
+        <p class="mc-fits">Why it fits you:</p>
+        <ul class="mc-list">${card.fits.map(f => '<li><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' + f + '</li>').join('')}</ul>
+        <button class="mc-btn" data-role="${card.role}">View Roadmap</button>
+      </div>`;
+    }).join('');
+    if (topCategory === 'people' || topCategory === 'design'){
+      const info = FOURTH_CARD_INFO[topCategory];
+      const fourthMatch = matchFromShare(share[topCategory]);
+      matchesHtml += `<div class="match-card" style="border-top:2px solid ${info.color}">
+        <div class="mc-top"><div class="mc-id"><div class="mc-icon" style="background:${info.colorSoft};color:${info.color}"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${info.icon}</svg></div>
+        <div><h4>${info.title}</h4><span class="match-badge">${fourthMatch}% Match</span></div></div></div>
+        <p class="mc-desc">${info.desc}</p>
+        <p class="mc-fits">Why it fits you:</p>
+        <ul class="mc-list">${info.fits.map(f => '<li><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' + f + '</li>').join('')}</ul>
+        <button class="mc-btn" data-role="${info.role}">View Roadmap</button>
+      </div>`;
+    }
+    document.getElementById('topMatchesGrid').innerHTML = matchesHtml;
+    document.getElementById('topMatchesTag').textContent = sourceLabel;
+
+    let bestRole = null, bestPct = -1;
+    MAIN_MATCH_CARDS.forEach(card => {
+      const pct = card.matchFn(share);
+      if(pct > bestPct){ bestPct = pct; bestRole = card.role; }
+    });
+    if(topCategory === 'people' || topCategory === 'design'){
+      const info = FOURTH_CARD_INFO[topCategory];
+      const fourthPct = matchFromShare(share[topCategory]);
+      if(fourthPct > bestPct){ bestPct = fourthPct; bestRole = info.role; }
+    }
+    persistCareerRecommendation(bestRole, bestPct, share);
+    lastRecommendedRole = bestRole;
+    return topCategory;
+  }
+  function renderProfileSubBars(patch){
+    Object.assign(lastSubBars, patch);
+    document.getElementById('profileSubBars').innerHTML = Object.entries(lastSubBars).map(([label, val]) =>
+      `<div class="skill-row"><div class="top-line"><span>${label}</span><span>${val}%</span></div><div class="skill-track"><span class="skill-fill" style="width:${val}%"></span></div></div>`
+    ).join('');
+  }
+
+  function markAssessmentCompleted(name){
+    completedAssessments.add(name);
+    const btn = document.querySelector('[data-assessment="' + name + '"]');
+    if (!btn) return;
+    btn.textContent = 'Retake Assessment';
+    const badge = btn.closest('.match-card')?.querySelector('.match-badge');
+    if (badge){
+      badge.textContent = 'Completed';
+      badge.style.background = '';
+      badge.style.color = '';
+    }
+  }
+
+  function showResultModal(summary, subtext, showRoadmapBtn){
+    document.getElementById('resultSummaryText').textContent = summary;
+    document.getElementById('resultTopMatchText').textContent = subtext;
+    document.getElementById('resultViewRoadmap').style.display = showRoadmapBtn ? 'block' : 'none';
+    showModal('resultBackdrop');
+  }
+
+  function onQuizComplete(){
+    if (currentQuizKey === 'Skills Strength Test') finishSkillsQuiz();
+    else if (currentQuizKey === 'Career Interest Profiler') finishInterestQuiz();
+    else if (currentQuizKey === 'Values & Goals Survey') finishValuesQuiz();
+    else finishFullAssessment();
+  }
+
+  function finishFullAssessment(){
     hideModal('quizBackdrop');
 
     // Sum every answer's category weights across the whole quiz.
@@ -1267,118 +1670,128 @@
       people: (totals.people / sum) * 100
     };
     const topCategory = Object.keys(share).reduce((a, b) => share[b] > share[a] ? b : a);
+    lastShare = share;
 
-    // ---- Build the 6 named skill bars (container was empty until now) ----
-    const skillFormulas = {
-      'Python Programming': { val: scoreFromShare(share.eng), color:'var(--accent)' },
-      'Data Analysis': { val: scoreFromShare(share.data), color:'var(--teal)' },
-      'Problem Solving': { val: scoreFromShare((share.eng + share.data) / 2), color:'var(--green)' },
-      'Machine Learning': { val: scoreFromShare(Math.max(0, share.data - 8)), color:'var(--amber)' },
-      'Communication': { val: scoreFromShare(share.people), color:'var(--pink)' },
-      'System Design': { val: scoreFromShare(share.eng * 0.7 + share.design * 0.3), color:'var(--blue)' }
-    };
-    document.getElementById('skillLevelsContainer').innerHTML = Object.entries(skillFormulas).map(([name, s]) =>
-      `<div class="skill-row" data-skill="${name}"><div class="top-line"><span>${name}</span><span class="skill-pct">${s.val}%</span></div><div class="skill-track"><span class="skill-fill" style="width:${s.val}%;background:${s.color}"></span></div></div>`
-    ).join('');
-    document.getElementById('skillsSourceTag').textContent = 'Based on your assessment results';
-
-    // ---- Recommended Next Skills: genuinely the 2 lowest-scoring skills ----
-    const SKILL_META = {
-      'Python Programming': { desc: 'A foundational skill for almost every engineering and data role — worth strengthening if it scored low.', icon:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>', color:'var(--accent)', colorSoft:'var(--accent-soft)' },
-      'Data Analysis': { desc: 'Being able to work with data is valuable across almost every career path you matched with.', icon:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>', color:'var(--teal)', colorSoft:'var(--teal-soft)' },
-      'Problem Solving': { desc: 'Structured problem solving underpins interviews and real work in every technical path.', icon:'<circle cx="12" cy="12" r="9"/><polygon points="16.2 7.8 13.5 13.5 7.8 16.2 10.5 10.5 16.2 7.8"/>', color:'var(--green)', colorSoft:'var(--green-soft)' },
-      'Machine Learning': { desc: 'Core requirement if you\'re leaning toward Data Science or AI/ML Engineer paths.', icon:'<circle cx="12" cy="12" r="9"/>', color:'var(--amber)', colorSoft:'var(--amber-soft)' },
-      'Communication': { desc: 'Explaining your work clearly matters in interviews, reviews, and leadership tracks alike.', icon:'<path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2 8.5 8.5 0 0 1-7.5 4.3 8.4 8.4 0 0 1-4.2-1.1L3 21l2.1-5.2A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 12.4 3a8.5 8.5 0 0 1 8.5 8.5z"/>', color:'var(--pink)', colorSoft:'var(--pink-soft)' },
-      'System Design': { desc: 'Closing this gap unlocks senior engineering and architecture-level roles.', icon:'<rect x="6" y="6" width="12" height="12" rx="2"/>', color:'var(--blue)', colorSoft:'var(--blue-soft)' }
-    };
-    const weakestSkills = Object.entries(skillFormulas).sort((a, b) => a[1].val - b[1].val).slice(0, 2);
-    document.getElementById('recommendedSkillsGrid').innerHTML = weakestSkills.map(([name, s]) => {
-      const meta = SKILL_META[name];
-      const gap = 100 - s.val;
-      return `<div class="match-card" style="border-top:2px solid ${meta.color}">
-        <div class="mc-top"><div class="mc-id"><div class="mc-icon" style="background:${meta.colorSoft};color:${meta.color}"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${meta.icon}</svg></div>
-        <div><h4>${name}</h4><span class="match-badge" style="background:var(--amber-soft);color:var(--amber)">Gap: ${gap}%</span></div></div></div>
-        <p class="mc-desc">${meta.desc}</p>
-        <button class="mc-btn" style="border:1px solid ${meta.color};color:${meta.color};" data-resource="${name}">Find Resources</button>
-      </div>`;
-    }).join('');
-    // Clicks on these buttons are handled by the existing document-level
-    // [data-resource] delegated listener — no extra binding needed.
+    renderSkillsSection({
+      'Python Programming': scoreFromShare(share.eng),
+      'Data Analysis': scoreFromShare(share.data),
+      'Problem Solving': scoreFromShare((share.eng + share.data) / 2),
+      'Machine Learning': scoreFromShare(Math.max(0, share.data - 8)),
+      'Communication': scoreFromShare(share.people),
+      'System Design': scoreFromShare(share.eng * 0.7 + share.design * 0.3)
+    }, 'Based on your assessment results');
 
     // ---- Build the profile ring sub-bars (Interests/Skills/Values/Goals) ----
     const overallScore = Math.round(Math.min(97, Math.max(40, 58 + (share[topCategory] - 25) * 0.9)));
     animateRingTo(overallScore);
-    const subBars = {
+    renderProfileSubBars({
       Interests: scoreFromShare(share[topCategory]),
       Skills: scoreFromShare((share.eng + share.data) / 2),
       Values: scoreFromShare((share.people + share.design) / 2),
       Goals: scoreFromShare((share.eng + share.people) / 2)
-    };
-    document.getElementById('profileSubBars').innerHTML = Object.entries(subBars).map(([label, val]) =>
-      `<div class="skill-row"><div class="top-line"><span>${label}</span><span>${val}%</span></div><div class="skill-track"><span class="skill-fill" style="width:${val}%"></span></div></div>`
-    ).join('');
+    });
     document.getElementById('profileNote').textContent = 'This profile reflects your latest assessment answers — retake it anytime as your interests change.';
 
-    // ---- Build Top Career Matches (container was empty until now) ----
-    let matchesHtml = MAIN_MATCH_CARDS.map(card => {
-      const pct = card.matchFn(share);
-      return `<div class="match-card ${card.className}">
-        <div class="mc-top"><div class="mc-id"><div class="mc-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${card.icon}</svg></div>
-        <div><h4>${card.role}</h4><span class="match-badge">${pct}% Match</span></div></div></div>
-        <p class="mc-desc">${card.desc}</p>
-        <p class="mc-fits">Why it fits you:</p>
-        <ul class="mc-list">${card.fits.map(f => '<li><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' + f + '</li>').join('')}</ul>
-        <button class="mc-btn" data-role="${card.role}">View Roadmap</button>
-      </div>`;
-    }).join('');
+    // The Full Career Assessment covers interests, skills and values in one
+    // pass, so completing it satisfies all 3 required assessments at once.
+    REQUIRED_ASSESSMENTS.forEach(markAssessmentCompleted);
+    refreshCompatibilityGate();
 
-    // Add a 4th, non-technical match card only when it's genuinely the
-    // person's strongest area — otherwise the 3 technical cards stand alone.
-    if (topCategory === 'people' || topCategory === 'design'){
-      const info = FOURTH_CARD_INFO[topCategory];
-      const fourthMatch = matchFromShare(share[topCategory]);
-      matchesHtml += `<div class="match-card" style="border-top:2px solid ${info.color}">
-        <div class="mc-top"><div class="mc-id"><div class="mc-icon" style="background:${info.colorSoft};color:${info.color}"><svg class="icon" viewBox="0 0 24 24" width="20" height="20">${info.icon}</svg></div>
-        <div><h4>${info.title}</h4><span class="match-badge">${fourthMatch}% Match</span></div></div></div>
-        <p class="mc-desc">${info.desc}</p>
-        <p class="mc-fits">Why it fits you:</p>
-        <ul class="mc-list">${info.fits.map(f => '<li><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' + f + '</li>').join('')}</ul>
-        <button class="mc-btn" data-role="${info.role}">View Roadmap</button>
-      </div>`;
-    }
-    document.getElementById('topMatchesGrid').innerHTML = matchesHtml;
-    document.getElementById('topMatchesTag').textContent = 'Based on your assessment results';
-
-    // ---- Work out the single best-matching career across ALL cards
-    //      (the 3 main cards plus the 4th card when it's shown) and
-    //      persist it so the Learning Roadmaps page can pick it up. ----
-    let bestRole = null, bestPct = -1;
-    MAIN_MATCH_CARDS.forEach(card => {
-      const pct = card.matchFn(share);
-      if(pct > bestPct){ bestPct = pct; bestRole = card.role; }
-    });
-    if(topCategory === 'people' || topCategory === 'design'){
-      const info = FOURTH_CARD_INFO[topCategory];
-      const fourthPct = matchFromShare(share[topCategory]);
-      if(fourthPct > bestPct){ bestPct = fourthPct; bestRole = info.role; }
-    }
-    persistCareerRecommendation(bestRole, bestPct, share);
-    lastRecommendedRole = bestRole;
-
-    // ---- Populate Career Paths / Roadmaps / Job Roles / Industries tabs ----
-    // These stayed completely empty until now — first population happens
-    // only once the assessment is actually completed.
-    renderPathsGrid();
-    renderRoadmapsGrid();
-    renderJobRolesGrid();
-    renderIndustriesGrid();
-
-    // ---- Personalized result modal ----
     const topLabelMap = { eng:'Software Engineering', data:'Data & AI', design:'Design & Product', people:'Leadership & Communication' };
-    document.getElementById('resultSummaryText').textContent = 'Your Career Profile has been updated with your ' + QUIZ.length + ' new responses.';
-    document.getElementById('resultTopMatchText').textContent = 'Your strongest area right now: ' + topLabelMap[topCategory] + ' (' + Math.round(share[topCategory]) + '% of your answers).';
+    showResultModal(
+      'Your Career Profile has been updated with your ' + currentQuizQuestions.length + ' new responses.',
+      'Your strongest area right now: ' + topLabelMap[topCategory] + ' (' + Math.round(share[topCategory]) + '% of your answers).',
+      true
+    );
+  }
 
-    showModal('resultBackdrop');
+  function finishInterestQuiz(){
+    hideModal('quizBackdrop');
+    const totals = { eng: 0, data: 0, design: 0, people: 0 };
+    quizAnswers.forEach(w => {
+      totals.eng += w.eng || 0;
+      totals.data += w.data || 0;
+      totals.design += w.design || 0;
+      totals.people += w.people || 0;
+    });
+    const sum = totals.eng + totals.data + totals.design + totals.people || 1;
+    const share = {
+      eng: (totals.eng / sum) * 100,
+      data: (totals.data / sum) * 100,
+      design: (totals.design / sum) * 100,
+      people: (totals.people / sum) * 100
+    };
+    const topCategory = Object.keys(share).reduce((a, b) => share[b] > share[a] ? b : a);
+    lastShare = share;
+
+    renderProfileSubBars({ Interests: scoreFromShare(share[topCategory]) });
+    markAssessmentCompleted('Career Interest Profiler');
+    refreshCompatibilityGate();
+
+    const topLabelMap = { eng:'Software Engineering', data:'Data & AI', design:'Design & Product', people:'Leadership & Communication' };
+    showResultModal(
+      'Your Career Interest Profiler results are in.',
+      allRequiredAssessmentsDone()
+        ? 'Your strongest interest area: ' + topLabelMap[topCategory] + ' (' + Math.round(share[topCategory]) + '% of your answers).'
+        : 'Finish the Skills Strength Test and Values & Goals Survey to unlock your compatible professions.',
+      allRequiredAssessmentsDone()
+    );
+  }
+
+  function finishSkillsQuiz(){
+    hideModal('quizBackdrop');
+    const vals = {};
+    quizAnswers.forEach(a => { if (a.skill) vals[a.skill] = a.val; });
+    renderSkillsSection(vals, 'Based on your Skills Strength Test');
+
+    const avg = Object.values(vals).reduce((a,b) => a+b, 0) / (Object.values(vals).length || 1);
+    renderProfileSubBars({ Skills: Math.round(avg) });
+    markAssessmentCompleted('Skills Strength Test');
+    const unlocked = refreshCompatibilityGate();
+    switchTab('Skills');
+
+    const strongest = Object.entries(vals).sort((a,b) => b[1]-a[1])[0];
+    showResultModal(
+      'Your Skills Strength Test results are in.',
+      unlocked && strongest ? 'Your strongest skill right now: ' + strongest[0] + ' (' + strongest[1] + '%).' : 'Finish the remaining assessment(s) to unlock your compatible professions.',
+      false
+    );
+  }
+
+  function finishValuesQuiz(){
+    hideModal('quizBackdrop');
+    const totals = { flexibility: 0, impact: 0, growth: 0, stability: 0 };
+    quizAnswers.forEach(w => {
+      totals.flexibility += w.flexibility || 0;
+      totals.impact += w.impact || 0;
+      totals.growth += w.growth || 0;
+      totals.stability += w.stability || 0;
+    });
+    const sum = totals.flexibility + totals.impact + totals.growth + totals.stability || 1;
+    const share = {
+      flexibility: (totals.flexibility / sum) * 100,
+      impact: (totals.impact / sum) * 100,
+      growth: (totals.growth / sum) * 100,
+      stability: (totals.stability / sum) * 100
+    };
+    const topValue = Object.keys(share).reduce((a, b) => share[b] > share[a] ? b : a);
+    const VALUE_LABELS = { flexibility:'Flexibility & Autonomy', impact:'Real-World Impact', growth:'Growth & Learning', stability:'Stability & Security' };
+
+    renderProfileSubBars({
+      Values: scoreFromShare(share.impact + share.flexibility > share.growth + share.stability ? share.impact : share.growth),
+      Goals: scoreFromShare(share[topValue])
+    });
+    markAssessmentCompleted('Values & Goals Survey');
+    const unlocked = refreshCompatibilityGate();
+
+    document.getElementById('detailTitle').textContent = 'Your Work Values';
+    document.getElementById('detailBody').textContent = 'Based on your Values & Goals Survey, ' + VALUE_LABELS[topValue] + ' matters most to you right now (' + Math.round(share[topValue]) + '% of your answers). Keep this in mind when weighing job offers or planning your next move.';
+
+    showResultModal(
+      'Your Values & Goals Survey results are in.',
+      unlocked ? 'What matters most to you: ' + VALUE_LABELS[topValue] + ' (' + Math.round(share[topValue]) + '% of your answers).' : 'Finish the remaining assessment(s) to unlock your compatible professions.',
+      false
+    );
   }
   document.getElementById('quizClose').addEventListener('click', () => hideModal('quizBackdrop'));
   document.getElementById('quizBackdrop').addEventListener('click', e => { if (e.target.id === 'quizBackdrop') hideModal('quizBackdrop'); });
@@ -1395,21 +1808,52 @@
     Business: {bg:'var(--amber-soft)', fg:'var(--amber)', svg:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'},
     Design: {bg:'var(--pink-soft)', fg:'var(--pink)', svg:'<circle cx="12" cy="12" r="10"/><path d="M9 16a3 3 0 0 0 5.5 1.8"/>'},
     Product: {bg:'var(--blue-soft)', fg:'var(--blue)', svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
-    Research: {bg:'var(--green-soft)', fg:'var(--green)', svg:'<path d="M9 2v6L4 18a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-10V2"/>'}
+    Research: {bg:'var(--green-soft)', fg:'var(--green)', svg:'<path d="M9 2v6L4 18a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-10V2"/>'},
+    Security: {bg:'var(--rose-soft)', fg:'var(--rose)', svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'},
+    Infrastructure: {bg:'var(--lime-soft)', fg:'var(--lime)', svg:'<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/>'},
+    'QA & Testing': {bg:'var(--green-soft)', fg:'var(--green)', svg:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'},
+    'IT & Support': {bg:'var(--amber-soft)', fg:'var(--amber)', svg:'<rect x="4" y="4" width="16" height="12" rx="2"/><path d="M8 21h8M12 16v5"/>'},
+    Marketing: {bg:'var(--pink-soft)', fg:'var(--pink)', svg:'<path d="M3 11l18-7-7 18-2-8-8-2z"/>'}
   };
 
   const ALL_PATHS = [
     {cat:'Engineering', name:'Software Engineer', match:95, desc:'Design, build and maintain software solutions that solve real-world problems.'},
-    {cat:'Engineering', name:'DevOps Engineer', match:74, desc:'Automate infrastructure and deployment pipelines so teams ship reliably.'},
+    {cat:'Engineering', name:'Frontend Engineer', match:88, desc:'Build the interfaces and interactions users touch directly, in the browser.'},
+    {cat:'Engineering', name:'Backend Engineer', match:86, desc:'Design APIs, services and data models that power applications behind the scenes.'},
+    {cat:'Engineering', name:'Full-Stack Engineer', match:87, desc:'Work across the whole stack, from database to UI, on end-to-end features.'},
     {cat:'Engineering', name:'Mobile Developer', match:69, desc:'Build native or cross-platform apps for iOS and Android.'},
+    {cat:'Engineering', name:'DevOps Engineer', match:74, desc:'Automate infrastructure and deployment pipelines so teams ship reliably.'},
+    {cat:'Engineering', name:'Embedded Systems Engineer', match:55, desc:'Write low-level software that runs directly on hardware and devices.'},
+    {cat:'Engineering', name:'Game Developer', match:60, desc:'Build interactive games using engines like Unity or Unreal.'},
+    {cat:'Engineering', name:'Blockchain Developer', match:48, desc:'Build smart contracts and decentralized applications on blockchain networks.'},
+    {cat:'Infrastructure', name:'Cloud Engineer', match:72, desc:'Design and manage scalable infrastructure on AWS, Azure or GCP.'},
+    {cat:'Infrastructure', name:'Site Reliability Engineer', match:68, desc:'Keep production systems fast, available and resilient at scale.'},
+    {cat:'Infrastructure', name:'Platform Engineer', match:64, desc:'Build the internal tools and platforms other engineers build on top of.'},
+    {cat:'Infrastructure', name:'Systems Administrator', match:50, desc:'Manage servers, networks and IT systems that keep an organization running.'},
+    {cat:'Security', name:'Cybersecurity Analyst', match:70, desc:'Monitor systems for threats and respond to security incidents.'},
+    {cat:'Security', name:'Penetration Tester', match:62, desc:'Simulate attacks to find and fix vulnerabilities before real attackers do.'},
+    {cat:'Security', name:'Security Engineer', match:66, desc:'Build the tools and systems that keep infrastructure and data secure.'},
     {cat:'Data Science', name:'Data Scientist', match:88, desc:'Extract insights from data and build models that drive decisions.'},
     {cat:'Data Science', name:'AI/ML Engineer', match:85, desc:'Build intelligent systems using machine learning and deep learning.'},
     {cat:'Data Science', name:'Data Analyst', match:80, desc:'Turn raw data into dashboards and reports that guide business decisions.'},
+    {cat:'Data Science', name:'Data Engineer', match:76, desc:'Build the pipelines and infrastructure that move and clean data at scale.'},
+    {cat:'Data Science', name:'Business Intelligence Analyst', match:63, desc:'Turn company data into reporting tools leadership relies on.'},
+    {cat:'QA & Testing', name:'QA Engineer', match:58, desc:'Design and run tests to catch bugs before they reach users.'},
+    {cat:'QA & Testing', name:'Automation Test Engineer', match:56, desc:'Build automated test suites that catch regressions continuously.'},
     {cat:'Business', name:'Product Manager', match:61, desc:'Define product strategy and coordinate teams to ship the right thing.'},
     {cat:'Business', name:'Business Analyst', match:58, desc:'Bridge business needs and technical solutions across teams.'},
-    {cat:'Design', name:'UX Designer', match:52, desc:'Research and design intuitive, accessible product experiences.'},
+    {cat:'Business', name:'Technical Program Manager', match:59, desc:'Coordinate complex, cross-team technical programs to delivery.'},
     {cat:'Product', name:'Technical Product Manager', match:66, desc:'Own the roadmap for technical products, working closely with engineering.'},
-    {cat:'Research', name:'Research Scientist', match:57, desc:'Run experiments and publish findings that push a field forward.'}
+    {cat:'Product', name:'Product Owner', match:57, desc:'Own the backlog and priorities for an agile development team.'},
+    {cat:'Design', name:'UX Designer', match:52, desc:'Research and design intuitive, accessible product experiences.'},
+    {cat:'Design', name:'UI Designer', match:54, desc:'Craft the visual look, feel and interaction detail of products.'},
+    {cat:'Design', name:'Product Designer', match:56, desc:'Own end-to-end product experience from research through polished UI.'},
+    {cat:'IT & Support', name:'IT Support Specialist', match:45, desc:'Troubleshoot hardware, software and network issues for an organization.'},
+    {cat:'IT & Support', name:'Technical Support Engineer', match:47, desc:'Help customers solve technical problems with a product or platform.'},
+    {cat:'Marketing', name:'Growth Marketer', match:49, desc:'Run data-driven campaigns and experiments to grow a product or company.'},
+    {cat:'Marketing', name:'Technical Writer', match:51, desc:'Turn complex technical concepts into clear docs, guides and tutorials.'},
+    {cat:'Research', name:'Research Scientist', match:57, desc:'Run experiments and publish findings that push a field forward.'},
+    {cat:'Research', name:'AI Research Engineer', match:53, desc:'Prototype and evaluate new machine learning methods and models.'}
   ];
 
   function iconHtml(cat, size){
@@ -1417,9 +1861,41 @@
     return `<div class="mc-icon" style="background:${c.bg};color:${c.fg}"><svg class="icon" viewBox="0 0 24 24" width="${size}" height="${size}">${c.svg}</svg></div>`;
   }
 
+  // Maps each career-path category onto the eng/data/design/people interest
+  // shares captured from the last Full Assessment or Interest Profiler run.
+  const CATEGORY_SHARE_WEIGHTS = {
+    Engineering: { eng:1 },
+    Infrastructure: { eng:0.7, data:0.3 },
+    Security: { eng:0.6, data:0.4 },
+    'Data Science': { data:0.7, eng:0.3 },
+    'QA & Testing': { eng:0.6, data:0.2, people:0.2 },
+    Business: { people:0.6, data:0.2, eng:0.2 },
+    Product: { people:0.5, design:0.3, eng:0.2 },
+    Design: { design:0.8, people:0.2 },
+    'IT & Support': { eng:0.5, people:0.5 },
+    Marketing: { people:0.6, design:0.4 },
+    Research: { data:0.6, eng:0.4 }
+  };
+  function pathMatchFromShare(p){
+    if (!lastShare) return p.match;
+    // For careers that also have a dedicated Top Career Matches card, reuse
+    // that exact same formula so the % is always identical between tabs —
+    // this is what was causing Career Paths and Overview to disagree.
+    const exactCard = MAIN_MATCH_CARDS.find(c => c.role === p.name);
+    if (exactCard) return exactCard.matchFn(lastShare);
+    if (FOURTH_CARD_INFO.people.role === p.name) return matchFromShare(lastShare.people);
+    if (FOURTH_CARD_INFO.design.role === p.name) return matchFromShare(lastShare.design);
+
+    const w = CATEGORY_SHARE_WEIGHTS[p.cat] || { eng:0.25, data:0.25, design:0.25, people:0.25 };
+    let weighted = 0;
+    Object.entries(w).forEach(([k, wt]) => { weighted += (lastShare[k] || 0) * wt; });
+    return matchFromShare(weighted);
+  }
   function renderPathsGrid(){
     const grid = document.getElementById('allPathsGrid');
-    grid.innerHTML = ALL_PATHS.map(p => `
+    const paths = ALL_PATHS.map(p => ({ ...p, match: pathMatchFromShare(p) }))
+      .sort((a, b) => b.match - a.match);
+    grid.innerHTML = paths.map(p => `
       <div class="match-card c-purple">
         <div class="mc-top"><div class="mc-id">${iconHtml(p.cat,20)}<div><h4>${p.name}</h4><span class="match-badge">${p.match}% Match</span></div></div></div>
         <p class="mc-desc">${p.desc}</p>
@@ -1428,7 +1904,7 @@
       </div>`).join('');
     // Clicks are handled by the document-level .mc-btn[data-role] delegation above.
     const categoryCount = new Set(ALL_PATHS.map(p => p.cat)).size;
-    document.getElementById('pathsCountTag').textContent = ALL_PATHS.length + ' paths across ' + categoryCount + ' categories';
+    document.getElementById('pathsCountTag').textContent = ALL_PATHS.length + ' paths across ' + categoryCount + ' categories' + (lastShare ? ' · sorted to your results' : '');
   }
 
   const ROADMAPS = [
@@ -1450,9 +1926,25 @@
 
   const JOB_ROLES = [
     {name:'Junior Software Engineer', cat:'Engineering', salary:'$70k–$95k', desc:'Entry-level engineering role focused on shipping well-tested features.'},
+    {name:'Senior Software Engineer', cat:'Engineering', salary:'$130k–$175k', desc:'Leads complex features and mentors other engineers on the team.'},
+    {name:'Frontend Developer', cat:'Engineering', salary:'$75k–$110k', desc:'Builds the interfaces users interact with directly in the browser.'},
+    {name:'Backend Developer', cat:'Engineering', salary:'$85k–$120k', desc:'Builds the APIs and services that power an application.'},
+    {name:'Mobile App Developer', cat:'Engineering', salary:'$80k–$115k', desc:'Builds native or cross-platform mobile applications.'},
+    {name:'DevOps Engineer', cat:'Infrastructure', salary:'$95k–$135k', desc:'Automates deployment pipelines and keeps infrastructure reliable.'},
+    {name:'Cloud Engineer', cat:'Infrastructure', salary:'$100k–$140k', desc:'Designs and manages infrastructure on AWS, Azure or GCP.'},
+    {name:'Site Reliability Engineer', cat:'Infrastructure', salary:'$110k–$150k', desc:'Keeps production systems fast, available and resilient at scale.'},
+    {name:'Cybersecurity Analyst', cat:'Security', salary:'$80k–$115k', desc:'Monitors systems for threats and responds to security incidents.'},
+    {name:'Penetration Tester', cat:'Security', salary:'$95k–$135k', desc:'Simulates attacks to find vulnerabilities before real attackers do.'},
     {name:'Machine Learning Engineer', cat:'Data Science', salary:'$110k–$150k', desc:'Builds and deploys ML models into production systems.'},
     {name:'Data Analyst', cat:'Data Science', salary:'$60k–$85k', desc:'Analyzes data to answer specific business questions.'},
-    {name:'Product Designer', cat:'Design', salary:'$80k–$120k', desc:'Designs end-to-end product experiences with research backing.'}
+    {name:'Data Engineer', cat:'Data Science', salary:'$100k–$140k', desc:'Builds pipelines and infrastructure that move data at scale.'},
+    {name:'QA Engineer', cat:'QA & Testing', salary:'$65k–$95k', desc:'Designs and runs tests to catch bugs before users do.'},
+    {name:'Product Manager', cat:'Business', salary:'$100k–$145k', desc:'Owns product strategy and coordinates teams to ship the right thing.'},
+    {name:'Product Designer', cat:'Design', salary:'$80k–$120k', desc:'Designs end-to-end product experiences with research backing.'},
+    {name:'UI/UX Designer', cat:'Design', salary:'$70k–$105k', desc:'Researches and designs intuitive, accessible interfaces.'},
+    {name:'IT Support Specialist', cat:'IT & Support', salary:'$45k–$65k', desc:'Troubleshoots hardware, software and network issues.'},
+    {name:'Technical Writer', cat:'Marketing', salary:'$65k–$95k', desc:'Turns complex technical concepts into clear documentation.'},
+    {name:'Growth Marketer', cat:'Marketing', salary:'$60k–$100k', desc:'Runs data-driven campaigns to grow a product or company.'}
   ];
   function renderJobRolesGrid(){
     const grid = document.getElementById('jobRolesGrid');
@@ -1468,7 +1960,11 @@
     {name:'Technology', desc:'Software, hardware and internet companies building digital products.', growth:'+12% YoY'},
     {name:'Healthcare', desc:'Hospitals, biotech and health-tech companies improving patient outcomes.', growth:'+8% YoY'},
     {name:'Finance', desc:'Banks, fintech and investment firms managing capital and risk.', growth:'+5% YoY'},
-    {name:'Education', desc:'Schools and ed-tech companies building learning tools and content.', growth:'+6% YoY'}
+    {name:'Education', desc:'Schools and ed-tech companies building learning tools and content.', growth:'+6% YoY'},
+    {name:'Cybersecurity', desc:'Companies protecting organizations from digital threats and breaches.', growth:'+13% YoY'},
+    {name:'E-commerce', desc:'Online retail and marketplace platforms connecting buyers and sellers.', growth:'+9% YoY'},
+    {name:'Gaming', desc:'Studios and platforms building interactive entertainment and games.', growth:'+7% YoY'},
+    {name:'Telecommunications', desc:'Companies building the networks that keep the world connected.', growth:'+4% YoY'}
   ];
   function renderIndustriesGrid(){
     const grid = document.getElementById('industriesGrid');
@@ -1480,10 +1976,9 @@
       </div>`).join('');
   }
 
-  // Career Paths, Roadmaps, Job Roles and Industries grids are intentionally
-  // NOT rendered here on page load — they stay empty until finishQuiz()
-  // populates them, so nothing sample/placeholder is ever shown before the
-  // assessment is taken.
+  // Career Paths, Roadmaps, Job Roles and Industries grids start locked —
+  // nothing sample/placeholder is ever shown before all 3 assessments are done.
+  refreshCompatibilityGate();
 
 })();
 

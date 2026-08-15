@@ -318,8 +318,134 @@
 
   :focus-visible{outline:2px solid var(--purple-2);outline-offset:2px;}
 </style>
+<style>
+/* === Orivon message system (om-) === */
+.om-toast-stack{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+.om-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:10px;background:#15121f;border:1px solid #241f33;border-left:3px solid #f0574e;border-radius:10px;padding:12px 14px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;}
+.om-toast.om-show{opacity:1;transform:translateY(0);}
+.om-toast.om-warn{border-left-color:#f0a94e;}
+.om-toast.om-ok{border-left-color:#4ecf8f;}
+.om-toast .om-icon{font-size:1.05rem;line-height:1.4;}
+.om-toast .om-body strong{display:block;font-size:.88rem;margin-bottom:2px;color:#f4f2fa;}
+.om-toast .om-body span{font-size:.8rem;color:#9a94ac;}
+
+.om-banner{display:flex;align-items:flex-start;gap:10px;background:rgba(240,87,78,.08);border:1px solid rgba(240,87,78,.3);border-radius:10px;padding:12px 14px;font-size:.85rem;margin-bottom:16px;}
+.om-banner strong{color:#ff8880;}
+.om-banner span{color:#9a94ac;}
+
+.om-empty{text-align:center;padding:40px 24px;background:#0e0c17;border:1px dashed #241f33;border-radius:14px;}
+.om-empty .om-glyph{width:44px;height:44px;border-radius:12px;margin:0 auto 14px;background:linear-gradient(135deg,#8b5cf6,#a855f7);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;}
+.om-empty h3{margin:0 0 6px;font-size:1rem;color:#f4f2fa;}
+.om-empty p{margin:0 0 16px;color:#9a94ac;font-size:.85rem;}
+.om-empty button{background:linear-gradient(135deg,#8b5cf6,#a855f7);border:none;color:#fff;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;}
+
+.om-retry{background:#0e0c17;border:1px solid #241f33;border-radius:14px;padding:28px 24px;text-align:center;}
+.om-retry .om-glyph{width:44px;height:44px;border-radius:12px;margin:0 auto 14px;background:rgba(240,87,78,.15);color:#f0574e;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.om-retry h3{margin:0 0 6px;font-size:1rem;color:#f4f2fa;}
+.om-retry p{margin:0 0 16px;color:#9a94ac;font-size:.85rem;}
+.om-retry button{background:#15121f;border:1px solid #241f33;color:#f4f2fa;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;}
+.om-retry button:hover{border-color:#a855f7;}
+
+.om-skeleton{background:#0e0c17;border:1px solid #241f33;border-radius:14px;padding:20px;}
+.om-sk-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#15121f 25%,#241f33 37%,#15121f 63%);background-size:400% 100%;animation:om-sk 1.4s ease infinite;margin-bottom:10px;}
+.om-sk-line:last-child{margin-bottom:0;}
+@keyframes om-sk{0%{background-position:100% 0;}100%{background-position:0 0;}}
+
+.om-wait{display:flex;align-items:center;gap:10px;color:#9a94ac;font-size:.85rem;background:#0e0c17;border:1px solid #241f33;border-radius:10px;padding:12px 14px;}
+.om-spinner{width:16px;height:16px;border-radius:50%;border:2px solid #241f33;border-top-color:#a855f7;animation:om-spin .8s linear infinite;flex-shrink:0;}
+@keyframes om-spin{to{transform:rotate(360deg);}}
+
+.om-timeout{background:rgba(240,169,78,.06);border:1px solid rgba(240,169,78,.28);border-radius:10px;padding:14px 16px;font-size:.85rem;display:flex;gap:10px;align-items:flex-start;}
+.om-timeout strong{color:#f0a94e;display:block;margin-bottom:2px;}
+.om-timeout span{color:#9a94ac;}
+</style>
+
 </head>
 <body>
+<script>
+/* === Orivon message system helpers (om-) === */
+window.OrivonMsg = (function(){
+  let stack;
+  function getStack(){
+    if (!stack){
+      stack = document.createElement('div');
+      stack.className = 'om-toast-stack';
+      document.body.appendChild(stack);
+    }
+    return stack;
+  }
+  const ICONS = { error:'⚠', warn:'⚠', ok:'✓' };
+
+  function toast(opts){
+    if (typeof opts === 'string') opts = { title: opts };
+    const type = opts.type || 'error';
+    const title = opts.title || 'Something went wrong';
+    const body = opts.body || '';
+    const el = document.createElement('div');
+    el.className = 'om-toast' + (type === 'warn' ? ' om-warn' : type === 'ok' ? ' om-ok' : '');
+    el.innerHTML = '<span class="om-icon">' + (ICONS[type] || ICONS.error) + '</span>' +
+      '<div class="om-body"><strong></strong>' + (body ? '<span></span>' : '') + '</div>';
+    el.querySelector('strong').textContent = title;
+    if (body) el.querySelector('span').textContent = body;
+    getStack().appendChild(el);
+    requestAnimationFrame(() => el.classList.add('om-show'));
+    setTimeout(() => {
+      el.classList.remove('om-show');
+      setTimeout(() => el.remove(), 250);
+    }, opts.duration || 5000);
+  }
+
+  function banner(container, opts){
+    container.innerHTML = '<div class="om-banner"><span>⚠</span><div><strong></strong> <span></span></div></div>';
+    container.querySelector('strong').textContent = opts.title || "We couldn't process that.";
+    container.querySelector('.om-banner span:last-child').textContent = opts.body || 'Please try again.';
+    container.style.display = '';
+  }
+
+  function empty(container, opts){
+    container.innerHTML = '<div class="om-empty"><div class="om-glyph">' + (opts.glyph || '◆') + '</div>' +
+      '<h3></h3><p></p>' + (opts.actionLabel ? '<button type="button"></button>' : '') + '</div>';
+    container.querySelector('h3').textContent = opts.title || 'Nothing here yet';
+    container.querySelector('p').textContent = opts.body || '';
+    if (opts.actionLabel){
+      const btn = container.querySelector('button');
+      btn.textContent = opts.actionLabel;
+      if (opts.onAction) btn.addEventListener('click', opts.onAction);
+    }
+  }
+
+  function retry(container, opts){
+    container.innerHTML = '<div class="om-retry"><div class="om-glyph">!</div>' +
+      '<h3></h3><p></p><button type="button"></button></div>';
+    container.querySelector('h3').textContent = opts.title || "Couldn't load this";
+    container.querySelector('p').textContent = opts.body || 'Something went wrong on our end. Give it another try.';
+    const btn = container.querySelector('button');
+    btn.textContent = opts.actionLabel || 'Retry';
+    if (opts.onRetry) btn.addEventListener('click', opts.onRetry);
+  }
+
+  function skeleton(container, lines){
+    lines = lines || [90, 60, 40];
+    container.innerHTML = '<div class="om-skeleton">' +
+      lines.map(w => '<div class="om-sk-line" style="width:' + w + '%"></div>').join('') +
+      '</div>';
+  }
+
+  function wait(container, message){
+    container.innerHTML = '<div class="om-wait"><div class="om-spinner"></div><span></span></div>';
+    container.querySelector('span').textContent = message || 'Working on it…';
+  }
+
+  function timeout(container, opts){
+    container.innerHTML = '<div class="om-timeout"><span>⏱</span><div><strong></strong> <span></span></div></div>';
+    container.querySelector('strong').textContent = opts.title || 'This is taking longer than usual.';
+    container.querySelector('.om-timeout span:last-child').textContent = opts.body || 'Still working on it — you can wait, or try again in a moment.';
+  }
+
+  return { toast, banner, empty, retry, skeleton, wait, timeout };
+})();
+</script>
+
 
 <header>
   <nav class="nav">

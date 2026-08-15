@@ -382,8 +382,134 @@
     .stage-tab{padding:8px 12px;font-size:12px;}
   }
 </style>
+<style>
+/* === Orivon message system (om-) === */
+.om-toast-stack{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+.om-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:10px;background:#15121f;border:1px solid #241f33;border-left:3px solid #f0574e;border-radius:10px;padding:12px 14px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease;}
+.om-toast.om-show{opacity:1;transform:translateY(0);}
+.om-toast.om-warn{border-left-color:#f0a94e;}
+.om-toast.om-ok{border-left-color:#4ecf8f;}
+.om-toast .om-icon{font-size:1.05rem;line-height:1.4;}
+.om-toast .om-body strong{display:block;font-size:.88rem;margin-bottom:2px;color:#f4f2fa;}
+.om-toast .om-body span{font-size:.8rem;color:#9a94ac;}
+
+.om-banner{display:flex;align-items:flex-start;gap:10px;background:rgba(240,87,78,.08);border:1px solid rgba(240,87,78,.3);border-radius:10px;padding:12px 14px;font-size:.85rem;margin-bottom:16px;}
+.om-banner strong{color:#ff8880;}
+.om-banner span{color:#9a94ac;}
+
+.om-empty{text-align:center;padding:40px 24px;background:#0e0c17;border:1px dashed #241f33;border-radius:14px;}
+.om-empty .om-glyph{width:44px;height:44px;border-radius:12px;margin:0 auto 14px;background:linear-gradient(135deg,#8b5cf6,#a855f7);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;}
+.om-empty h3{margin:0 0 6px;font-size:1rem;color:#f4f2fa;}
+.om-empty p{margin:0 0 16px;color:#9a94ac;font-size:.85rem;}
+.om-empty button{background:linear-gradient(135deg,#8b5cf6,#a855f7);border:none;color:#fff;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;}
+
+.om-retry{background:#0e0c17;border:1px solid #241f33;border-radius:14px;padding:28px 24px;text-align:center;}
+.om-retry .om-glyph{width:44px;height:44px;border-radius:12px;margin:0 auto 14px;background:rgba(240,87,78,.15);color:#f0574e;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.om-retry h3{margin:0 0 6px;font-size:1rem;color:#f4f2fa;}
+.om-retry p{margin:0 0 16px;color:#9a94ac;font-size:.85rem;}
+.om-retry button{background:#15121f;border:1px solid #241f33;color:#f4f2fa;padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;}
+.om-retry button:hover{border-color:#a855f7;}
+
+.om-skeleton{background:#0e0c17;border:1px solid #241f33;border-radius:14px;padding:20px;}
+.om-sk-line{height:12px;border-radius:6px;background:linear-gradient(90deg,#15121f 25%,#241f33 37%,#15121f 63%);background-size:400% 100%;animation:om-sk 1.4s ease infinite;margin-bottom:10px;}
+.om-sk-line:last-child{margin-bottom:0;}
+@keyframes om-sk{0%{background-position:100% 0;}100%{background-position:0 0;}}
+
+.om-wait{display:flex;align-items:center;gap:10px;color:#9a94ac;font-size:.85rem;background:#0e0c17;border:1px solid #241f33;border-radius:10px;padding:12px 14px;}
+.om-spinner{width:16px;height:16px;border-radius:50%;border:2px solid #241f33;border-top-color:#a855f7;animation:om-spin .8s linear infinite;flex-shrink:0;}
+@keyframes om-spin{to{transform:rotate(360deg);}}
+
+.om-timeout{background:rgba(240,169,78,.06);border:1px solid rgba(240,169,78,.28);border-radius:10px;padding:14px 16px;font-size:.85rem;display:flex;gap:10px;align-items:flex-start;}
+.om-timeout strong{color:#f0a94e;display:block;margin-bottom:2px;}
+.om-timeout span{color:#9a94ac;}
+</style>
+
 </head>
 <body>
+<script>
+/* === Orivon message system helpers (om-) === */
+window.OrivonMsg = (function(){
+  let stack;
+  function getStack(){
+    if (!stack){
+      stack = document.createElement('div');
+      stack.className = 'om-toast-stack';
+      document.body.appendChild(stack);
+    }
+    return stack;
+  }
+  const ICONS = { error:'⚠', warn:'⚠', ok:'✓' };
+
+  function toast(opts){
+    if (typeof opts === 'string') opts = { title: opts };
+    const type = opts.type || 'error';
+    const title = opts.title || 'Something went wrong';
+    const body = opts.body || '';
+    const el = document.createElement('div');
+    el.className = 'om-toast' + (type === 'warn' ? ' om-warn' : type === 'ok' ? ' om-ok' : '');
+    el.innerHTML = '<span class="om-icon">' + (ICONS[type] || ICONS.error) + '</span>' +
+      '<div class="om-body"><strong></strong>' + (body ? '<span></span>' : '') + '</div>';
+    el.querySelector('strong').textContent = title;
+    if (body) el.querySelector('span').textContent = body;
+    getStack().appendChild(el);
+    requestAnimationFrame(() => el.classList.add('om-show'));
+    setTimeout(() => {
+      el.classList.remove('om-show');
+      setTimeout(() => el.remove(), 250);
+    }, opts.duration || 5000);
+  }
+
+  function banner(container, opts){
+    container.innerHTML = '<div class="om-banner"><span>⚠</span><div><strong></strong> <span></span></div></div>';
+    container.querySelector('strong').textContent = opts.title || "We couldn't process that.";
+    container.querySelector('.om-banner span:last-child').textContent = opts.body || 'Please try again.';
+    container.style.display = '';
+  }
+
+  function empty(container, opts){
+    container.innerHTML = '<div class="om-empty"><div class="om-glyph">' + (opts.glyph || '◆') + '</div>' +
+      '<h3></h3><p></p>' + (opts.actionLabel ? '<button type="button"></button>' : '') + '</div>';
+    container.querySelector('h3').textContent = opts.title || 'Nothing here yet';
+    container.querySelector('p').textContent = opts.body || '';
+    if (opts.actionLabel){
+      const btn = container.querySelector('button');
+      btn.textContent = opts.actionLabel;
+      if (opts.onAction) btn.addEventListener('click', opts.onAction);
+    }
+  }
+
+  function retry(container, opts){
+    container.innerHTML = '<div class="om-retry"><div class="om-glyph">!</div>' +
+      '<h3></h3><p></p><button type="button"></button></div>';
+    container.querySelector('h3').textContent = opts.title || "Couldn't load this";
+    container.querySelector('p').textContent = opts.body || 'Something went wrong on our end. Give it another try.';
+    const btn = container.querySelector('button');
+    btn.textContent = opts.actionLabel || 'Retry';
+    if (opts.onRetry) btn.addEventListener('click', opts.onRetry);
+  }
+
+  function skeleton(container, lines){
+    lines = lines || [90, 60, 40];
+    container.innerHTML = '<div class="om-skeleton">' +
+      lines.map(w => '<div class="om-sk-line" style="width:' + w + '%"></div>').join('') +
+      '</div>';
+  }
+
+  function wait(container, message){
+    container.innerHTML = '<div class="om-wait"><div class="om-spinner"></div><span></span></div>';
+    container.querySelector('span').textContent = message || 'Working on it…';
+  }
+
+  function timeout(container, opts){
+    container.innerHTML = '<div class="om-timeout"><span>⏱</span><div><strong></strong> <span></span></div></div>';
+    container.querySelector('strong').textContent = opts.title || 'This is taking longer than usual.';
+    container.querySelector('.om-timeout span:last-child').textContent = opts.body || 'Still working on it — you can wait, or try again in a moment.';
+  }
+
+  return { toast, banner, empty, retry, skeleton, wait, timeout };
+})();
+</script>
+
 
 <div class="app">
 
@@ -407,7 +533,7 @@
       <svg class="hex" viewBox="0 0 24 24"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/></svg>
       <div class="brand-text">
         <h1>Orivon Mentor</h1>
-        <p>Your Offline AI Mentor</p>
+        <p>Your AI Mentor</p>
       </div>
     </a>
 
@@ -478,7 +604,7 @@
           <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
         </div>
         <div>
-          <h3>Everything is offline</h3>
+          <h3>Your data, your privacy</h3>
           <p>All data stays on your device. No internet, no tracking.</p>
         </div>
       </div>
@@ -517,10 +643,21 @@
             <div class="hero-actions">
               <select id="careerSelect" class="btn btn-outline btn-sm" style="cursor:pointer;">
                 <option value="Software Engineer">Software Engineer</option>
+                <option value="Frontend Engineer">Frontend Engineer</option>
+                <option value="Backend Engineer">Backend Engineer</option>
+                <option value="Full-Stack Engineer">Full-Stack Engineer</option>
+                <option value="Mobile Developer">Mobile Developer</option>
+                <option value="DevOps Engineer">DevOps Engineer</option>
+                <option value="Cloud Engineer">Cloud Engineer</option>
+                <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
                 <option value="Data Scientist">Data Scientist</option>
                 <option value="AI/ML Engineer">AI/ML Engineer</option>
+                <option value="Data Engineer">Data Engineer</option>
+                <option value="QA Engineer">QA Engineer</option>
                 <option value="Product Manager">Product Manager</option>
                 <option value="UX Designer">UX Designer</option>
+                <option value="Technical Writer">Technical Writer</option>
+                <option value="IT Support Specialist">IT Support Specialist</option>
               </select>
               <button class="btn btn-primary btn-sm" id="continueLearningBtn">
                 <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -776,6 +913,550 @@
         {title:'Go-to-Market Strategy', hours:6, desc:'Plan and execute successful product launches.', resources:[{type:'course',title:'GTM Strategy for PMs'}], tasks:['Write a GTM plan', 'Define launch success metrics']},
         {title:'Capstone Portfolio Project', hours:10, desc:'A polished, job-ready PM case study.', resources:[{type:'project',title:'Full product management case study'}], tasks:['Finalize case study', 'Publish to portfolio']}
       ]
+    },
+    'Frontend Engineer': {
+      beginner: [
+        {title:'HTML, CSS & JS Foundations', hours:8, desc:'The core building blocks of every website.', resources:[{type:'course',title:'Web Fundamentals'}], tasks:['Build a static portfolio page', 'Practice flexbox & grid layouts']},
+        {title:'Responsive Design', hours:5, desc:'Make interfaces work across screen sizes.', resources:[{type:'video',title:'Responsive Design Crash Course'}], tasks:['Rebuild a page mobile-first', 'Test on 3 breakpoints']},
+        {title:'JavaScript DOM Basics', hours:6, desc:'Manipulate pages dynamically with vanilla JS.', resources:[{type:'course',title:'DOM Manipulation'}], tasks:['Build a to-do list app', 'Handle form validation']}
+      ],
+      intermediate: [
+        {title:'Modern Frontend Framework', hours:9, desc:'Learn React (or similar) fundamentals.', resources:[{type:'course',title:'React Fundamentals'}], tasks:['Build a component library', 'Manage state with hooks']},
+        {title:'API Integration', hours:5, desc:'Fetch and render data from REST APIs.', resources:[{type:'video',title:'Working with APIs'}], tasks:['Build a weather app using a public API', 'Handle loading & error states']},
+        {title:'Portfolio Project I', hours:8, desc:'A polished, interactive frontend project.', resources:[{type:'project',title:'Full frontend app build'}], tasks:['Ship a complete app', 'Deploy it publicly']}
+      ],
+      advanced: [
+        {title:'Performance & Accessibility', hours:6, desc:'Make apps fast and usable for everyone.', resources:[{type:'course',title:'Web Performance & a11y'}], tasks:['Audit a site with Lighthouse', 'Fix top accessibility issues']},
+        {title:'Testing Frontend Apps', hours:5, desc:'Unit and integration testing for UI code.', resources:[{type:'video',title:'Frontend Testing Basics'}], tasks:['Write tests for a component', 'Set up CI test runs']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A production-quality, job-ready frontend project.', resources:[{type:'project',title:'Full-featured web app'}], tasks:['Finalize and polish the app', 'Publish to portfolio']}
+      ]
+    },
+    'Backend Engineer': {
+      beginner: [
+        {title:'Server & API Basics', hours:7, desc:'How servers, requests and APIs work.', resources:[{type:'course',title:'Intro to Backend Development'}], tasks:['Build a basic REST API', 'Test endpoints with Postman']},
+        {title:'Databases Fundamentals', hours:6, desc:'Store and query data with SQL.', resources:[{type:'course',title:'SQL Fundamentals'}], tasks:['Design a simple schema', 'Write basic CRUD queries']},
+        {title:'Authentication Basics', hours:5, desc:'Secure APIs with logins and tokens.', resources:[{type:'video',title:'Auth for Beginners'}], tasks:['Add login/signup to an API', 'Implement token-based auth']}
+      ],
+      intermediate: [
+        {title:'API Design at Scale', hours:7, desc:'Build clean, versioned, well-documented APIs.', resources:[{type:'course',title:'API Design Best Practices'}], tasks:['Document an API with OpenAPI', 'Add pagination & filtering']},
+        {title:'Caching & Performance', hours:5, desc:'Speed up backend systems under load.', resources:[{type:'video',title:'Backend Performance Basics'}], tasks:['Add a caching layer', 'Load-test an endpoint']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete backend service with real data.', resources:[{type:'project',title:'Full backend API build'}], tasks:['Ship a complete API', 'Deploy it to the cloud']}
+      ],
+      advanced: [
+        {title:'Microservices & Messaging', hours:7, desc:'Break systems into scalable services.', resources:[{type:'course',title:'Microservices Fundamentals'}], tasks:['Split a monolith into 2 services', 'Add a message queue']},
+        {title:'Reliability & Monitoring', hours:5, desc:'Keep backend systems healthy in production.', resources:[{type:'video',title:'Monitoring & Observability'}], tasks:['Add logging & metrics', 'Set up basic alerting']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A production-grade backend system.', resources:[{type:'project',title:'Full backend platform'}], tasks:['Finalize the system', 'Publish to portfolio']}
+      ]
+    },
+    'Full-Stack Engineer': {
+      beginner: [
+        {title:'Frontend + Backend Foundations', hours:9, desc:'Connect a UI to a working API.', resources:[{type:'course',title:'Full-Stack Foundations'}], tasks:['Build a UI that calls your own API', 'Handle basic error states']},
+        {title:'Databases for Full-Stack Apps', hours:6, desc:'Persist and query app data.', resources:[{type:'course',title:'SQL & NoSQL Basics'}], tasks:['Design a schema for a small app', 'Connect it to your API']},
+        {title:'Deployment Basics', hours:4, desc:'Get an app live on the internet.', resources:[{type:'video',title:'Deploying Your First App'}], tasks:['Deploy frontend + backend', 'Set up a custom domain']}
+      ],
+      intermediate: [
+        {title:'Auth & User Accounts', hours:6, desc:'Full login, signup and session flows.', resources:[{type:'course',title:'Full-Stack Auth Patterns'}], tasks:['Build complete signup/login flow', 'Add protected routes']},
+        {title:'State Management at Scale', hours:6, desc:'Manage complex app state cleanly.', resources:[{type:'video',title:'State Management Patterns'}], tasks:['Refactor an app with a state library', 'Add optimistic UI updates']},
+        {title:'Portfolio Project I', hours:9, desc:'A complete, end-to-end application.', resources:[{type:'project',title:'Full-stack app build'}], tasks:['Ship a complete app', 'Deploy it publicly']}
+      ],
+      advanced: [
+        {title:'Scaling Full-Stack Apps', hours:7, desc:'Handle real traffic and growth.', resources:[{type:'course',title:'Scaling Web Applications'}], tasks:['Add caching + CDN', 'Load-test the app']},
+        {title:'CI/CD for Full-Stack Projects', hours:5, desc:'Automate testing and deployment.', resources:[{type:'video',title:'CI/CD Basics'}], tasks:['Set up an automated pipeline', 'Add automated tests to CI']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A polished, production-ready full-stack app.', resources:[{type:'project',title:'Full production-ready app'}], tasks:['Finalize the app', 'Publish to portfolio']}
+      ]
+    },
+    'Mobile Developer': {
+      beginner: [
+        {title:'Mobile Dev Fundamentals', hours:7, desc:'How native and cross-platform apps work.', resources:[{type:'course',title:'Intro to Mobile Development'}], tasks:['Build a basic screen layout', 'Run app on a simulator']},
+        {title:'UI Components & Navigation', hours:6, desc:'Build multi-screen mobile experiences.', resources:[{type:'video',title:'Mobile Navigation Patterns'}], tasks:['Build a 3-screen app flow', 'Add tab & stack navigation']},
+        {title:'Working with Device APIs', hours:5, desc:'Access camera, location and storage.', resources:[{type:'course',title:'Device APIs for Mobile'}], tasks:['Add camera access to an app', 'Store data locally']}
+      ],
+      intermediate: [
+        {title:'API Integration & State', hours:6, desc:'Connect mobile apps to backend data.', resources:[{type:'course',title:'Mobile Networking Basics'}], tasks:['Fetch and display live data', 'Handle offline states']},
+        {title:'App Performance', hours:5, desc:'Keep mobile apps smooth and responsive.', resources:[{type:'video',title:'Mobile Performance Tips'}], tasks:['Profile a slow screen', 'Fix a rendering bottleneck']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete, installable mobile app.', resources:[{type:'project',title:'Full mobile app build'}], tasks:['Ship a complete app', 'Test on a real device']}
+      ],
+      advanced: [
+        {title:'Publishing to App Stores', hours:5, desc:'Prepare and ship an app to users.', resources:[{type:'course',title:'App Store Submission Guide'}], tasks:['Prepare store listing assets', 'Submit a build for review']},
+        {title:'Push Notifications & Background Tasks', hours:5, desc:'Keep users engaged beyond the app.', resources:[{type:'video',title:'Push Notifications Basics'}], tasks:['Add push notifications', 'Add a background sync task']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A polished, store-ready mobile app.', resources:[{type:'project',title:'Full store-ready app'}], tasks:['Finalize the app', 'Publish to portfolio']}
+      ]
+    },
+    'DevOps Engineer': {
+      beginner: [
+        {title:'Linux & Command Line Basics', hours:6, desc:'The foundation of most DevOps work.', resources:[{type:'course',title:'Linux Fundamentals'}], tasks:['Complete a shell scripting exercise', 'Automate a simple task with a script']},
+        {title:'Version Control & CI Basics', hours:5, desc:'Git workflows and continuous integration.', resources:[{type:'video',title:'Git & CI Fundamentals'}], tasks:['Set up a CI pipeline', 'Fix a failing build']},
+        {title:'Containers Fundamentals', hours:6, desc:'Package apps with Docker.', resources:[{type:'course',title:'Docker for Beginners'}], tasks:['Containerize a sample app', 'Write a Dockerfile from scratch']}
+      ],
+      intermediate: [
+        {title:'Infrastructure as Code', hours:7, desc:'Manage infrastructure with code, not clicks.', resources:[{type:'course',title:'Terraform Fundamentals'}], tasks:['Provision infra with Terraform', 'Version your infra config']},
+        {title:'Orchestration Basics', hours:6, desc:'Run containers at scale with Kubernetes.', resources:[{type:'video',title:'Kubernetes Basics'}], tasks:['Deploy an app to a cluster', 'Scale a deployment']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete CI/CD pipeline for a real app.', resources:[{type:'project',title:'End-to-end CI/CD pipeline'}], tasks:['Build a full pipeline', 'Document the setup']}
+      ],
+      advanced: [
+        {title:'Monitoring & Incident Response', hours:6, desc:'Detect and respond to production issues.', resources:[{type:'course',title:'Monitoring & Alerting'}], tasks:['Set up dashboards & alerts', 'Run a mock incident response']},
+        {title:'Security in DevOps', hours:5, desc:'Bake security into the deployment pipeline.', resources:[{type:'video',title:'DevSecOps Basics'}], tasks:['Add security scanning to CI', 'Audit pipeline permissions']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A production-grade DevOps setup.', resources:[{type:'project',title:'Full infra + pipeline build'}], tasks:['Finalize the setup', 'Publish to portfolio']}
+      ]
+    },
+    'Cloud Engineer': {
+      beginner: [
+        {title:'Cloud Fundamentals', hours:7, desc:'Core concepts across AWS, Azure and GCP.', resources:[{type:'course',title:'Cloud Computing Basics'}], tasks:['Create a free-tier cloud account', 'Launch your first virtual machine']},
+        {title:'Networking Basics', hours:5, desc:'How cloud networking and security groups work.', resources:[{type:'video',title:'Cloud Networking Explained'}], tasks:['Set up a virtual network', 'Configure a security group']},
+        {title:'Storage & Compute Services', hours:6, desc:'Core building blocks of cloud apps.', resources:[{type:'course',title:'Cloud Storage & Compute'}], tasks:['Deploy a static site to cloud storage', 'Launch a managed compute instance']}
+      ],
+      intermediate: [
+        {title:'Infrastructure as Code', hours:7, desc:'Manage cloud resources with code.', resources:[{type:'course',title:'Terraform for Cloud'}], tasks:['Provision resources with Terraform', 'Manage state across environments']},
+        {title:'Cost & Resource Management', hours:4, desc:'Keep cloud spend under control.', resources:[{type:'video',title:'Cloud Cost Optimization'}], tasks:['Audit a sample cloud bill', 'Set up billing alerts']},
+        {title:'Portfolio Project I', hours:8, desc:'A cloud-hosted application with real infra.', resources:[{type:'project',title:'Full cloud deployment'}], tasks:['Deploy a complete app to the cloud', 'Document the architecture']}
+      ],
+      advanced: [
+        {title:'High Availability & Scaling', hours:6, desc:'Design systems that survive failure.', resources:[{type:'course',title:'HA Architecture Patterns'}], tasks:['Design a multi-AZ architecture', 'Add auto-scaling to a service']},
+        {title:'Cloud Security', hours:5, desc:'Secure cloud infrastructure and data.', resources:[{type:'video',title:'Cloud Security Fundamentals'}], tasks:['Audit IAM permissions', 'Encrypt data at rest and in transit']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A resilient, production-grade cloud architecture.', resources:[{type:'project',title:'Full cloud architecture build'}], tasks:['Finalize the architecture', 'Publish to portfolio']}
+      ]
+    },
+    'Cybersecurity Analyst': {
+      beginner: [
+        {title:'Security Fundamentals', hours:7, desc:'Core concepts: threats, risk, and defense.', resources:[{type:'course',title:'Intro to Cybersecurity'}], tasks:['Complete a security fundamentals course', 'Set up a home lab environment']},
+        {title:'Networking for Security', hours:6, desc:'Understand what you\'re defending.', resources:[{type:'video',title:'Networking Basics for Security'}], tasks:['Map out a sample network', 'Identify common attack surfaces']},
+        {title:'Common Threats & Attacks', hours:5, desc:'Phishing, malware, and social engineering.', resources:[{type:'course',title:'Common Cyber Threats'}], tasks:['Analyze a sample phishing email', 'Write up an incident summary']}
+      ],
+      intermediate: [
+        {title:'Security Tools & Monitoring', hours:7, desc:'SIEM tools and log analysis.', resources:[{type:'course',title:'SIEM & Log Analysis'}], tasks:['Analyze logs for suspicious activity', 'Set up a basic monitoring alert']},
+        {title:'Vulnerability Assessment', hours:6, desc:'Find weaknesses before attackers do.', resources:[{type:'video',title:'Vulnerability Scanning Basics'}], tasks:['Run a vulnerability scan', 'Prioritize findings by risk']},
+        {title:'Portfolio Project I', hours:8, desc:'A documented security assessment.', resources:[{type:'project',title:'Security audit case study'}], tasks:['Complete a mock security audit', 'Write a findings report']}
+      ],
+      advanced: [
+        {title:'Incident Response', hours:6, desc:'Contain and recover from breaches.', resources:[{type:'course',title:'Incident Response Fundamentals'}], tasks:['Run a tabletop incident exercise', 'Write an incident response plan']},
+        {title:'Security Certifications Prep', hours:6, desc:'Prepare for industry-recognized certs.', resources:[{type:'video',title:'Security+ Exam Prep'}], tasks:['Complete practice exam questions', 'Review weak-area topics']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A complete security assessment portfolio piece.', resources:[{type:'project',title:'Full security assessment'}], tasks:['Finalize the assessment', 'Publish to portfolio']}
+      ]
+    },
+    'Data Engineer': {
+      beginner: [
+        {title:'SQL & Data Modeling', hours:7, desc:'Structure and query data effectively.', resources:[{type:'course',title:'SQL for Data Engineers'}], tasks:['Design a normalized schema', 'Write complex join queries']},
+        {title:'Python for Data Pipelines', hours:6, desc:'Automate data processing with Python.', resources:[{type:'video',title:'Python for Data Engineering'}], tasks:['Write a script to clean a dataset', 'Automate a recurring data task']},
+        {title:'Working with APIs & Files', hours:5, desc:'Pull data from real-world sources.', resources:[{type:'course',title:'Data Ingestion Basics'}], tasks:['Ingest data from a public API', 'Parse CSV and JSON sources']}
+      ],
+      intermediate: [
+        {title:'ETL Pipeline Design', hours:7, desc:'Build pipelines that move and transform data.', resources:[{type:'course',title:'ETL Pipeline Fundamentals'}], tasks:['Build a basic ETL pipeline', 'Schedule it to run automatically']},
+        {title:'Data Warehousing', hours:6, desc:'Store data for fast analytical queries.', resources:[{type:'video',title:'Data Warehousing Concepts'}], tasks:['Design a warehouse schema', 'Load sample data into it']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete, automated data pipeline.', resources:[{type:'project',title:'End-to-end data pipeline'}], tasks:['Build a full pipeline', 'Document the data flow']}
+      ],
+      advanced: [
+        {title:'Big Data Processing', hours:7, desc:'Handle data at scale with distributed tools.', resources:[{type:'course',title:'Big Data Fundamentals'}], tasks:['Process a large dataset with a distributed tool', 'Optimize a slow query']},
+        {title:'Data Quality & Governance', hours:5, desc:'Keep pipelines trustworthy and compliant.', resources:[{type:'video',title:'Data Quality Basics'}], tasks:['Add data validation checks', 'Document data lineage']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A production-grade data platform.', resources:[{type:'project',title:'Full data platform build'}], tasks:['Finalize the platform', 'Publish to portfolio']}
+      ]
+    },
+    'QA Engineer': {
+      beginner: [
+        {title:'Testing Fundamentals', hours:6, desc:'Core concepts of software quality.', resources:[{type:'course',title:'Intro to Software Testing'}], tasks:['Write a test plan for a sample app', 'Log 5 sample bug reports']},
+        {title:'Manual Testing Techniques', hours:5, desc:'Systematic approaches to finding bugs.', resources:[{type:'video',title:'Manual Testing Techniques'}], tasks:['Run exploratory testing on an app', 'Write clear reproduction steps']},
+        {title:'Bug Tracking & Reporting', hours:4, desc:'Communicate issues clearly to engineers.', resources:[{type:'course',title:'Effective Bug Reports'}], tasks:['Triage a backlog of sample bugs', 'Prioritize by severity']}
+      ],
+      intermediate: [
+        {title:'Test Automation Basics', hours:7, desc:'Automate repetitive test cases.', resources:[{type:'course',title:'Test Automation Fundamentals'}], tasks:['Write automated tests for a UI flow', 'Run tests in CI']},
+        {title:'API Testing', hours:5, desc:'Test backend endpoints directly.', resources:[{type:'video',title:'API Testing Basics'}], tasks:['Write automated API tests', 'Test edge cases and error codes']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete automated test suite.', resources:[{type:'project',title:'Full test automation suite'}], tasks:['Build a complete suite', 'Integrate it into a CI pipeline']}
+      ],
+      advanced: [
+        {title:'Performance & Load Testing', hours:6, desc:'Test how systems behave under stress.', resources:[{type:'course',title:'Load Testing Fundamentals'}], tasks:['Run a load test on an app', 'Identify a performance bottleneck']},
+        {title:'Test Strategy & Leadership', hours:5, desc:'Plan quality strategy across a team.', resources:[{type:'video',title:'QA Strategy for Teams'}], tasks:['Write a team test strategy doc', 'Define quality metrics to track']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A complete QA strategy and automation portfolio.', resources:[{type:'project',title:'Full QA portfolio project'}], tasks:['Finalize the project', 'Publish to portfolio']}
+      ]
+    },
+    'Technical Writer': {
+      beginner: [
+        {title:'Technical Writing Fundamentals', hours:5, desc:'Write clearly about complex topics.', resources:[{type:'course',title:'Intro to Technical Writing'}], tasks:['Rewrite a confusing doc for clarity', 'Study 3 great API docs']},
+        {title:'Documentation Types', hours:4, desc:'Tutorials, references, and guides differ.', resources:[{type:'video',title:'Types of Technical Documentation'}], tasks:['Write a short tutorial', 'Write a reference doc for a function']},
+        {title:'Working with Engineers', hours:4, desc:'Extract accurate info from technical teams.', resources:[{type:'course',title:'Collaborating with Engineers'}], tasks:['Interview an engineer about a feature', 'Turn notes into a draft doc']}
+      ],
+      intermediate: [
+        {title:'API Documentation', hours:6, desc:'Document endpoints developers can actually use.', resources:[{type:'course',title:'API Documentation Basics'}], tasks:['Document a sample API', 'Add code examples for each endpoint']},
+        {title:'Docs-as-Code Workflows', hours:5, desc:'Manage docs like software, with version control.', resources:[{type:'video',title:'Docs-as-Code Basics'}], tasks:['Set up a docs site with version control', 'Submit a doc change via pull request']},
+        {title:'Portfolio Project I', hours:7, desc:'A complete documentation set for a real project.', resources:[{type:'project',title:'Full documentation project'}], tasks:['Write a complete docs set', 'Publish it online']}
+      ],
+      advanced: [
+        {title:'Information Architecture', hours:5, desc:'Organize large documentation sets.', resources:[{type:'course',title:'Information Architecture for Docs'}], tasks:['Restructure a messy docs site', 'Design a clear navigation system']},
+        {title:'Style Guides & Consistency', hours:4, desc:'Keep large docs sets consistent.', resources:[{type:'video',title:'Building a Style Guide'}], tasks:['Write a documentation style guide', 'Audit docs for consistency']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A polished, professional documentation portfolio.', resources:[{type:'project',title:'Full documentation portfolio'}], tasks:['Finalize the portfolio set', 'Publish to portfolio']}
+      ]
+    },
+    'IT Support Specialist': {
+      beginner: [
+        {title:'Hardware & OS Basics', hours:6, desc:'Understand the systems you\'ll be supporting.', resources:[{type:'course',title:'IT Fundamentals'}], tasks:['Troubleshoot a sample hardware issue', 'Reinstall an OS in a test environment']},
+        {title:'Networking Basics', hours:5, desc:'Diagnose common connectivity issues.', resources:[{type:'video',title:'Networking for IT Support'}], tasks:['Diagnose a sample connectivity issue', 'Configure a basic network device']},
+        {title:'Customer Service for IT', hours:4, desc:'Communicate clearly with frustrated users.', resources:[{type:'course',title:'IT Customer Service Skills'}], tasks:['Practice a support call script', 'Write a clear resolution summary']}
+      ],
+      intermediate: [
+        {title:'Ticketing & Systems Management', hours:5, desc:'Manage and track support requests.', resources:[{type:'course',title:'IT Service Management Basics'}], tasks:['Triage a sample ticket queue', 'Document a recurring issue fix']},
+        {title:'Security Basics for IT Support', hours:5, desc:'Spot and prevent common security issues.', resources:[{type:'video',title:'IT Security Basics'}], tasks:['Audit a machine for basic security gaps', 'Write a password policy doc']},
+        {title:'Portfolio Project I', hours:6, desc:'A documented set of support runbooks.', resources:[{type:'project',title:'IT support runbook set'}], tasks:['Write 5 troubleshooting runbooks', 'Organize them into a knowledge base']}
+      ],
+      advanced: [
+        {title:'Systems Administration Basics', hours:6, desc:'Manage users, permissions, and devices at scale.', resources:[{type:'course',title:'Intro to Sysadmin'}], tasks:['Set up user accounts and permissions', 'Automate a routine admin task']},
+        {title:'Cloud & Remote Support Tools', hours:4, desc:'Support distributed and remote teams.', resources:[{type:'video',title:'Remote IT Support Tools'}], tasks:['Set up a remote support tool', 'Document a remote onboarding process']},
+        {title:'Capstone Portfolio Project', hours:8, desc:'A complete IT support knowledge base.', resources:[{type:'project',title:'Full IT support portfolio'}], tasks:['Finalize the knowledge base', 'Publish to portfolio']}
+      ]
+    },
+    'Embedded Systems Engineer': {
+      beginner: [
+        {title:'C Programming Fundamentals', hours:8, desc:'The core language behind most embedded systems.', resources:[{type:'course',title:'C Programming Basics'}], tasks:['Write a small C program', 'Practice pointers & memory management']},
+        {title:'Microcontroller Basics', hours:6, desc:'How code runs directly on hardware.', resources:[{type:'video',title:'Intro to Microcontrollers'}], tasks:['Blink an LED on a dev board', 'Read a sensor value over GPIO']},
+        {title:'Digital Logic & Circuits', hours:5, desc:'The hardware fundamentals underneath embedded code.', resources:[{type:'course',title:'Digital Logic Basics'}], tasks:['Build a simple logic circuit', 'Simulate it before flashing hardware']}
+      ],
+      intermediate: [
+        {title:'Real-Time Operating Systems', hours:7, desc:'Manage tasks and timing on constrained devices.', resources:[{type:'course',title:'RTOS Fundamentals'}], tasks:['Run a multi-task RTOS project', 'Debug a timing issue']},
+        {title:'Communication Protocols', hours:6, desc:'I2C, SPI, UART — how chips talk to each other.', resources:[{type:'video',title:'Embedded Protocols Explained'}], tasks:['Wire up an I2C sensor', 'Log data over UART']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete embedded hardware/software project.', resources:[{type:'project',title:'Embedded device build'}], tasks:['Build a working device prototype', 'Document the schematic & code']}
+      ],
+      advanced: [
+        {title:'Power & Performance Optimization', hours:6, desc:'Make devices efficient and reliable.', resources:[{type:'course',title:'Low-Power Embedded Design'}], tasks:['Profile power usage of a device', 'Reduce a routine\'s power draw']},
+        {title:'Firmware Testing & Debugging', hours:5, desc:'Debug issues you can\'t easily print-statement your way through.', resources:[{type:'video',title:'Firmware Debugging Techniques'}], tasks:['Use a debugger/JTAG on real hardware', 'Fix a hard-to-reproduce bug']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A polished, documented embedded systems project.', resources:[{type:'project',title:'Full embedded systems build'}], tasks:['Finalize the device', 'Publish to portfolio']}
+      ]
+    },
+    'Game Developer': {
+      beginner: [
+        {title:'Game Engine Fundamentals', hours:8, desc:'Learn a modern engine like Unity or Unreal.', resources:[{type:'course',title:'Intro to Game Engines'}], tasks:['Build a simple 2D game scene', 'Add basic player movement']},
+        {title:'Game Programming Basics', hours:6, desc:'Scripting gameplay logic and interactions.', resources:[{type:'video',title:'Game Scripting Basics'}], tasks:['Script a scoring system', 'Add collision detection']},
+        {title:'Game Design Fundamentals', hours:5, desc:'What makes gameplay fun and balanced.', resources:[{type:'course',title:'Intro to Game Design'}], tasks:['Design a simple game loop on paper', 'Playtest and iterate on it']}
+      ],
+      intermediate: [
+        {title:'3D Development', hours:8, desc:'Move from 2D to full 3D game worlds.', resources:[{type:'course',title:'3D Game Development'}], tasks:['Build a simple 3D level', 'Add lighting and camera controls']},
+        {title:'Game AI & Physics', hours:6, desc:'NPC behavior and realistic movement.', resources:[{type:'video',title:'Game AI Basics'}], tasks:['Script basic enemy AI', 'Tune physics on a moving object']},
+        {title:'Portfolio Project I', hours:9, desc:'A complete, playable small game.', resources:[{type:'project',title:'Full game build'}], tasks:['Ship a complete playable game', 'Playtest with real users']}
+      ],
+      advanced: [
+        {title:'Multiplayer & Networking', hours:7, desc:'Sync gameplay across multiple players.', resources:[{type:'course',title:'Multiplayer Game Networking'}], tasks:['Add basic multiplayer sync', 'Handle latency & disconnects']},
+        {title:'Performance Optimization', hours:5, desc:'Keep frame rates smooth under load.', resources:[{type:'video',title:'Game Performance Optimization'}], tasks:['Profile a game scene', 'Fix a frame-rate bottleneck']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A polished, shippable game.', resources:[{type:'project',title:'Full polished game'}], tasks:['Finalize and polish the game', 'Publish to portfolio']}
+      ]
+    },
+    'Blockchain Developer': {
+      beginner: [
+        {title:'Blockchain Fundamentals', hours:7, desc:'How blocks, consensus and wallets work.', resources:[{type:'course',title:'Intro to Blockchain'}], tasks:['Set up a crypto wallet on testnet', 'Send a test transaction']},
+        {title:'Solidity Basics', hours:7, desc:'The core language for smart contracts.', resources:[{type:'video',title:'Solidity for Beginners'}], tasks:['Write a simple smart contract', 'Deploy it to a testnet']},
+        {title:'Web3 Fundamentals', hours:5, desc:'Connect frontends to blockchain networks.', resources:[{type:'course',title:'Web3 Basics'}], tasks:['Connect a wallet to a web page', 'Read contract data from the frontend']}
+      ],
+      intermediate: [
+        {title:'Smart Contract Security', hours:7, desc:'Avoid the bugs that cost real money.', resources:[{type:'course',title:'Smart Contract Security Basics'}], tasks:['Audit a sample contract for bugs', 'Fix a reentrancy vulnerability']},
+        {title:'DeFi & Token Standards', hours:6, desc:'ERC-20, ERC-721 and common DeFi patterns.', resources:[{type:'video',title:'Token Standards Explained'}], tasks:['Deploy a custom token contract', 'Build a simple staking contract']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete decentralized application.', resources:[{type:'project',title:'Full dApp build'}], tasks:['Ship a working dApp', 'Deploy contracts to testnet']}
+      ],
+      advanced: [
+        {title:'Gas Optimization', hours:5, desc:'Make contracts cheaper to run.', resources:[{type:'course',title:'Gas Optimization Techniques'}], tasks:['Optimize a contract\'s gas usage', 'Benchmark before & after']},
+        {title:'Cross-Chain & Layer 2', hours:6, desc:'Scale beyond a single blockchain.', resources:[{type:'video',title:'Layer 2 Fundamentals'}], tasks:['Deploy a contract to a Layer 2 network', 'Bridge test assets across chains']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A production-ready decentralized application.', resources:[{type:'project',title:'Full production dApp'}], tasks:['Finalize the dApp', 'Publish to portfolio']}
+      ]
+    },
+    'Site Reliability Engineer': {
+      beginner: [
+        {title:'Linux & Systems Fundamentals', hours:7, desc:'The foundation for keeping systems running.', resources:[{type:'course',title:'Linux Systems Fundamentals'}], tasks:['Diagnose a resource bottleneck', 'Write a system health check script']},
+        {title:'Monitoring Basics', hours:5, desc:'Know when something is actually wrong.', resources:[{type:'video',title:'Monitoring Fundamentals'}], tasks:['Set up a basic metrics dashboard', 'Define your first alert threshold']},
+        {title:'Incident Response Basics', hours:5, desc:'What to do when something breaks.', resources:[{type:'course',title:'Incident Response 101'}], tasks:['Write a basic runbook', 'Simulate responding to a mock outage']}
+      ],
+      intermediate: [
+        {title:'Service Level Objectives', hours:6, desc:'Define and measure reliability goals.', resources:[{type:'course',title:'SLOs & Error Budgets'}], tasks:['Define an SLO for a sample service', 'Track error budget consumption']},
+        {title:'Automation & Toil Reduction', hours:6, desc:'Automate the repetitive parts of ops work.', resources:[{type:'video',title:'Reducing Operational Toil'}], tasks:['Automate a manual ops task', 'Measure the time saved']},
+        {title:'Portfolio Project I', hours:8, desc:'A documented reliability improvement project.', resources:[{type:'project',title:'Reliability case study'}], tasks:['Improve reliability of a sample service', 'Write up the before/after']}
+      ],
+      advanced: [
+        {title:'Chaos Engineering', hours:6, desc:'Break things on purpose to find weaknesses.', resources:[{type:'course',title:'Chaos Engineering Basics'}], tasks:['Run a controlled failure test', 'Document the resilience gaps found']},
+        {title:'Postmortems & Learning Culture', hours:4, desc:'Turn incidents into lasting improvements.', resources:[{type:'video',title:'Writing Blameless Postmortems'}], tasks:['Write a postmortem for a mock incident', 'Propose 3 concrete follow-up fixes']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A complete reliability engineering portfolio piece.', resources:[{type:'project',title:'Full SRE portfolio project'}], tasks:['Finalize the project', 'Publish to portfolio']}
+      ]
+    },
+    'Platform Engineer': {
+      beginner: [
+        {title:'Developer Tooling Basics', hours:6, desc:'What makes other engineers productive.', resources:[{type:'course',title:'Intro to Platform Engineering'}], tasks:['Map out a team\'s current dev workflow', 'Identify 3 friction points']},
+        {title:'Containers & CI Basics', hours:6, desc:'The building blocks of internal platforms.', resources:[{type:'video',title:'Containers & CI Fundamentals'}], tasks:['Containerize a sample service', 'Set up a basic CI pipeline']},
+        {title:'Internal APIs & Self-Service', hours:5, desc:'Build tools other engineers can use themselves.', resources:[{type:'course',title:'Self-Service Platform Basics'}], tasks:['Design a simple self-service API', 'Document it for other engineers']}
+      ],
+      intermediate: [
+        {title:'Infrastructure as Code', hours:7, desc:'Manage platform infra with code.', resources:[{type:'course',title:'IaC for Platform Teams'}], tasks:['Template a reusable infra module', 'Version and share it across teams']},
+        {title:'Golden Paths & Templates', hours:5, desc:'Make the right way the easy way.', resources:[{type:'video',title:'Golden Path Design'}], tasks:['Build a project starter template', 'Get a teammate to use it']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete internal developer platform feature.', resources:[{type:'project',title:'Platform feature build'}], tasks:['Ship a self-service platform feature', 'Document it for adoption']}
+      ],
+      advanced: [
+        {title:'Platform Reliability', hours:6, desc:'Keep the platform itself dependable.', resources:[{type:'course',title:'Platform Reliability Basics'}], tasks:['Add monitoring to a platform service', 'Define an SLA for platform uptime']},
+        {title:'Developer Experience Metrics', hours:5, desc:'Measure whether the platform is actually helping.', resources:[{type:'video',title:'Measuring Developer Experience'}], tasks:['Survey team on platform pain points', 'Define 2 DevEx metrics to track']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A complete internal platform initiative.', resources:[{type:'project',title:'Full platform initiative'}], tasks:['Finalize the initiative', 'Publish to portfolio']}
+      ]
+    },
+    'Systems Administrator': {
+      beginner: [
+        {title:'OS & User Management', hours:6, desc:'Manage machines, users and permissions.', resources:[{type:'course',title:'Sysadmin Fundamentals'}], tasks:['Set up user accounts with proper permissions', 'Configure a basic file server']},
+        {title:'Networking Basics', hours:5, desc:'Keep systems talking to each other.', resources:[{type:'video',title:'Networking for Sysadmins'}], tasks:['Configure a basic network setup', 'Diagnose a connectivity issue']},
+        {title:'Backup & Recovery', hours:4, desc:'Protect data before disaster strikes.', resources:[{type:'course',title:'Backup Strategy Basics'}], tasks:['Set up an automated backup job', 'Test a full recovery from backup']}
+      ],
+      intermediate: [
+        {title:'Scripting for Automation', hours:6, desc:'Automate repetitive admin tasks.', resources:[{type:'course',title:'Shell Scripting for Admins'}], tasks:['Automate a routine maintenance task', 'Schedule it to run reliably']},
+        {title:'Server Security Hardening', hours:6, desc:'Lock down systems against attackers.', resources:[{type:'video',title:'Server Hardening Basics'}], tasks:['Harden a sample server configuration', 'Audit open ports and services']},
+        {title:'Portfolio Project I', hours:7, desc:'A documented systems administration project.', resources:[{type:'project',title:'Infrastructure setup project'}], tasks:['Set up a small multi-server environment', 'Document the full configuration']}
+      ],
+      advanced: [
+        {title:'Virtualization & Cloud Migration', hours:6, desc:'Move workloads to modern infrastructure.', resources:[{type:'course',title:'Virtualization Fundamentals'}], tasks:['Set up a virtual machine environment', 'Migrate a sample workload to it']},
+        {title:'Monitoring & Alerting', hours:5, desc:'Catch problems before users do.', resources:[{type:'video',title:'Systems Monitoring Basics'}], tasks:['Set up monitoring across servers', 'Configure meaningful alert thresholds']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A complete, documented infrastructure environment.', resources:[{type:'project',title:'Full infrastructure environment'}], tasks:['Finalize the environment', 'Publish to portfolio']}
+      ]
+    },
+    'Penetration Tester': {
+      beginner: [
+        {title:'Security & Networking Fundamentals', hours:7, desc:'Understand what you\'ll be attacking.', resources:[{type:'course',title:'Networking for Security'}], tasks:['Map a sample network\'s attack surface', 'Set up a personal pentesting lab']},
+        {title:'Reconnaissance Techniques', hours:5, desc:'Gather information before an attack.', resources:[{type:'video',title:'OSINT & Recon Basics'}], tasks:['Run recon on a lab target', 'Document findings in a report']},
+        {title:'Common Vulnerabilities', hours:6, desc:'The OWASP Top 10 and beyond.', resources:[{type:'course',title:'Web Vulnerabilities 101'}], tasks:['Exploit a vulnerable lab app', 'Explain the fix for each bug found']}
+      ],
+      intermediate: [
+        {title:'Exploitation Techniques', hours:7, desc:'Turn found vulnerabilities into proof of impact.', resources:[{type:'course',title:'Exploitation Fundamentals'}], tasks:['Exploit a lab vulnerability end-to-end', 'Document steps to reproduce']},
+        {title:'Tools of the Trade', hours:5, desc:'Burp Suite, Metasploit, and friends.', resources:[{type:'video',title:'Pentesting Tools Overview'}], tasks:['Run a scan with a standard toolset', 'Triage and prioritize the results']},
+        {title:'Portfolio Project I', hours:8, desc:'A documented penetration test on a lab environment.', resources:[{type:'project',title:'Full pentest report'}], tasks:['Complete a full mock pentest', 'Write a professional findings report']}
+      ],
+      advanced: [
+        {title:'Advanced Exploitation', hours:7, desc:'Privilege escalation and lateral movement.', resources:[{type:'course',title:'Advanced Exploitation Techniques'}], tasks:['Escalate privileges in a lab environment', 'Chain multiple vulnerabilities together']},
+        {title:'Reporting & Client Communication', hours:4, desc:'Make findings useful to non-security teams.', resources:[{type:'video',title:'Writing Pentest Reports'}], tasks:['Rewrite a technical finding for executives', 'Present findings clearly and concisely']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A complete professional-grade pentest engagement.', resources:[{type:'project',title:'Full pentest engagement'}], tasks:['Finalize the engagement report', 'Publish to portfolio']}
+      ]
+    },
+    'Security Engineer': {
+      beginner: [
+        {title:'Security Fundamentals', hours:7, desc:'Core principles behind secure systems.', resources:[{type:'course',title:'Security Engineering Basics'}], tasks:['Threat-model a sample application', 'List its top 5 risks']},
+        {title:'Secure Coding Practices', hours:6, desc:'Prevent vulnerabilities at the source.', resources:[{type:'video',title:'Secure Coding Basics'}], tasks:['Fix injected vulnerabilities in sample code', 'Add input validation to an endpoint']},
+        {title:'Identity & Access Management', hours:5, desc:'Control who can do what.', resources:[{type:'course',title:'IAM Fundamentals'}], tasks:['Set up role-based access control', 'Audit a set of user permissions']}
+      ],
+      intermediate: [
+        {title:'Security Tooling & Automation', hours:6, desc:'Bake security checks into everyday workflows.', resources:[{type:'course',title:'Security Automation Basics'}], tasks:['Add automated security scanning to CI', 'Fix issues it surfaces']},
+        {title:'Cloud Security', hours:6, desc:'Secure infrastructure in the cloud.', resources:[{type:'video',title:'Cloud Security Fundamentals'}], tasks:['Audit cloud IAM permissions', 'Encrypt data at rest and in transit']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete security engineering project.', resources:[{type:'project',title:'Security hardening project'}], tasks:['Harden a sample application end-to-end', 'Document every change made']}
+      ],
+      advanced: [
+        {title:'Threat Detection & Response', hours:6, desc:'Build systems that catch attacks in progress.', resources:[{type:'course',title:'Threat Detection Fundamentals'}], tasks:['Build a basic threat detection rule', 'Test it against simulated attacks']},
+        {title:'Security Architecture', hours:6, desc:'Design systems secure by default.', resources:[{type:'video',title:'Security Architecture Patterns'}], tasks:['Design a secure architecture diagram', 'Get it peer-reviewed']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A complete, production-grade security engineering project.', resources:[{type:'project',title:'Full security engineering build'}], tasks:['Finalize the project', 'Publish to portfolio']}
+      ]
+    },
+    'Data Analyst': {
+      beginner: [
+        {title:'Spreadsheets & SQL Basics', hours:6, desc:'The everyday tools of data analysis.', resources:[{type:'course',title:'SQL & Spreadsheets for Analysts'}], tasks:['Clean a messy sample dataset', 'Write basic SQL queries against it']},
+        {title:'Data Visualization Basics', hours:5, desc:'Turn numbers into charts people understand.', resources:[{type:'video',title:'Data Visualization Fundamentals'}], tasks:['Build 3 charts from a sample dataset', 'Choose the right chart for each question']},
+        {title:'Statistics Fundamentals', hours:6, desc:'The math behind trustworthy conclusions.', resources:[{type:'course',title:'Intro to Statistics'}], tasks:['Calculate summary statistics for a dataset', 'Explain what they mean in plain language']}
+      ],
+      intermediate: [
+        {title:'Dashboarding Tools', hours:6, desc:'Build reports stakeholders actually use.', resources:[{type:'course',title:'Dashboard Design Basics'}], tasks:['Build an interactive dashboard', 'Present it to a mock stakeholder']},
+        {title:'Advanced SQL', hours:6, desc:'Joins, window functions, and complex queries.', resources:[{type:'video',title:'Advanced SQL Techniques'}], tasks:['Write a query using window functions', 'Optimize a slow query']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete data analysis case study.', resources:[{type:'project',title:'Full analysis case study'}], tasks:['Analyze a real-world dataset end-to-end', 'Write up findings and recommendations']}
+      ],
+      advanced: [
+        {title:'A/B Testing & Experimentation', hours:6, desc:'Measure the impact of real changes.', resources:[{type:'course',title:'A/B Testing Fundamentals'}], tasks:['Design an A/B test', 'Analyze the results for significance']},
+        {title:'Storytelling with Data', hours:4, desc:'Make analysis persuasive, not just correct.', resources:[{type:'video',title:'Data Storytelling Basics'}], tasks:['Turn an analysis into a narrative deck', 'Present it to a mock audience']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A polished, presentation-ready analysis portfolio piece.', resources:[{type:'project',title:'Full analytics portfolio project'}], tasks:['Finalize the analysis', 'Publish to portfolio']}
+      ]
+    },
+    'Business Intelligence Analyst': {
+      beginner: [
+        {title:'BI Fundamentals', hours:6, desc:'How organizations turn data into decisions.', resources:[{type:'course',title:'Intro to Business Intelligence'}], tasks:['Map out a company\'s key metrics', 'Identify data sources for each one']},
+        {title:'SQL for Reporting', hours:6, desc:'Query the data behind business reports.', resources:[{type:'video',title:'SQL for BI'}], tasks:['Write queries for a sample reporting need', 'Validate the numbers against source data']},
+        {title:'BI Tools Basics', hours:5, desc:'Power BI, Tableau or similar platforms.', resources:[{type:'course',title:'Intro to BI Tools'}], tasks:['Build a basic report in a BI tool', 'Add filters and drill-downs']}
+      ],
+      intermediate: [
+        {title:'Data Modeling for BI', hours:6, desc:'Structure data for fast, reliable reporting.', resources:[{type:'course',title:'Dimensional Modeling Basics'}], tasks:['Design a star schema for a reporting need', 'Load sample data into it']},
+        {title:'KPI Design', hours:5, desc:'Define metrics that actually drive decisions.', resources:[{type:'video',title:'Designing Good KPIs'}], tasks:['Define 3 KPIs for a sample business', 'Justify why each one matters']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete BI reporting solution.', resources:[{type:'project',title:'Full BI reporting build'}], tasks:['Build a complete reporting solution', 'Present it to a mock stakeholder']}
+      ],
+      advanced: [
+        {title:'Automated Reporting Pipelines', hours:6, desc:'Keep dashboards fresh without manual work.', resources:[{type:'course',title:'Automated BI Pipelines'}], tasks:['Automate a recurring report', 'Add data quality checks to it']},
+        {title:'Advanced Analytics for BI', hours:5, desc:'Go beyond dashboards into forecasting.', resources:[{type:'video',title:'Forecasting Basics for BI'}], tasks:['Build a simple forecast model', 'Compare it against actuals']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A complete, automated BI system.', resources:[{type:'project',title:'Full BI system build'}], tasks:['Finalize the system', 'Publish to portfolio']}
+      ]
+    },
+    'Automation Test Engineer': {
+      beginner: [
+        {title:'Testing & Scripting Fundamentals', hours:6, desc:'The foundation of test automation.', resources:[{type:'course',title:'Intro to Test Automation'}], tasks:['Write a basic automated test script', 'Run it against a sample app']},
+        {title:'UI Automation Basics', hours:6, desc:'Automate testing of user interfaces.', resources:[{type:'video',title:'UI Test Automation Basics'}], tasks:['Automate a login flow test', 'Handle a flaky test case']},
+        {title:'Version Control & Test Organization', hours:4, desc:'Keep test suites maintainable.', resources:[{type:'course',title:'Organizing Test Suites'}], tasks:['Organize tests into logical suites', 'Commit tests with clear structure']}
+      ],
+      intermediate: [
+        {title:'API Test Automation', hours:6, desc:'Automate testing at the API layer.', resources:[{type:'course',title:'API Test Automation'}], tasks:['Automate a set of API tests', 'Add assertions for edge cases']},
+        {title:'CI Integration', hours:5, desc:'Run automated tests on every change.', resources:[{type:'video',title:'Tests in CI Pipelines'}], tasks:['Integrate a test suite into CI', 'Fix a test that breaks the build']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete, CI-integrated automation framework.', resources:[{type:'project',title:'Full test automation framework'}], tasks:['Build a complete framework', 'Document how to extend it']}
+      ],
+      advanced: [
+        {title:'Test Framework Design', hours:6, desc:'Build reusable, scalable test architecture.', resources:[{type:'course',title:'Test Framework Architecture'}], tasks:['Refactor tests into a reusable framework', 'Add reporting to the framework']},
+        {title:'Performance Test Automation', hours:5, desc:'Automate testing for speed and scale.', resources:[{type:'video',title:'Automated Performance Testing'}], tasks:['Automate a load test scenario', 'Set performance thresholds as pass/fail']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A production-grade automation framework.', resources:[{type:'project',title:'Full production framework'}], tasks:['Finalize the framework', 'Publish to portfolio']}
+      ]
+    },
+    'Business Analyst': {
+      beginner: [
+        {title:'Business Analysis Fundamentals', hours:6, desc:'Bridge business needs and technical solutions.', resources:[{type:'course',title:'Intro to Business Analysis'}], tasks:['Write a sample business requirements doc', 'Interview a stakeholder about a need']},
+        {title:'Process Mapping', hours:5, desc:'Visualize how work actually happens.', resources:[{type:'video',title:'Process Mapping Basics'}], tasks:['Map a current business process', 'Identify 2 inefficiencies in it']},
+        {title:'Data-Informed Decisions', hours:5, desc:'Use data to support recommendations.', resources:[{type:'course',title:'Data for Business Analysts'}], tasks:['Pull data to support a recommendation', 'Present findings clearly']}
+      ],
+      intermediate: [
+        {title:'Requirements Gathering', hours:6, desc:'Turn vague asks into clear specs.', resources:[{type:'course',title:'Requirements Gathering Techniques'}], tasks:['Run a requirements workshop', 'Write clear, testable requirements']},
+        {title:'Stakeholder Management', hours:5, desc:'Align competing priorities across teams.', resources:[{type:'video',title:'Stakeholder Management Basics'}], tasks:['Map stakeholders by influence & interest', 'Draft a communication plan for them']},
+        {title:'Portfolio Project I', hours:7, desc:'A complete business analysis case study.', resources:[{type:'project',title:'Full BA case study'}], tasks:['Complete an end-to-end analysis project', 'Present recommendations to a mock team']}
+      ],
+      advanced: [
+        {title:'Solution Evaluation', hours:5, desc:'Judge whether a solution actually worked.', resources:[{type:'course',title:'Solution Evaluation Basics'}], tasks:['Evaluate a shipped solution against goals', 'Recommend next steps']},
+        {title:'Agile for Business Analysts', hours:5, desc:'Work effectively inside agile teams.', resources:[{type:'video',title:'Agile Basics for BAs'}], tasks:['Write user stories for a backlog', 'Participate in a mock sprint planning']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A polished, end-to-end business analysis portfolio piece.', resources:[{type:'project',title:'Full BA portfolio project'}], tasks:['Finalize the project', 'Publish to portfolio']}
+      ]
+    },
+    'Technical Program Manager': {
+      beginner: [
+        {title:'Program Management Fundamentals', hours:6, desc:'Coordinate complex, cross-team efforts.', resources:[{type:'course',title:'Intro to Program Management'}], tasks:['Map dependencies for a sample program', 'Write a program charter']},
+        {title:'Technical Fluency for TPMs', hours:5, desc:'Understand enough to coordinate engineering work.', resources:[{type:'video',title:'Technical Concepts for TPMs'}], tasks:['Read and summarize a technical design doc', 'Ask clarifying questions on it']},
+        {title:'Risk & Dependency Tracking', hours:5, desc:'Spot problems before they derail a program.', resources:[{type:'course',title:'Risk Management Basics'}], tasks:['Build a risk register for a program', 'Track 3 cross-team dependencies']}
+      ],
+      intermediate: [
+        {title:'Cross-Team Coordination', hours:6, desc:'Keep multiple teams moving toward one goal.', resources:[{type:'course',title:'Cross-Functional Coordination'}], tasks:['Run a cross-team status sync', 'Resolve a scheduling conflict between teams']},
+        {title:'Program Communication', hours:5, desc:'Keep leadership and teams aligned.', resources:[{type:'video',title:'Executive Communication Basics'}], tasks:['Write a program status update', 'Present it to a mock leadership team']},
+        {title:'Portfolio Project I', hours:8, desc:'A documented multi-team program case study.', resources:[{type:'project',title:'Full program case study'}], tasks:['Run a mock multi-team program', 'Document how it was delivered']}
+      ],
+      advanced: [
+        {title:'Program Metrics & Reporting', hours:5, desc:'Prove impact with data.', resources:[{type:'course',title:'Program Metrics Basics'}], tasks:['Define success metrics for a program', 'Build a reporting cadence for them']},
+        {title:'Managing Program Risk at Scale', hours:5, desc:'Handle the messiest cross-org problems.', resources:[{type:'video',title:'Advanced Risk Management'}], tasks:['Run a mock escalation scenario', 'Propose a mitigation plan']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A complete, large-scale program case study.', resources:[{type:'project',title:'Full TPM portfolio project'}], tasks:['Finalize the case study', 'Publish to portfolio']}
+      ]
+    },
+    'Technical Product Manager': {
+      beginner: [
+        {title:'PM Fundamentals for Technical Products', hours:6, desc:'What it means to own a technical roadmap.', resources:[{type:'course',title:'Technical Product Management Basics'}], tasks:['Write a sample technical PRD', 'Review 3 real API-driven products']},
+        {title:'Working with Engineering', hours:5, desc:'Speak the language of the teams you work with.', resources:[{type:'video',title:'Engineering Fluency for PMs'}], tasks:['Read a technical architecture doc', 'Ask informed questions about trade-offs']},
+        {title:'Prioritization Frameworks', hours:4, desc:'RICE, MoSCoW, and other prioritization tools.', resources:[{type:'course',title:'Prioritization Frameworks'}], tasks:['Apply RICE to a sample backlog', 'Justify a trade-off decision']}
+      ],
+      intermediate: [
+        {title:'API & Platform Strategy', hours:6, desc:'Own products other developers build on.', resources:[{type:'course',title:'API Product Strategy'}], tasks:['Design an API surface for a sample product', 'Write developer-facing docs for it']},
+        {title:'Technical Roadmapping', hours:5, desc:'Balance technical debt with new features.', resources:[{type:'video',title:'Technical Roadmapping Basics'}], tasks:['Build a roadmap balancing debt & features', 'Present trade-offs to stakeholders']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete technical product case study.', resources:[{type:'project',title:'Technical product case study'}], tasks:['Define and ship a technical feature', 'Publish a case study on the process']}
+      ],
+      advanced: [
+        {title:'Platform & Ecosystem Thinking', hours:6, desc:'Design products that scale beyond one team.', resources:[{type:'course',title:'Platform Product Strategy'}], tasks:['Design a strategy for platform adoption', 'Identify 3 ecosystem partners']},
+        {title:'Technical Metrics & Analytics', hours:5, desc:'Measure a technical product\'s real impact.', resources:[{type:'video',title:'Product Analytics for Technical PMs'}], tasks:['Define key technical product metrics', 'Analyze a feature\'s adoption data']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A polished, job-ready technical PM case study.', resources:[{type:'project',title:'Full technical PM portfolio'}], tasks:['Finalize the case study', 'Publish to portfolio']}
+      ]
+    },
+    'Product Owner': {
+      beginner: [
+        {title:'Product Ownership Fundamentals', hours:5, desc:'Own the backlog for an agile team.', resources:[{type:'course',title:'Intro to Product Ownership'}], tasks:['Write 5 sample user stories', 'Prioritize a sample backlog']},
+        {title:'Agile & Scrum Basics', hours:5, desc:'Work inside the sprint cadence.', resources:[{type:'video',title:'Scrum Fundamentals'}], tasks:['Participate in a mock sprint planning', 'Run a mock sprint review']},
+        {title:'Writing Good User Stories', hours:4, desc:'Clear stories keep teams unblocked.', resources:[{type:'course',title:'Writing Effective User Stories'}], tasks:['Write stories with clear acceptance criteria', 'Get peer feedback on them']}
+      ],
+      intermediate: [
+        {title:'Backlog Management', hours:5, desc:'Keep the backlog healthy and prioritized.', resources:[{type:'course',title:'Backlog Management Basics'}], tasks:['Groom a sample backlog', 'Remove or merge stale items']},
+        {title:'Stakeholder Collaboration', hours:5, desc:'Balance competing requests from stakeholders.', resources:[{type:'video',title:'Stakeholder Collaboration for POs'}], tasks:['Negotiate scope on a sample request', 'Document the agreed trade-off']},
+        {title:'Portfolio Project I', hours:7, desc:'A complete sprint cycle case study.', resources:[{type:'project',title:'Full sprint cycle case study'}], tasks:['Run a mock sprint end-to-end', 'Document outcomes and learnings']}
+      ],
+      advanced: [
+        {title:'Release Planning', hours:5, desc:'Plan beyond a single sprint.', resources:[{type:'course',title:'Release Planning Basics'}], tasks:['Build a multi-sprint release plan', 'Communicate it to stakeholders']},
+        {title:'Metrics for Product Owners', hours:4, desc:'Know if the backlog is delivering value.', resources:[{type:'video',title:'Product Metrics for POs'}], tasks:['Define 2 success metrics for a release', 'Track them after a mock launch']},
+        {title:'Capstone Portfolio Project', hours:8, desc:'A polished, job-ready product ownership case study.', resources:[{type:'project',title:'Full PO portfolio project'}], tasks:['Finalize the case study', 'Publish to portfolio']}
+      ]
+    },
+    'UI Designer': {
+      beginner: [
+        {title:'Visual Design Fundamentals', hours:6, desc:'Color, type, spacing and hierarchy.', resources:[{type:'course',title:'Visual Design Basics'}], tasks:['Redesign a simple screen for visual clarity', 'Build a small color & type palette']},
+        {title:'Design Tools Setup', hours:5, desc:'Get fluent with Figma or similar tools.', resources:[{type:'video',title:'Figma for Beginners'}], tasks:['Recreate a UI screen in Figma', 'Learn components & auto layout']},
+        {title:'UI Patterns & Components', hours:5, desc:'Common patterns users already understand.', resources:[{type:'course',title:'UI Component Patterns'}], tasks:['Design a small component library', 'Apply it to 2 screens']}
+      ],
+      intermediate: [
+        {title:'Design Systems', hours:6, desc:'Build consistent, reusable UI systems.', resources:[{type:'course',title:'Design Systems Basics'}], tasks:['Build a mini design system', 'Apply it across a small app']},
+        {title:'Interaction & Micro-animation', hours:5, desc:'Make interfaces feel alive and responsive.', resources:[{type:'video',title:'UI Micro-interactions'}], tasks:['Design a small interaction animation', 'Prototype it in Figma']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete, polished UI design project.', resources:[{type:'project',title:'Full UI design project'}], tasks:['Design a complete app UI', 'Publish high-fidelity mockups']}
+      ],
+      advanced: [
+        {title:'Accessibility in UI Design', hours:5, desc:'Design interfaces that work for everyone.', resources:[{type:'course',title:'Accessible UI Design'}], tasks:['Audit a design for contrast & accessibility', 'Fix the issues found']},
+        {title:'Design Handoff & Dev Collaboration', hours:4, desc:'Get designs built accurately.', resources:[{type:'video',title:'Design-to-Dev Handoff'}], tasks:['Prepare a design for developer handoff', 'Review the built result against the design']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A polished, job-ready UI design portfolio.', resources:[{type:'project',title:'Full UI portfolio project'}], tasks:['Finalize the portfolio piece', 'Publish to portfolio']}
+      ]
+    },
+    'Product Designer': {
+      beginner: [
+        {title:'Product Design Fundamentals', hours:6, desc:'Own experience from research through polished UI.', resources:[{type:'course',title:'Intro to Product Design'}], tasks:['Map a simple product\'s user journey', 'Sketch 3 solution concepts']},
+        {title:'User Research Basics', hours:6, desc:'Understand real users before designing.', resources:[{type:'video',title:'User Research Fundamentals'}], tasks:['Conduct 3 user interviews', 'Summarize key findings']},
+        {title:'Wireframing', hours:5, desc:'Translate ideas into structured layouts.', resources:[{type:'course',title:'Wireframing Basics'}], tasks:['Wireframe a 3-screen flow', 'Get feedback and iterate']}
+      ],
+      intermediate: [
+        {title:'Prototyping & Testing', hours:7, desc:'Validate ideas before they\'re built.', resources:[{type:'course',title:'Prototyping & Usability Testing'}], tasks:['Build an interactive prototype', 'Run a usability test with 3 users']},
+        {title:'Design Systems', hours:6, desc:'Design at scale, consistently.', resources:[{type:'video',title:'Design Systems for Product Designers'}], tasks:['Contribute to a mini design system', 'Apply it to a new feature']},
+        {title:'Portfolio Project I', hours:8, desc:'A complete, end-to-end product design case study.', resources:[{type:'project',title:'Full product design case study'}], tasks:['Design a feature from research to UI', 'Write up the case study']}
+      ],
+      advanced: [
+        {title:'Design Strategy', hours:6, desc:'Connect design decisions to business goals.', resources:[{type:'course',title:'Design Strategy Basics'}], tasks:['Write a design rationale doc', 'Tie it to a business metric']},
+        {title:'Cross-Functional Collaboration', hours:5, desc:'Partner effectively with PM and engineering.', resources:[{type:'video',title:'Design Collaboration Basics'}], tasks:['Run a mock design review', 'Incorporate engineering feedback']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A polished, job-ready product design portfolio piece.', resources:[{type:'project',title:'Full product design portfolio'}], tasks:['Finalize the case study', 'Publish to portfolio']}
+      ]
+    },
+    'Technical Support Engineer': {
+      beginner: [
+        {title:'Product & Troubleshooting Basics', hours:6, desc:'Understand a product well enough to fix issues.', resources:[{type:'course',title:'Technical Support Fundamentals'}], tasks:['Learn a sample product end-to-end', 'Troubleshoot 3 common issues']},
+        {title:'Reading Logs & Errors', hours:5, desc:'Diagnose problems from technical evidence.', resources:[{type:'video',title:'Reading Logs for Support'}], tasks:['Diagnose an issue from sample logs', 'Write a clear root-cause summary']},
+        {title:'Customer Communication', hours:4, desc:'Explain technical issues clearly to customers.', resources:[{type:'course',title:'Technical Communication Basics'}], tasks:['Write a clear resolution email', 'Practice a support call script']}
+      ],
+      intermediate: [
+        {title:'API & Integration Support', hours:6, desc:'Help customers with technical integrations.', resources:[{type:'course',title:'Supporting API Integrations'}], tasks:['Debug a sample API integration issue', 'Write up the fix for the customer']},
+        {title:'Escalation Handling', hours:5, desc:'Know when and how to escalate.', resources:[{type:'video',title:'Escalation Best Practices'}], tasks:['Triage a batch of sample tickets', 'Draft an escalation summary for engineering']},
+        {title:'Portfolio Project I', hours:7, desc:'A documented set of technical support case studies.', resources:[{type:'project',title:'Support case study set'}], tasks:['Document 5 resolved support cases', 'Extract patterns for a knowledge base']}
+      ],
+      advanced: [
+        {title:'Building Support Tools', hours:6, desc:'Automate and scale support work.', resources:[{type:'course',title:'Support Tooling Basics'}], tasks:['Build a simple support automation script', 'Reduce time-to-resolution with it']},
+        {title:'Working with Engineering on Bugs', hours:5, desc:'Turn tickets into actionable bug reports.', resources:[{type:'video',title:'Writing Engineering-Ready Bug Reports'}], tasks:['Reproduce a sample bug reliably', 'Write a report engineers can act on']},
+        {title:'Capstone Portfolio Project', hours:8, desc:'A complete technical support knowledge base.', resources:[{type:'project',title:'Full support portfolio project'}], tasks:['Finalize the knowledge base', 'Publish to portfolio']}
+      ]
+    },
+    'Growth Marketer': {
+      beginner: [
+        {title:'Growth Marketing Fundamentals', hours:6, desc:'How data-driven marketing actually works.', resources:[{type:'course',title:'Intro to Growth Marketing'}], tasks:['Map a sample product\'s growth funnel', 'Identify the biggest drop-off point']},
+        {title:'Analytics Basics', hours:5, desc:'Measure what\'s actually working.', resources:[{type:'video',title:'Marketing Analytics Basics'}], tasks:['Set up basic funnel tracking', 'Pull a simple conversion report']},
+        {title:'Content & Channels', hours:5, desc:'Where and how to reach an audience.', resources:[{type:'course',title:'Marketing Channels Overview'}], tasks:['Draft content for 2 different channels', 'Compare expected reach & cost']}
+      ],
+      intermediate: [
+        {title:'A/B Testing for Growth', hours:6, desc:'Run experiments that actually move metrics.', resources:[{type:'course',title:'Growth Experimentation'}], tasks:['Design and run an A/B test', 'Analyze results and decide next steps']},
+        {title:'Paid Acquisition Basics', hours:5, desc:'Understand paid channels and budgets.', resources:[{type:'video',title:'Paid Acquisition Fundamentals'}], tasks:['Plan a sample paid campaign', 'Calculate estimated CAC & ROI']},
+        {title:'Portfolio Project I', hours:7, desc:'A complete growth campaign case study.', resources:[{type:'project',title:'Full growth campaign case study'}], tasks:['Run a mock growth campaign', 'Document the results and learnings']}
+      ],
+      advanced: [
+        {title:'Retention & Lifecycle Marketing', hours:6, desc:'Growth isn\'t just acquisition.', resources:[{type:'course',title:'Retention Marketing Basics'}], tasks:['Design a lifecycle email sequence', 'Define a retention metric to track']},
+        {title:'Growth Strategy & Prioritization', hours:5, desc:'Decide what to test next, and why.', resources:[{type:'video',title:'Growth Prioritization Frameworks'}], tasks:['Build a prioritized growth experiment backlog', 'Justify the top 3 picks']},
+        {title:'Capstone Portfolio Project', hours:9, desc:'A polished, job-ready growth marketing portfolio.', resources:[{type:'project',title:'Full growth portfolio project'}], tasks:['Finalize the portfolio piece', 'Publish to portfolio']}
+      ]
+    },
+    'Research Scientist': {
+      beginner: [
+        {title:'Research Methodology', hours:7, desc:'Design experiments that produce real answers.', resources:[{type:'course',title:'Research Methods Fundamentals'}], tasks:['Design a small research study', 'Identify potential confounds in it']},
+        {title:'Reading & Reviewing Papers', hours:5, desc:'Learn from the field\'s existing work.', resources:[{type:'video',title:'How to Read Research Papers'}], tasks:['Summarize 3 papers in your field', 'Identify open questions they raise']},
+        {title:'Statistics for Research', hours:6, desc:'Analyze results rigorously.', resources:[{type:'course',title:'Statistics for Researchers'}], tasks:['Run a statistical test on sample data', 'Interpret the results correctly']}
+      ],
+      intermediate: [
+        {title:'Experiment Design', hours:7, desc:'Build studies that hold up to scrutiny.', resources:[{type:'course',title:'Advanced Experiment Design'}], tasks:['Design a controlled experiment', 'Pre-register the hypothesis and method']},
+        {title:'Data Analysis for Research', hours:6, desc:'Turn raw results into findings.', resources:[{type:'video',title:'Research Data Analysis'}], tasks:['Analyze results from a sample study', 'Visualize the findings clearly']},
+        {title:'Portfolio Project I', hours:9, desc:'A complete, documented research study.', resources:[{type:'project',title:'Full research study'}], tasks:['Run a small original study', 'Write it up in paper format']}
+      ],
+      advanced: [
+        {title:'Scientific Writing', hours:6, desc:'Communicate findings to the field.', resources:[{type:'course',title:'Scientific Writing Basics'}], tasks:['Write a full research paper draft', 'Get peer feedback on it']},
+        {title:'Peer Review & Publication', hours:5, desc:'Understand how research gets validated.', resources:[{type:'video',title:'Peer Review Process Explained'}], tasks:['Review a sample paper as a mock reviewer', 'Revise your own paper based on feedback']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A publication-ready research study.', resources:[{type:'project',title:'Full research portfolio project'}], tasks:['Finalize the study', 'Publish to portfolio']}
+      ]
+    },
+    'AI Research Engineer': {
+      beginner: [
+        {title:'ML Foundations', hours:8, desc:'The math and concepts behind modern AI.', resources:[{type:'course',title:'Machine Learning Foundations'}], tasks:['Implement a basic ML model from scratch', 'Explain how it learns']},
+        {title:'Reading ML Papers', hours:5, desc:'Learn to extract ideas from dense research.', resources:[{type:'video',title:'How to Read ML Papers'}], tasks:['Summarize 3 foundational ML papers', 'Reimplement a simple result from one']},
+        {title:'Deep Learning Basics', hours:7, desc:'Neural networks, training, and evaluation.', resources:[{type:'course',title:'Deep Learning Fundamentals'}], tasks:['Train a small neural network', 'Evaluate it on a held-out test set']}
+      ],
+      intermediate: [
+        {title:'Model Experimentation', hours:8, desc:'Rigorously test new ideas and architectures.', resources:[{type:'course',title:'ML Experimentation Practices'}], tasks:['Run a controlled model comparison', 'Track experiments systematically']},
+        {title:'Working with Large Models', hours:6, desc:'Fine-tune and adapt pretrained models.', resources:[{type:'video',title:'Fine-Tuning Large Models'}], tasks:['Fine-tune a pretrained model on new data', 'Evaluate the improvement it gives']},
+        {title:'Portfolio Project I', hours:9, desc:'A complete original ML research project.', resources:[{type:'project',title:'Full ML research project'}], tasks:['Run an original research experiment', 'Write up the results and method']}
+      ],
+      advanced: [
+        {title:'Novel Architecture Design', hours:7, desc:'Push past standard model designs.', resources:[{type:'course',title:'Advanced Model Architectures'}], tasks:['Prototype a modified model architecture', 'Benchmark it against a baseline']},
+        {title:'Reproducibility & Rigor', hours:5, desc:'Make research results others can trust.', resources:[{type:'video',title:'Reproducible ML Research'}], tasks:['Make an experiment fully reproducible', 'Document the exact setup used']},
+        {title:'Capstone Portfolio Project', hours:10, desc:'A publication-quality AI research project.', resources:[{type:'project',title:'Full AI research portfolio project'}], tasks:['Finalize the research project', 'Publish to portfolio']}
+      ]
     }
   };
 
@@ -791,12 +1472,9 @@
      Toast
   ========================================================= */
   let toastTimer = null;
-  function toast(msg){
-    const el = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = msg;
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  function toast(msg, type){
+    if (typeof msg === 'object'){ OrivonMsg.toast(msg); return; }
+    OrivonMsg.toast({ type: type || 'ok', title: msg });
   }
 
   /* =========================================================
@@ -827,7 +1505,7 @@
     });
   });
   document.getElementById('navAbout').addEventListener('click', () => {
-    toast('Orivon Mentor v1.0 — fully offline');
+    toast('Orivon Mentor v1.0');
     closeDrawers();
   });
 
